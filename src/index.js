@@ -1,19 +1,19 @@
 import Fastify from 'fastify';
 import dbPlugin from './plugins/sequelize.js';
 
+// Carga dotenv antes que nada
+import 'dotenv/config';
 
 const fastify = Fastify({ logger: true });
+
 await fastify.register(dbPlugin);
+await fastify.register(await import('./api/auth.routes.js'));
 
-
-// Rutas pueden vivir en src/api (mejor práctica, pero para el hello world la dejamos aquí)
+// Hello world para comprobar arranque
 fastify.get('/', async (request, reply) => {
   return { message: '¡Email Cleaner Fastify corriendo OK con arquitectura modular!' };
 });
 
-// Modularidad: aquí luego cargarás plugins, rutas externas, etc.
-
-// Arranque del servidor
 const start = async () => {
   try {
     await fastify.listen({ port: 3000 });
@@ -25,3 +25,4 @@ const start = async () => {
 };
 
 start();
+
