@@ -1,0 +1,113 @@
+openapi: 3.0.0
+info:
+  title: Email Cleaner API
+  version: 1.0.0
+  description: API para listar correos de Gmail con filtros personalizados.
+servers:
+  - url: http://localhost:3000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Email:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID del correo en Gmail
+        subject:
+          type: string
+          description: Asunto
+        from:
+          type: string
+          description: Remitente
+        date:
+          type: string
+          description: Fecha en RFC 2822
+        labels:
+          type: array
+          items:
+            type: string
+          description: Etiquetas de Gmail
+        hasAttachment:
+          type: boolean
+          description: Si tiene adjunto
+        size:
+          type: integer
+          description: Tamaño en bytes
+paths:
+  /api/mails:
+    get:
+      tags:
+        - Mails
+      summary: Listar correos con filtros personalizados
+      description: Devuelve correos del usuario autenticado aplicando filtros (no leídos, antigüedad, categoría, adjuntos grandes).
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: unread
+          schema:
+            type: boolean
+          description: Solo correos no leídos
+        - in: query
+          name: olderThan
+          schema:
+            type: integer
+            minimum: 1
+            example: 30
+          description: Correos más viejos que N días
+        - in: query
+          name: category
+          schema:
+            type: string
+            enum: [promotions, social, updates, forums, primary]
+            example: promotions
+          description: Categoría de Gmail
+        - in: query
+          name: minAttachmentSize
+          schema:
+            type: integer
+            minimum: 1
+            example: 2
+          description: Tamaño mínimo de adjuntos en MB
+        - in: query
+          name: pageToken
+          schema:
+            type: string
+          description: Token de paginación para siguientes resultados
+      responses:
+        '200':
+          description: Lista de correos filtrados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mails:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Email'
+                  nextPageToken:
+                    type: string
+                    nullable: true
+                  total:
+                    type: integer
+                example:
+                  mails:
+                    - id: "17c3b53bc1234567"
+                      subject: "¡Oferta especial!"
+                      from: "promo@ejemplo.com"
+                      date: "Mon, 10 Jun 2024 12:30:00 -0600"
+                      labels: ["INBOX", "CATEGORY_PROMOTIONS"]
+                      hasAttachment: true
+                      size: 2097152
+                  nextPageToken: "abcd"
+                  total: 37
+        '401':
+          description: No autorizado, token inválido
+        '500':
+          description: Error interno del servidor
