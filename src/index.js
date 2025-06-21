@@ -1,6 +1,10 @@
 import Fastify from 'fastify';
+import dbPlugin from './plugins/sequelize.js';
+
 
 const fastify = Fastify({ logger: true });
+await fastify.register(dbPlugin);
+
 
 // Rutas pueden vivir en src/api (mejor práctica, pero para el hello world la dejamos aquí)
 fastify.get('/', async (request, reply) => {
