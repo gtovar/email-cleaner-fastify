@@ -27,6 +27,7 @@ export async function googleAuthCallback(request, reply) {
   try {
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
+    console.log('TOKENS OBTENIDOS:', tokens);
 
     let email = null;
     if (tokens.id_token) {
