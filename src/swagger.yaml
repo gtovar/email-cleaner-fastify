@@ -38,6 +38,27 @@ components:
         size:
           type: integer
           description: Tamaño en bytes
+    EmailSuggestion:
+      type: object
+      properties:
+        id:
+          type: string
+        from:
+          type: string
+        subject:
+          type: string
+        date:
+          type: string
+        isRead:
+          type: boolean
+        category:
+          type: string
+        attachmentSizeMb:
+          type: number
+        suggestions:
+          type: array
+          items:
+            type: string
 paths:
   /api/mails:
     get:
@@ -111,3 +132,37 @@ paths:
           description: No autorizado, token inválido
         '500':
           description: Error interno del servidor
+    /suggestions:
+      get:
+        tags:
+          - Sugerencias
+      summary: Sugerir acciones automáticas para limpieza de correos
+      description: Devuelve sugerencias de acciones (eliminar, archivar, mover) para los correos del usuario autenticado, sin ejecutar acciones automáticamente.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de sugerencias para limpieza
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  emails:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EmailSuggestion'
+                example:
+                  emails:
+                    - id: "abc123"
+                      from: "notificaciones@ejemplo.com"
+                      subject: "Promoción especial"
+                      date: "2024-07-01T12:00:00Z"
+                      isRead: false
+                      category: "promotions"
+                      attachmentSizeMb: 2.5
+                      suggestions: ["suggested-archive"]
+        '401':
+          description: No autorizado, token inválido
+        '500':
+          description: Error interno del servidor.

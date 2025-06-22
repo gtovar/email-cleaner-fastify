@@ -38,6 +38,7 @@ await fastify.register(swaggerUI, {
 await fastify.register(dbPlugin);
 await fastify.register(await import('./routes/authRoutes.js'));
 await fastify.register(await import('./routes/mailRoutes.js'));
+await fastify.register(await import('./routes/suggestionRoutes.js'));
 
 // Hello world para comprobar arranque
 fastify.get('/', async (request, reply) => {
