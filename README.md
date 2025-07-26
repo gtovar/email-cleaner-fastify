@@ -92,8 +92,9 @@ Verifica:
 | `/api/mails` | GET | Lista correos con filtros (no leídos, promociones, adjuntos) |
 | `/suggestions` | GET | Sugerencias de limpieza automática |
 | `/notifications/summary` | GET | Agrupación por fechas de sugerencias |
-| `/notifications/confirm` | POST | Confirmar acciones sobre correos |
-| `/notifications/history` | GET | Historial de acciones |
+| `/notifications/confirm` | POST | Ejecuta acciones aceptadas (ej. archivar) y registra historial |
+| `/notifications/history` | GET | Muestra acciones anteriores con paginación real desde PostgreSQL |
+
 
 > 🔧 Todos requieren `Bearer Token` en header excepto `/auth/google` y `/`
 
