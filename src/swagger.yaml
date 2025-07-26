@@ -59,6 +59,55 @@ components:
           type: array
           items:
             type: string
+    ConfirmActionsRequest:
+      type: object
+      required: [ids, action]
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+        action:
+          type: string
+          enum: [accept, reject]
+    ConfirmActionsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        processed:
+          type: integer
+        action:
+          type: string
+    ActionHistoryItem:
+      type: object
+      properties:
+        userId:
+          type: string
+        emailId:
+          type: string
+        action:
+          type: string
+          enum: [accept, reject, delete, archive, move]
+        timestamp:
+          type: string
+          format: date-time
+        details:
+          type: object
+    ActionHistoryList:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        perPage:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionHistoryItem'
+
 paths:
   /api/mails:
     get:
@@ -166,3 +215,115 @@ paths:
           description: No autorizado, token inválido
         '500':
           description: Error interno del servidor.
+    /notifications/summary:
+    get:
+      tags:
+        - Notificaciones
+      summary: Obtener resumen de sugerencias a limpiar
+      description: Devuelve la lista de correos sugeridos para limpieza (eliminar, archivar, mover), agrupados por fecha.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum: [daily, weekly]
+          required: false
+          description: Periodo del resumen (diario/semanal)
+      responses:
+        '200':
+          description: Resumen de sugerencias
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmailSuggestion'
+              examples:
+                example:
+                  value:
+                    - id: "abc123"
+                      from: "servicio@email.com"
+                      subject: "Recibo de luz"
+                      date: "2024-06-20T10:45:00Z"
+                      isRead: false
+                      category: "Recibos"
+                      attachmentSizeMb: 0.5
+                      suggestions: ["delete", "archive"]
+        '401':
+          description: No autorizado
+
+  /notifications/confirm:
+    post:
+      tags:
+        - Notificaciones
+      summary: Confirmar acciones sugeridas
+      description: Confirma o rechaza sugerencias de limpieza sobre uno o más correos.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmActionsRequest'
+            examples:
+              confirmar:
+                value:
+                  ids: ["abc123", "def456"]
+                  action: "accept"
+              rechazar:
+                value:
+                  ids: ["xyz789"]
+                  action: "reject"
+      responses:
+        '200':
+          description: Resultado de la confirmación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmActionsResponse'
+              examples:
+                resultado:
+                  value:
+                    success: true
+                    processed: 2
+                    action: "accept"
+        '400':
+          description: Datos inválidos
+        '401':
+          description: No autorizado
+
+  /notifications/history:
+    get:
+      tags:
+        - Notificaciones
+      summary: Consultar historial de acciones
+      description: Consulta el historial de acciones ejecutadas por el usuario (aceptadas, rechazadas, etc).
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          required: false
+          description: Página de resultados
+        - in: query
+          name: perPage
+          schema:
+            type: integer
+            default: 20
+          required: false
+          description: Resultados por página
+      responses:
+        '200':
+          description: Historial de acciones
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionHistoryList'
+        '401':
+          description: No autorizado

@@ -8,7 +8,8 @@
 export const SUGGESTION_LABELS = {
   DELETE:    'suggested-delete',
   ARCHIVE:   'suggested-archive',
-  MOVE_BIG:  'suggested-move-big-attachments'
+  MOVE_BIG:  'suggested-move-big-attachments',
+  REVIEW:    'suggested-review-recent'   // <- NUEVA etiqueta temporal
 };
 
 /**
@@ -34,6 +35,10 @@ export function suggestActions(emails) {
     if (email.attachmentSizeMb > 10 && monthsAgo(email.date, now) >= 12) {
       suggestions.push(SUGGESTION_LABELS.MOVE_BIG);
     }
+    // NUEVA: todos los correos recientes (últimos 3 días)
+    if (daysAgo(email.date, now) <= 3) {
+      suggestions.push(SUGGESTION_LABELS.REVIEW);
+    }
 
     return {
       ...email,
@@ -48,4 +53,9 @@ function monthsAgo(date, now) {
     (now.getFullYear() - d.getFullYear()) * 12 +
     (now.getMonth() - d.getMonth())
   );
+}
+
+function daysAgo(date, now) {
+  const d = new Date(date);
+  return Math.floor((now - d) / (1000 * 60 * 60 * 24));
 }

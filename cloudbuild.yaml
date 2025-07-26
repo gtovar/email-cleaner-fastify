@@ -1,0 +1,13 @@
+teps:
+  - id: "Build & Push"
+    name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-t", "$LOCATION-docker.pkg.dev/$PROJECT_ID/email-cleaner/email-cleaner:$SHORT_SHA", "."]
+
+  - id: "Deploy"
+    name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: "gcloud"
+    args:
+      ["run", "deploy", "email-cleaner", "--image", "$LOCATION-docker.pkg.dev/$PROJECT_ID/email-cleaner/email-cleaner:$SHORT_SHA", "--platform", "managed", "--region", "$LOCATION", "--quiet"]
+
+images:
+  - "$LOCATION-docker.pkg.dev/$PROJECT_ID/email-cleaner/email-cleaner:$SHORT_SHA"

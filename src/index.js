@@ -2,6 +2,11 @@ import Fastify from 'fastify';
 import dbPlugin from './plugins/sequelize.js';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
+import authRoutes from './routes/authRoutes.js';
+import mailRoutes from './routes/mailRoutes.js';
+import suggestionRoutes from './routes/suggestionRoutes.js';
+import notificationsRoutes from './routes/notificationsRoutes.js';
+
 // Carga dotenv antes que nada
 import 'dotenv/config';
 
@@ -36,11 +41,13 @@ await fastify.register(swaggerUI, {
 
 // Registro de plugins y rutas (nota los imports dinámicos)
 await fastify.register(dbPlugin);
-await fastify.register(await import('./routes/authRoutes.js'));
-await fastify.register(await import('./routes/mailRoutes.js'));
-await fastify.register(await import('./routes/suggestionRoutes.js'));
+await fastify.register(authRoutes);
+await fastify.register(mailRoutes);
+await fastify.register(suggestionRoutes);
+await fastify.register(notificationsRoutes);
 
-// Hello world para comprobar arranque
+
+// Healthcheck
 fastify.get('/', async (request, reply) => {
   return { message: '¡Email Cleaner Fastify corriendo OK con arquitectura modular!' };
 });

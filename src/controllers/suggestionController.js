@@ -19,7 +19,7 @@ export async function getSuggestedEmails(request, reply) {
 
     // 3. Llama al método del servicio para obtener correos (puedes ajustar filtros aquí)
     const emails = await gmailService.listMessages({
-      maxResults: 2000
+      maxResults: 20
       // Puedes agregar más filtros: filter, dateBefore, combine, etc.
     });
 

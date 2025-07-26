@@ -1,11 +1,9 @@
 import fp from 'fastify-plugin';
-import { Sequelize } from 'sequelize';
+import { Sequelize, DataTypes } from 'sequelize';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import 'dotenv/config';
 
-
-// Para resolver rutas con ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -30,12 +28,11 @@ async function dbConnector(fastify, options) {
     throw err;
   }
 
-  // Carga todos los modelos (puedes automatizar esto en proyectos grandes)
-  const Token = (await import(path.join(__dirname, '../models/token.js'))).default(sequelize);
+  const Token = (await import(path.join(__dirname, '../models/token.js'))).default(sequelize, DataTypes);
+  const ActionHistory = (await import(path.join(__dirname, '../models/actionHistory.js'))).default(sequelize, DataTypes);
 
-  // Agrega los modelos y la instancia a fastify
   fastify.decorate('sequelize', sequelize);
-  fastify.decorate('models', { Token });
+  fastify.decorate('models', { Token, ActionHistory });
 }
 
 export default fp(dbConnector);
