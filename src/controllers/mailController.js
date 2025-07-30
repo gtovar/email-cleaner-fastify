@@ -1,4 +1,6 @@
-import {google} from 'googleapis';
+import { google } from 'googleapis';
+import { suggestActions } from '../services/emailSuggester.js';
+
 
 /**
  * Lista correos de Gmail aplicando filtros personalizados.
@@ -36,17 +38,21 @@ export async function listEmails(req, reply) {
           from: headers.find(h => h.name === 'From')?.value,
           date: headers.find(h => h.name === 'Date')?.value,
           labels: mail.data.labelIds,
-          hasAttachment: !!mail.data.payload.parts?.find(p => p.filename),
-          size: mail.data.sizeEstimate,
+          isRead: !mail.data.labelIds.includes('UNREAD'), // necesario para sugerencias
+          attachmentSizeMb: mail.data.sizeEstimate / (1024 * 1024),
+          category: category || 'general', // fallback para testing
         };
       })
     );
 
+    const mailsWithSuggestions = await suggestActions(mails);
+
     reply.send({
-      mails,
+      mails: mailsWithSuggestions,
       nextPageToken: res.data.nextPageToken,
       total: res.data.resultSizeEstimate,
     });
+
   } catch (err) {
     req.log.error(err);
     reply.code(500).send({ error: 'No se pudo obtener los correos.' });

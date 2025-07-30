@@ -3,7 +3,11 @@
 .env.*
 /logs
 *.log
-.DS_Store
+*.DS_Store
 .idea/
 .vscode/
-.swp
+*.swp
+python.zip
+src.zip
+nodejs_src.zip
+git_diff.txt

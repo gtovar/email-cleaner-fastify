@@ -1,61 +1,79 @@
 // src/services/emailSuggester.js
 
-/**
- * Lógica para sugerir acciones automáticas sobre correos electrónicos.
- * Extensible para reglas personalizadas y ML en el futuro.
- */
+import fetch from 'node-fetch'; // o usa globalThis.fetch si estás en Node 18+
 
-export const SUGGESTION_LABELS = {
-  DELETE:    'suggested-delete',
-  ARCHIVE:   'suggested-archive',
-  MOVE_BIG:  'suggested-move-big-attachments',
-  REVIEW:    'suggested-review-recent'   // <- NUEVA etiqueta temporal
-};
+const CLASSIFIER_URL = 'http://127.0.0.1:5055/suggest';
 
 /**
- * Sugerencias según reglas básicas.
- * @param {Array<Object>} emails - Lista de correos.
- * @returns {Array<Object>} - Correos con sugerencias.
+ * Llama al microservicio Python para obtener sugerencias.
+ * @param {Array<Object>} emails - Lista de correos con metadatos.
+ * @returns {Object} - Objeto con clave "emails" y lista de correos con sugerencias.
  */
-export function suggestActions(emails) {
-  const now = new Date();
+export async function suggestActions(emails) {
+  try {
+    const response = await fetch(CLASSIFIER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(emails)
+    });
 
-  return emails.map(email => {
-    const suggestions = [];
+    if (!response.ok) {
+      throw new Error(`Clasificador Python falló: ${response.status}`);
+    }
 
-    // No leído y >1 año
-    if (!email.isRead && monthsAgo(email.date, now) >= 12) {
-      suggestions.push(SUGGESTION_LABELS.DELETE);
+    const suggestionMap = await response.json();
+
+    console.log("📬 MAPA DE RESPUESTA ↓↓↓");
+    console.dir(suggestionMap, { depth: null });
+
+    // 💡 NUEVO: Log de tipos para depurar malformaciones
+    console.log("✅ Tipado original de sugerencias:");
+    for (const [id, suggestions] of Object.entries(suggestionMap)) {
+      console.log(id, '→', Array.isArray(suggestions) ? suggestions.map(s => typeof s) : typeof suggestions);
     }
-    // Promociones viejas
-    if (email.category === 'promotions' && monthsAgo(email.date, now) >= 6) {
-      suggestions.push(SUGGESTION_LABELS.ARCHIVE);
-    }
-    // Adjunto grande y viejo
-    if (email.attachmentSizeMb > 10 && monthsAgo(email.date, now) >= 12) {
-      suggestions.push(SUGGESTION_LABELS.MOVE_BIG);
-    }
-    // NUEVA: todos los correos recientes (últimos 3 días)
-    if (daysAgo(email.date, now) <= 3) {
-      suggestions.push(SUGGESTION_LABELS.REVIEW);
-    }
+
+    // Enriquecer cada email con sus sugerencias, parseando si vienen mal
+    const enriched = emails.map(email => {
+      let suggestions = suggestionMap[email.id] || [];
+
+      if (Array.isArray(suggestions)) {
+        suggestions = suggestions.map(s => {
+          if (typeof s === 'string') {
+            try {
+              s = JSON.parse(s);
+            } catch (err) {
+              console.warn(`❌ No se pudo parsear la sugerencia malformada para ${email.id}:`, s);
+              return null;
+            }
+          }
+
+          return {
+            action: s?.action || '',
+            category: s?.category || '',
+            confidence_score: s?.confidence_score || 0
+          };
+        }).filter(Boolean); // elimina nulls
+      } else {
+        suggestions = [];
+      }
+
+      console.log(`🔍 Enriquecido: ${email.id} →`, suggestions);
+      return {
+        ...email,
+        suggestions
+      };
+    });
+
+    return { emails: enriched };
+
+  } catch (err) {
+    console.error('Error llamando al clasificador:', err);
 
     return {
-      ...email,
-      suggestions
+      emails: emails.map(email => ({
+        ...email,
+        suggestions: []
+      }))
     };
-  });
-}
-
-function monthsAgo(date, now) {
-  const d = new Date(date);
-  return (
-    (now.getFullYear() - d.getFullYear()) * 12 +
-    (now.getMonth() - d.getMonth())
-  );
-}
-
-function daysAgo(date, now) {
-  const d = new Date(date);
-  return Math.floor((now - d) / (1000 * 60 * 60 * 24));
+  }
 }

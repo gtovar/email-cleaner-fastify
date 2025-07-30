@@ -17,27 +17,20 @@ components:
       properties:
         id:
           type: string
-          description: ID del correo en Gmail
         subject:
           type: string
-          description: Asunto
         from:
           type: string
-          description: Remitente
         date:
           type: string
-          description: Fecha en RFC 2822
         labels:
           type: array
           items:
             type: string
-          description: Etiquetas de Gmail
         hasAttachment:
           type: boolean
-          description: Si tiene adjunto
         size:
           type: integer
-          description: Tamaño en bytes
     EmailSuggestion:
       type: object
       properties:
@@ -58,7 +51,14 @@ components:
         suggestions:
           type: array
           items:
-            type: string
+            type: object
+            properties:
+              action:
+                type: string
+              category:
+                type: string
+              confidence_score:
+                type: number
     ConfirmActionsRequest:
       type: object
       required: [ids, action]
@@ -114,7 +114,7 @@ paths:
       tags:
         - Mails
       summary: Listar correos con filtros personalizados
-      description: Devuelve correos del usuario autenticado aplicando filtros (no leídos, antigüedad, categoría, adjuntos grandes).
+      description: Devuelve correos del usuario autenticado aplicando filtros.
       security:
         - bearerAuth: []
       parameters:
@@ -122,33 +122,25 @@ paths:
           name: unread
           schema:
             type: boolean
-          description: Solo correos no leídos
         - in: query
           name: olderThan
           schema:
             type: integer
-            minimum: 1
             example: 30
-          description: Correos más viejos que N días
         - in: query
           name: category
           schema:
             type: string
             enum: [promotions, social, updates, forums, primary]
-            example: promotions
-          description: Categoría de Gmail
         - in: query
           name: minAttachmentSize
           schema:
             type: integer
-            minimum: 1
             example: 2
-          description: Tamaño mínimo de adjuntos en MB
         - in: query
           name: pageToken
           schema:
             type: string
-          description: Token de paginación para siguientes resultados
       responses:
         '200':
           description: Lista de correos filtrados
@@ -166,32 +158,22 @@ paths:
                     nullable: true
                   total:
                     type: integer
-                example:
-                  mails:
-                    - id: "17c3b53bc1234567"
-                      subject: "¡Oferta especial!"
-                      from: "promo@ejemplo.com"
-                      date: "Mon, 10 Jun 2024 12:30:00 -0600"
-                      labels: ["INBOX", "CATEGORY_PROMOTIONS"]
-                      hasAttachment: true
-                      size: 2097152
-                  nextPageToken: "abcd"
-                  total: 37
         '401':
-          description: No autorizado, token inválido
+          description: No autorizado
         '500':
-          description: Error interno del servidor
-    /suggestions:
-      get:
-        tags:
-          - Sugerencias
-      summary: Sugerir acciones automáticas para limpieza de correos
-      description: Devuelve sugerencias de acciones (eliminar, archivar, mover) para los correos del usuario autenticado, sin ejecutar acciones automáticamente.
+          description: Error interno
+
+  /suggestions:
+    get:
+      tags:
+        - Sugerencias
+      summary: Sugerir acciones automáticas para limpieza
+      description: Devuelve sugerencias de acciones (eliminar, archivar, mover) para los correos del usuario autenticado.
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Lista de sugerencias para limpieza
+          description: Lista de sugerencias
           content:
             application/json:
               schema:
@@ -201,26 +183,17 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/EmailSuggestion'
-                example:
-                  emails:
-                    - id: "abc123"
-                      from: "notificaciones@ejemplo.com"
-                      subject: "Promoción especial"
-                      date: "2024-07-01T12:00:00Z"
-                      isRead: false
-                      category: "promotions"
-                      attachmentSizeMb: 2.5
-                      suggestions: ["suggested-archive"]
         '401':
-          description: No autorizado, token inválido
+          description: No autorizado
         '500':
-          description: Error interno del servidor.
-    /notifications/summary:
+          description: Error interno del servidor
+
+  /notifications/summary:
     get:
       tags:
         - Notificaciones
       summary: Obtener resumen de sugerencias a limpiar
-      description: Devuelve la lista de correos sugeridos para limpieza (eliminar, archivar, mover), agrupados por fecha.
+      description: Devuelve sugerencias agrupadas por fecha.
       security:
         - bearerAuth: []
       parameters:
@@ -229,8 +202,6 @@ paths:
           schema:
             type: string
             enum: [daily, weekly]
-          required: false
-          description: Periodo del resumen (diario/semanal)
       responses:
         '200':
           description: Resumen de sugerencias
@@ -240,17 +211,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/EmailSuggestion'
-              examples:
-                example:
-                  value:
-                    - id: "abc123"
-                      from: "servicio@email.com"
-                      subject: "Recibo de luz"
-                      date: "2024-06-20T10:45:00Z"
-                      isRead: false
-                      category: "Recibos"
-                      attachmentSizeMb: 0.5
-                      suggestions: ["delete", "archive"]
         '401':
           description: No autorizado
 
@@ -259,7 +219,7 @@ paths:
       tags:
         - Notificaciones
       summary: Confirmar acciones sugeridas
-      description: Confirma o rechaza sugerencias de limpieza sobre uno o más correos.
+      description: Confirma o rechaza sugerencias sobre correos.
       security:
         - bearerAuth: []
       requestBody:
@@ -268,15 +228,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ConfirmActionsRequest'
-            examples:
-              confirmar:
-                value:
-                  ids: ["abc123", "def456"]
-                  action: "accept"
-              rechazar:
-                value:
-                  ids: ["xyz789"]
-                  action: "reject"
       responses:
         '200':
           description: Resultado de la confirmación
@@ -284,12 +235,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConfirmActionsResponse'
-              examples:
-                resultado:
-                  value:
-                    success: true
-                    processed: 2
-                    action: "accept"
         '400':
           description: Datos inválidos
         '401':
@@ -300,7 +245,7 @@ paths:
       tags:
         - Notificaciones
       summary: Consultar historial de acciones
-      description: Consulta el historial de acciones ejecutadas por el usuario (aceptadas, rechazadas, etc).
+      description: Muestra el historial de decisiones tomadas.
       security:
         - bearerAuth: []
       parameters:
@@ -309,15 +254,11 @@ paths:
           schema:
             type: integer
             default: 1
-          required: false
-          description: Página de resultados
         - in: query
           name: perPage
           schema:
             type: integer
             default: 20
-          required: false
-          description: Resultados por página
       responses:
         '200':
           description: Historial de acciones
