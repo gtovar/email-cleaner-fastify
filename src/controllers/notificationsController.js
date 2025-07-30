@@ -5,7 +5,9 @@ import { notificationsService } from '../services/notificationsService.js';
 export async function getSummary(request, reply) {
     // TODO: Extraer usuario autenticado (request.user o token)
     // TODO: Lógica para obtener sugerencias no confirmadas agrupadas por fecha
-    const summary = await notificationsService.getSummary(/* userId */);
+    const service = notificationsService(request.server.models);
+    const userId = request.user?.id || 'demo-user';
+    const summary = await service.getSummary(userId);
     return reply.send(summary);
 }
 
@@ -22,3 +24,27 @@ export async function confirmActions(request, reply) {
     const result = await service.confirmActions({ ids, action, userId });
     return reply.send(result);
 }
+
+
+export async function confirmSuggestion(req, reply) {
+  try {
+    const { emailId, subject, from, action, category, confidenceScore, confirmed } = req.body;
+
+    const saved = await Notification.create({
+      emailId,
+      subject,
+      from,
+      action,
+      category,
+      confidenceScore,
+      confirmed,
+      confirmedAt: new Date()
+    });
+
+    reply.send({ success: true, id: saved.id });
+  } catch (err) {
+    console.error("❌ Error al guardar confirmación:", err);
+    reply.code(500).send({ error: 'No se pudo guardar la confirmación.' });
+  }
+}
+
