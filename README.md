@@ -1,128 +1,138 @@
-# Email Cleaner Fastify
+# 🧩 Email Cleaner & Smart Notifications
 
-## Setup inicial
-
-1. Instala dependencias:  npm install
-2. Corre el servidor: node src/index.js
-3. Visita `http://localhost:3000/` para validar el hello world.
-
-## Estructura del proyecto
-
-- Código principal: `/src/`
-- Tests: `/tests/`
-- Modelos y migraciones: `/src/models/`, `/migrations/
-
-# Email Cleaner & Smart Notifications
-
-Sistema inteligente para limpieza de correos y notificaciones personalizadas, con conexión segura a Gmail, filtrado avanzado y arquitectura modular.
+An intelligent system that automatically classifies your emails, prioritizes what truly matters, and alerts you when action is needed.  
+Built with **Fastify (Node.js)** for backend logic, **FastAPI (Python)** for machine learning, and **n8n** for smart automation.
 
 ---
 
-## 🚀 Propósito del Proyecto
-Automatizar la gestión del correo electrónico personal, priorizando seguridad, limpieza inteligente, categorización, y alertas personalizadas (vía WhatsApp, Telegram, etc.).
+## 🚀 Overview
+
+Managing dozens of emails daily can easily lead to **decision fatigue** and **loss of focus**.  
+This system connects securely to Gmail, classifies messages with ML models, and filters what deserves your attention.
 
 ---
 
-## ⚙️ Requisitos Técnicos
+## 🧠 Core Features
 
-- Node.js v18+
-- PostgreSQL 13+
-- Google Cloud Project con OAuth2 activado
-- `.env` con variables definidas (ver más abajo)
+- **Smart Classification** — NLP-based categorization of incoming emails.  
+- **Priority Notifications** — Only alerts you for messages that matter.  
+- **Seamless Gmail Integration** — OAuth2-based secure connection.  
+- **Multi-service Architecture** — Node.js backend + Python ML microservice.  
+- **Automation-ready** — n8n workflows for Telegram or Slack notifications.
 
 ---
 
-## 🧪 Instalación y Setup
+## 🧱 Architecture Overview
+
+| Layer           | Technology         | Purpose                          |
+| --------------- | ------------------ | -------------------------------- |
+| Frontend        | React + Vite       | Web interface and control panel  |
+| Backend API     | Fastify (Node.js)  | Business logic and orchestration |
+| ML Microservice | FastAPI (Python)   | Email classification engine      |
+| Database        | PostgreSQL         | Data persistence                 |
+| Infrastructure  | Docker + Cloud Run | Deployment and scalability       |
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1. Clone the Repository
 
 ```bash
-# Clona el repositorio
-$ git clone https://github.com/tu_usuario/email-cleaner.git
-$ cd email-cleaner
-
-# Instala dependencias
-$ npm install
-
-# Crea el archivo .env
-$ cp .env.example .env
+git clone https://github.com/gilbertotovar/email-cleaner.git
+cd email-cleaner
 ```
 
-### Variables de entorno esperadas (`.env`)
+### 2. Environment Setup
 
-```dotenv
-GOOGLE_CLIENT_ID=xxx
-GOOGLE_CLIENT_SECRET=xxx
-GOOGLE_REDIRECT_URI=http://localhost:3000/auth/google/callback
-DB_USERNAME=gilberto
-DB_PASSWORD=admin
-DB_DATABASE=email_cleaner
-DB_HOST=127.0.0.1
-DB_PORT=5432
-```
-
----
-
-## ▶️ Correr en modo local
+Copy the environment example and fill in your Gmail credentials:
 
 ```bash
-$ node src/index.js
+cp .env.example .env
 ```
 
-Verifica:
-- `http://localhost:3000/` responde ✅
-- `http://localhost:3000/docs` muestra Swagger UI ✅
+### 3. Install Dependencies
+
+**Backend:**
+```bash
+npm install
+```
+
+**ML Microservice:**
+```bash
+cd python/classifier
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 4. Run the Services
+
+**Fastify Backend:**
+```bash
+npm run dev
+# http://localhost:3000
+```
+
+**Python Classifier (FastAPI):**
+```bash
+uvicorn main:app --reload --port 8000
+# http://localhost:8000/docs
+```
 
 ---
 
-## 🔐 Autenticación con Gmail
+## 🧪 Testing the Pipeline
 
-1. Accede a:
-   ```
-   http://localhost:3000/auth/google
-   ```
-2. Completa el login con tu cuenta Gmail
-3. El token se guardará en la base de datos automáticamente
+To test classification end-to-end:
 
----
+```bash
+curl -X POST http://localhost:3000/api/v1/emails/classify -H "Content-Type: application/json" -d '{
+  "from": "invoices@cfe.mx",
+  "subject": "Your electricity bill is ready",
+  "body": "Due date: November 15. Amount: $350."
+}'
+```
 
-## 📬 Endpoints Clave
-
-| Ruta | Método | Descripción |
-|------|--------|-------------|
-| `/auth/google` | GET | Redirección a login con Google |
-| `/api/mails` | GET | Lista correos con filtros (no leídos, promociones, adjuntos) |
-| `/suggestions` | GET | Sugerencias de limpieza automática |
-| `/notifications/summary` | GET | Agrupación por fechas de sugerencias |
-| `/notifications/confirm` | POST | Ejecuta acciones aceptadas (ej. archivar) y registra historial |
-| `/notifications/history` | GET | Muestra acciones anteriores con paginación real desde PostgreSQL |
-
-
-> 🔧 Todos requieren `Bearer Token` en header excepto `/auth/google` y `/`
+Expected result:
+```json
+{
+  "category": "Finance/Utilities/CFE",
+  "action": "archive",
+  "confidence": 0.93
+}
+```
 
 ---
 
-## 🧱 Arquitectura
+## 📦 Related Documentation
 
-- Backend: Fastify (modular, liviano, extensible)
-- DB: PostgreSQL + Sequelize
-- Gmail API: vía `googleapis`
-- Autenticación: OAuth2 Google
-- Documentación: Swagger (`/docs`)
-- Pronto: integración con IA y mensajería automática
-
-📌 Ver detalles técnicos en [`/docs/arquitectura.md`](docs/arquitectura.md)
-
----
-
-## 🧑‍💻 Contribuir
-
-- Revisa la guía en [`/docs/readme.guia.md`](docs/readme.guia.md)
-- Sigue el estilo de commits convencional (`feat:`, `fix:`, `refactor:`...)
-- Usa ramas `feature/nombre` o `fix/nombre`
-- Documenta tus endpoints
+| File                     | Description                           |
+| ------------------------ | ------------------------------------- |
+| `DESIGN_DOCUMENT.md`     | Technical design rationale            |
+| `API_REFERENCE.md`       | REST API specification                |
+| `architecture.md`        | Mermaid architecture diagram          |
+| `despliegue-cloudrun.md` | Deployment guide for Google Cloud Run |
+| `migraciones.md`         | Database migration guide              |
+| `seeders.guia.md`        | Seeder reference                      |
 
 ---
 
-## 📜 Licencia
-Proyecto privado. No se permite redistribución sin autorización del autor.
+## 🧰 Tech Stack Summary
 
+- **Backend:** Node.js (Fastify), PostgreSQL  
+- **ML Service:** Python (FastAPI, scikit‑learn)  
+- **Infra:** Docker, Cloud Run, Secret Manager  
+- **Notifications:** n8n + Telegram integration
 
+---
+
+## 🧾 License and Maintainers
+
+Maintained by **Gilberto Tovar**  
+📧 gilbertotovar.dev@gmail.com  
+🌐 [www.gilbertotovar.com](https://www.gilbertotovar.com)
+
+---
+
+**Last updated:** July 2025  

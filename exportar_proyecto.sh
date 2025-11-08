@@ -19,15 +19,22 @@ find . -type f \
     ! -path "./vendor/*" \
     ! -path "./storage/*" \
     ! -path "./public/*" \
+    ! -path "./.git/*" \
+    ! -path "./venv/*" \
+    ! -path "*/venv/*" \
+    ! -path "*/.venv/*" \
+    ! -path "*/__pycache__/*" \
     ! -name "*.css" \
     ! -name "*.png" \
     ! -name "*.jpg" \
     ! -name "*.jpeg" \
     ! -name "*.gif" \
     ! -name "*.svg" \
+    ! -name "*.pyc" \
+    ! -name "*.pyo" \
+    ! -name "*.pyd" \
     ! -name ".DS_Store" \
     ! -name ".zip" \
-    ! -path "./.git/*" \
     ! -name "*.swp" \
     ! -name "*.swo" \
     ! -name "*.tmp" \
@@ -42,6 +49,7 @@ find . -type f \
     cat "$file" >> "$OUTPUT_FILE"
     echo -e "\n=== FIN: $file ===\n" >> "$OUTPUT_FILE"
 done
+
 
 echo "Archivo generado: $OUTPUT_FILE"
 

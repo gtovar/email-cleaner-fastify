@@ -6,6 +6,8 @@ import authRoutes from './routes/authRoutes.js';
 import mailRoutes from './routes/mailRoutes.js';
 import suggestionRoutes from './routes/suggestionRoutes.js';
 import notificationsRoutes from './routes/notificationsRoutes.js';
+import cors from '@fastify/cors';
+
 
 // Carga dotenv antes que nada
 import 'dotenv/config';
@@ -61,6 +63,12 @@ const start = async () => {
     process.exit(1);
   }
 };
+
+await fastify.register(cors, {
+  origin: 'http://localhost:5173', // Solo acepta peticiones desde el frontend
+  credentials: true
+});
+
 
 start();
 
