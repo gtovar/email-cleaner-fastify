@@ -1,0 +1,59 @@
+site_name: Email Cleaner & Smart Notifications
+site_url: https://gtovar.github.io/email-cleaner-fastify/
+repo_url: https://github.com/gtovar/email-cleaner-fastify
+repo_name: gtovar/email-cleaner-fastify
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.top
+    - navigation.sections
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+
+nav:
+  - Overview: index.md
+  - Architecture:
+      - Architecture Overview: architecture.md
+      - Design Document: DESIGN_DOCUMENT.md
+      - Roadmap: roadmap.md
+      - Scrum: scrum.md
+  - API:
+      - Reference: API_REFERENCE.md
+  - Deployment:
+      - Cloud Run: despliegue-cloudrun.md
+  - Database:
+      - Migrations: migraciones.md
+      - Seeders: seeders.guia.md
+  - Tutorials:
+      - Quickstart: TUTORIALS/QUICKSTART.md
+  - Guides:
+      - Readme Guide: readme.guia.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/gtovar
+    - icon: fontawesome/solid/globe
+      link: https://www.gilbertotovar.com
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - footnotes
+  - attr_list
+  - def_list
+  - tables
+  - pymdownx.emoji
+  - pymdownx.highlight
+  - pymdownx.superfences

@@ -71,7 +71,7 @@ flowchart LR
 | [🗄️ Database Migrations](./migraciones.md) | Sequelize migration workflow |
 | [🌱 Seeders Guide](./seeders.guia.md) | Load initial or reference data |
 | [🚀 Deploy to Cloud Run](./despliegue-cloudrun.md) | Cloud Build + Cloud Run deployment steps |
-| [🤝 Contribution Guide](../CONTRIBUTION.md) | Collaboration and commit standards |
+| [🤝 Contribution Guide](https://github.com/gtovar/email-cleaner-fastify/blob/main/CONTRIBUTION.md) | Collaboration and commit standards |
 
 ---
 

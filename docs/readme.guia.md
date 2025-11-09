@@ -87,8 +87,8 @@ npm start
 ```
 
 ## Documentation
-- Architecture: [docs/architecture.md](docs/architecture.md)
-- Deployment: [docs/deploy-cloudrun.md](docs/deploy-cloudrun.md)
+- Architecture: [architecture.md](architecture.md)
+- Deployment: [despliegue-cloudrun.md](despliegue-cloudrun.md)
 
 ## Contribution
 1. Create branch `feature/<name>`  
