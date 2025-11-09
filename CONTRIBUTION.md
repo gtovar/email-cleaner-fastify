@@ -120,7 +120,7 @@ Before approving a PR:
 ## 👥 Maintainer Contact
 
 **Maintainer:** Gilberto Tovar  
-📧 gilbertotovar.dev@gmail.com  
+📧 contacto@gilbertotovar.com
 🌐 [www.gilbertotovar.com](https://www.gilbertotovar.com)
 
 ---

@@ -20,10 +20,12 @@ find . -type f \
     ! -path "./storage/*" \
     ! -path "./public/*" \
     ! -path "./.git/*" \
-    ! -path "./venv/*" \
     ! -path "*/venv/*" \
     ! -path "*/.venv/*" \
     ! -path "*/__pycache__/*" \
+    ! -path "./coverage/*" \
+    ! -path "./.idea/*" \
+    ! -path "./.vscode/*" \
     ! -name "*.css" \
     ! -name "*.png" \
     ! -name "*.jpg" \
@@ -33,16 +35,24 @@ find . -type f \
     ! -name "*.pyc" \
     ! -name "*.pyo" \
     ! -name "*.pyd" \
-    ! -name ".DS_Store" \
-    ! -name ".zip" \
     ! -name "*.swp" \
     ! -name "*.swo" \
     ! -name "*.tmp" \
     ! -name "*.bak" \
     ! -name "*.sqlite" \
     ! -name "*.sqlite3" \
+    ! -name "*.log" \
+    ! -name "*.lock" \
+    ! -name ".DS_Store" \
+    ! -name ".zip" \
+    ! -name ".env" \
     ! -name ".env.production" \
     ! -name ".env.development" \
+    ! -name "package-lock.json" \
+    ! -name "yarn.lock" \
+    ! -name "pnpm-lock.yaml" \
+    ! -name "Gemfile.lock" \
+    ! -path "./python/*" \
     ! -name "$SCRIPT_NAME" \
     ! -name "$OUTPUT_FILE" | while read -r file; do
     echo "=== INICIO: $file ===" >> "$OUTPUT_FILE"
@@ -50,11 +60,9 @@ find . -type f \
     echo -e "\n=== FIN: $file ===\n" >> "$OUTPUT_FILE"
 done
 
-
 echo "Archivo generado: $OUTPUT_FILE"
 
 # Ahora dividir el archivo en partes de 200 líneas
 echo "Dividiendo archivo en partes pequeñas de 200 líneas..."
 split -l 200 -a 2 -d "$OUTPUT_FILE" "proyecto_parte_"
-
 

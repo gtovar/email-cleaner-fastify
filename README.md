@@ -1,4 +1,6 @@
 # 🧩 Email Cleaner & Smart Notifications
+![Build](https://github.com/gtovar/email-cleaner/actions/workflows/ci.yml/badge.svg)
+![Docs](https://img.shields.io/badge/docs-online-brightgreen)
 
 An intelligent system that automatically classifies your emails, prioritizes what truly matters, and alerts you when action is needed.  
 Built with **Fastify (Node.js)** for backend logic, **FastAPI (Python)** for machine learning, and **n8n** for smart automation.
@@ -9,6 +11,8 @@ Built with **Fastify (Node.js)** for backend logic, **FastAPI (Python)** for mac
 
 Managing dozens of emails daily can easily lead to **decision fatigue** and **loss of focus**.  
 This system connects securely to Gmail, classifies messages with ML models, and filters what deserves your attention.
+
+![Email Cleaner Flow](docs/assets/diagram_overview.png)
 
 ---
 
@@ -36,10 +40,13 @@ This system connects securely to Gmail, classifies messages with ML models, and 
 
 ## ⚙️ Setup Instructions
 
+> ⚠️ **Requirements:** Node.js ≥ 20.0  •  Python ≥ 3.10  •  Docker (optional)  
+> Ensure you have both environments active before running the backend and ML microservice.
+
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/gilbertotovar/email-cleaner.git
+git clone https://github.com/gtovar/email-cleaner.git
 cd email-cleaner
 ```
 
@@ -102,6 +109,8 @@ Expected result:
   "confidence": 0.93
 }
 ```
+# Trigger notification test
+curl -X POST http://localhost:5678/webhook/telegram-test
 
 ---
 
@@ -109,7 +118,7 @@ Expected result:
 
 | File                     | Description                           |
 | ------------------------ | ------------------------------------- |
-| `DESIGN_DOCUMENT.md`     | Technical design rationale            |
+| [`DESIGN_DOCUMENT.md`](https://gtovar.github.io/email-cleaner-fastify/DESIGN_DOCUMENT.html) | Technical design rationale |
 | `API_REFERENCE.md`       | REST API specification                |
 | `architecture.md`        | Mermaid architecture diagram          |
 | `despliegue-cloudrun.md` | Deployment guide for Google Cloud Run |
@@ -124,15 +133,18 @@ Expected result:
 - **ML Service:** Python (FastAPI, scikit‑learn)  
 - **Infra:** Docker, Cloud Run, Secret Manager  
 - **Notifications:** n8n + Telegram integration
+- **CI/CD:** GitHub Actions (build + deploy + lint)
+- **Monitoring:** ELK Stack / Prometheus (optional phase 4)
 
 ---
 
 ## 🧾 License and Maintainers
 
 Maintained by **Gilberto Tovar**  
-📧 gilbertotovar.dev@gmail.com  
+📧 contacto@gilbertotovar.com
 🌐 [www.gilbertotovar.com](https://www.gilbertotovar.com)
 
 ---
+# pre-commit hook
+sed -i "s/Last updated:.*/Last updated: $(date '+%B %Y')/" README.md
 
-**Last updated:** July 2025  

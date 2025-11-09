@@ -1,0 +1,2974 @@
+=== INICIO: ./CONTRIBUTION.md ===
+# 🤝 Contribution Guide — Email Cleaner & Smart Notifications
+
+Thank you for contributing to this project 💌  
+This guide ensures consistency, code quality, and efficient collaboration.
+
+---
+
+## 🧱 Project Structure
+
+* `src/` — Fastify backend source code  
+* `docs/` — Technical documentation and tutorials  
+* `ops/` — Infrastructure and CI/CD scripts  
+* `tests/` — Unit and integration tests  
+
+---
+
+## 🧩 Workflow
+
+1. **Create a descriptive branch**
+   ```bash
+   git checkout -b feat/new-feature
+   ```
+
+2. **Follow Conventional Commits**
+   ```bash
+   git commit -m "feat: add email classification endpoint"
+   git commit -m "fix: correct token validation error"
+   ```
+
+3. **Run tests before pushing**
+   ```bash
+   npm test
+   ```
+
+4. **Submit a Pull Request (PR)**
+   - Clearly describe what changed and why.  
+   - Include screenshots or logs if applicable.  
+   - Reference related issues.  
+
+---
+
+## 🧠 Code Conventions
+
+- Use **English names** for functions and variables (`EmailService`, `RuleController`).  
+- Maintain consistent style via **Prettier + ESLint**.  
+- Avoid logic duplication (“Don’t Repeat Yourself”).  
+- Document public methods using **JSDoc**.  
+- Maintain **≥ 80% test coverage** per PR.  
+
+---
+
+## 🧪 Testing
+
+**Backend (Fastify):**
+```bash
+npm run test:unit
+npm run test:integration
+```
+
+**ML Microservice (Python):**
+```bash
+pytest -v
+```
+
+Every PR must include at least one relevant unit or integration test.
+
+---
+
+## 🧰 Branching & Versioning Standards
+
+| Type          | Prefix      | Example                   |
+| ------------- | ----------- | ------------------------- |
+| New feature   | `feat/`     | feat/auto-rules           |
+| Bug fix       | `fix/`      | fix/token-expiration      |
+| Documentation | `docs/`     | docs/api-reference        |
+| Refactor      | `refactor/` | refactor/plugin-structure |
+| Maintenance   | `chore/`    | chore/update-dependencies |
+
+**Versioning:** Semantic Versioning (SemVer)  
+Format: `MAJOR.MINOR.PATCH` → Example: `1.4.2`
+
+---
+
+## 🧾 Commit Guidelines (Conventional Commits)
+
+```bash
+<type>(<scope>): <short description>
+# Valid types: feat | fix | docs | style | refactor | test | chore
+```
+
+Example:
+```bash
+feat(auth): implement Gmail refresh token logic
+```
+
+---
+
+## 🧱 Code Review Checklist
+
+Before approving a PR:
+
+1. Validate that CI tests pass.  
+2. Review variable and function naming.  
+3. Ensure no `console.log` or secrets are left in code.  
+4. Confirm alignment with the project’s style guide.  
+
+---
+
+## 🧾 Pull Request Checklist
+
+- [ ] Tests pass locally and in CI  
+- [ ] Lint runs cleanly (no warnings or errors)  
+- [ ] Documentation or comments updated if needed  
+- [ ] No unnecessary dependencies introduced  
+- [ ] Conventional commits respected  
+- [ ] Includes at least one new or updated test  
+
+---
+
+## 👥 Maintainer Contact
+
+**Maintainer:** Gilberto Tovar  
+📧 gilbertotovar.dev@gmail.com  
+🌐 [www.gilbertotovar.com](https://www.gilbertotovar.com)
+
+---
+
+**Last updated:** July 2025  
+=== FIN: ./CONTRIBUTION.md ===
+
+=== INICIO: ./migrations/20250726054610-create-action-history.cjs ===
+'use strict';
+
+module.exports = {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.createTable('ActionHistories', {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER
+      },
+      userId: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      emailId: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      action: {
+        type: Sequelize.ENUM('accept', 'reject', 'delete', 'archive', 'move'),
+        allowNull: false
+      },
+      timestamp: {
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.fn('NOW')
+      },
+      details: {
+        type: Sequelize.JSONB,
+        defaultValue: {}
+      },
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.fn('NOW')
+      },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.fn('NOW')
+      }
+    });
+  },
+
+  async down(queryInterface, Sequelize) {
+    await queryInterface.dropTable('ActionHistories');
+  }
+};
+
+=== FIN: ./migrations/20250726054610-create-action-history.cjs ===
+
+=== INICIO: ./SUMMARY.md ===
+# 📘 Índice de Documentación — Email Cleaner & Smart Notifications
+
+## 1. Visión General
+- [Diseño y Arquitectura](DESIGN_DOCUMENT.md)
+
+## 2. Referencia Técnica
+- [API de Emails y Reglas](docs/API_REFERENCE.md)
+
+## 3. Guías y Tutoriales
+- [Guía de Inicio Rápido](docs/TUTORIALS/QUICKSTART.md)
+
+## 4. Colaboración
+- [Guía de Contribución](CONTRIBUTION.md)
+
+=== FIN: ./SUMMARY.md ===
+
+=== INICIO: ./Dockerfile ===
+# Etapa 1 – build
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY . .
+RUN npm run build # si aplica (TS)
+
+# Etapa 2 – runtime optimizado
+FROM node:18-alpine
+WORKDIR /app
+COPY --from=builder /app .
+ENV NODE_ENV=production
+EXPOSE 8080
+CMD ["node", "src/index.js"]
+
+=== FIN: ./Dockerfile ===
+
+=== INICIO: ./.env.prod ===
+
+=== FIN: ./.env.prod ===
+
+=== INICIO: ./tests/mailService.test.js ===
+
+=== FIN: ./tests/mailService.test.js ===
+
+=== INICIO: ./tests/emailSuggester.test.js ===
+
+=== FIN: ./tests/emailSuggester.test.js ===
+
+=== INICIO: ./tests/filters.test.js ===
+// src/tests/filters.test.js
+const { buildGmailQuery } = require('../utils/filters');
+
+test('buildGmailQuery with unread and category', () => {
+  const q = buildGmailQuery({ unread: 'true', category: 'promotions' });
+  expect(q).toBe('is:unread category:promotions');
+});
+
+=== FIN: ./tests/filters.test.js ===
+
+=== INICIO: ./docs/readme.guia.md ===
+# 📘 Official README Writing Guide
+
+This guide defines the minimum structure and best practices for creating consistent `README.md` files across **Email Cleaner & Smart Notifications** and related projects.  
+Inspired by:
+
+- **Readme‑Driven Development** — Tom Preston‑Werner  
+- **GitHub Open Source Guides**  
+- **Google Engineering Practices**  
+- **Clean Architecture / The Art of Readable Code**  
+
+---
+
+## 🎯 Purpose of a README
+
+1. **Onboarding in ≤ 2 minutes:** any developer should understand and run the project locally.  
+2. **Single source of truth:** the README is the entry point; avoid duplicating critical info elsewhere.  
+3. **Implicit contract:** it defines expectations before writing code.  
+
+---
+
+## 🧩 Required Structure
+
+| Section                          | Description                                    | Purpose                         |
+| -------------------------------- | ---------------------------------------------- | ------------------------------- |
+| **Title**                        | Concise, descriptive project name.             | Immediate identification.       |
+| **Description / Purpose**        | One‑sentence summary of the problem it solves. | “Start with why.”               |
+| **Technical Requirements**       | Language, DB, and service versions.            | Prevent environment mismatches. |
+| **Installation & Configuration** | Steps to clone, install, and set up `.env`.    | Accelerate onboarding.          |
+| **Basic Usage**                  | Minimal run or API example.                    | Quick verification.             |
+| **Extended Docs**                | Links to `/docs/*.md` or Swagger.              | Keep the README lightweight.    |
+| **Contribution**                 | PR, branch, and commit rules.                  | Maintain team consistency.      |
+| **License**                      | License type or privacy notice.                | Legal compliance.               |
+
+> Rule of thumb: if a section exceeds 4 lines, move it to `/docs/` and link it.
+
+---
+
+## 🧱 Optional Sections
+
+- System overview or architecture diagram  
+- Roadmap or backlog  
+- Project status (badges)  
+- Advanced usage examples (API/CLI)  
+- FAQ or troubleshooting guide  
+
+---
+
+## ✍️ Style Conventions
+
+- Write in **second person** (“You can run…”)  
+- Use **short sentences** and **clear lists**  
+- Avoid internal jargon or abbreviations  
+- Always specify the language in code blocks  
+- Limit lines to ~80 characters for readability  
+
+---
+
+## ✅ Pre‑Merge Checklist
+
+- [ ] Includes all required sections  
+- [ ] Installation steps verified  
+- [ ] Example commands tested locally  
+- [ ] All links functional (`npm run lint:links`)  
+- [ ] CI badge shows *passing* status  
+
+---
+
+## 📋 Base Template
+
+```markdown
+# <Project Name>
+
+Brief description of its purpose.
+
+## Requirements
+- Node.js vXX
+- PostgreSQL
+
+## Installation
+```bash
+npm install
+```
+
+## Quick Start
+```bash
+npm start
+```
+
+## Documentation
+- Architecture: [docs/architecture.md](docs/architecture.md)
+- Deployment: [docs/deploy-cloudrun.md](docs/deploy-cloudrun.md)
+
+## Contribution
+1. Create branch `feature/<name>`  
+2. Run `npm test`  
+3. Open PR with clear description
+
+## License
+MIT (or Private)
+```
+
+---
+
+**Last updated:** July 2025 — Architecture Team  
+=== FIN: ./docs/readme.guia.md ===
+
+=== INICIO: ./docs/architecture.md ===
+# 🏗️ System Architecture Diagram
+
+This diagram represents the main data flow of the **Email Cleaner & Smart Notifications** system.
+
+```mermaid
+flowchart LR
+    A["1️⃣ Start: Gmail API — OAuth2"] --> B["2️⃣ Pre-processing: Fastify Backend (Node.js)\nNormalize and create JSON payload"]
+    B --> C["3️⃣ Request: HTTP POST (JSON)"]
+    C --> D["4️⃣ Classification: FastAPI (Python ML)\nInference and tagging"]
+    D --> E["5️⃣ End: Persistence (PostgreSQL) + Notification (n8n / Telegram)\nSave results and trigger alert"]
+
+```
+
+---
+
+## 🔄 Stage Descriptions
+
+### 1️⃣ Start: Gmail API (OAuth2)
+- Fetches incoming emails securely using OAuth2 tokens.  
+- Read‑only access; no local credential storage.
+
+### 2️⃣ Pre‑Processing: Fastify Backend
+- Normalizes and sanitizes the email payload.  
+- Converts raw Gmail data into a standardized JSON schema.  
+- Logs structural anomalies for debugging.
+
+### 3️⃣ HTTP POST Request
+- The backend sends the JSON payload to the Python microservice.  
+- Includes an internal authentication token for inter‑service trust.
+
+### 4️⃣ Classification: FastAPI (Python ML)
+- Executes a machine‑learning model for text classification.  
+- Returns both the **predicted category** and **recommended action** (archive, notify, label).
+
+### 5️⃣ Persistence & Notification
+- Fastify writes classification results to PostgreSQL.  
+- Triggers n8n / Telegram notification workflows if required.  
+- Returns the final response to the React frontend.
+
+---
+
+## ⚙️ Technical Notes
+
+- **Communication:** RESTful HTTP between Node.js ↔ Python.  
+- **Security:** Internal JWT tokens between microservices.  
+- **Observability:** Centralized logging via Cloud Logging.  
+- **Fault Tolerance:** Automatic retries for transient network failures.  
+
+---
+
+**Last updated:** July 2025  
+=== FIN: ./docs/architecture.md ===
+
+=== INICIO: ./docs/index.html ===
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="refresh" content="0; url=DESIGN_DOCUMENT.md">
+    <title>Cargando Documentación de Arquitectura...</title>
+</head>
+<body>
+    <p>Redireccionando a la página principal de la documentación...</p>
+</body>
+</html>
+
+=== FIN: ./docs/index.html ===
+
+=== INICIO: ./docs/API_REFERENCE.md ===
+# 📡 Emails API Reference (v1)
+
+> Base URL: `/api/v1`
+
+---
+
+## 1️⃣ Create a New Classification Rule
+
+**Method:** `POST /api/v1/emails/rules`
+
+**Description:**  
+Creates a new **classification rule** to be applied to incoming emails (by subject, sender, or body content) and defines the corresponding action (label, archive, notify, etc.).
+
+### Request Body (JSON)
+```json
+{
+  "name": "CFE Invoice Rule",
+  "match": {
+    "from": ["invoices@cfe.mx", "alerts@cfe.mx"],
+    "subjectContains": ["bill", "electricity", "CFE"],
+    "bodyContainsAny": ["due", "payment"]
+  },
+  "action": {
+    "label": "Finance/Utilities/CFE",
+    "notify": ["telegram"],
+    "archive": true
+  },
+  "enabled": true,
+  "priority": 10
+}
+```
+
+### Successful Response
+```json
+{
+  "id": "rul_01HZXQ6W6F",
+  "name": "CFE Invoice Rule",
+  "enabled": true,
+  "priority": 10,
+  "createdAt": "2025-11-06T02:21:34.000Z",
+  "updatedAt": "2025-11-06T02:21:34.000Z"
+}
+```
+
+---
+
+## 2️⃣ Retrieve Classified Emails
+
+**Method:** `GET /api/v1/emails`
+
+**Description:**  
+Returns a paginated list of classified emails, including categories and suggested actions.
+
+### Query Parameters
+
+| Parameter | Type    | Required | Description                |
+| --------- | ------- | -------- | -------------------------- |
+| `page`    | integer | No       | Current page (default 1).  |
+| `limit`   | integer | No       | Page size (default 20).    |
+| `label`   | string  | No       | Filter by category or tag. |
+| `from`    | string  | No       | Filter by sender.          |
+| `since`   | string  | No       | Minimum date (ISO 8601).   |
+| `until`   | string  | No       | Maximum date (ISO 8601).   |
+
+### Example Response
+```json
+{
+  "page": 1,
+  "limit": 20,
+  "total": 132,
+  "items": [
+    {
+      "id": "msg_01HZXT0W1E",
+      "from": "invoices@cfe.mx",
+      "subject": "Your electricity bill is ready",
+      "receivedAt": "2025-11-02T14:10:05.000Z",
+      "labels": ["Finance", "Utilities", "CFE"],
+      "classification": {
+        "category": "Finance/Utilities/CFE",
+        "confidence": 0.94
+      },
+      "actions": {
+        "suggested": ["label", "archive", "notify:telegram"],
+        "applied": ["label"]
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 3️⃣ Update an Existing Rule
+
+**Method:** `PATCH /api/v1/emails/rules/:ruleId`
+
+**Description:**  
+Partially updates an existing rule (e.g., change priority or toggle `enabled`).
+
+### Example Request Body
+```json
+{
+  "enabled": false,
+  "priority": 20
+}
+```
+
+### Example Response
+```json
+{
+  "id": "rul_01HZXQ6W6F",
+  "name": "CFE Invoice Rule",
+  "enabled": false,
+  "priority": 20,
+  "updatedAt": "2025-11-06T02:28:11.000Z"
+}
+```
+
+---
+
+## 🧩 Implementation Notes (Fastify)
+
+- Always version APIs under `/api/v1`.  
+- Validate all payloads with `@fastify/ajv`.  
+- Return correct HTTP status codes (`200`, `201`, `400`, `404`).  
+- Always include pagination metadata: `page`, `limit`, `total`, and `items`.  
+- Ensure `PATCH` operations are idempotent.  
+
+---
+
+**Last updated:** July 2025  
+=== FIN: ./docs/API_REFERENCE.md ===
+
+=== INICIO: ./docs/cloudbuild.yaml ===
+teps:
+  - id: "Build & Push"
+    name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-t", "$LOCATION-docker.pkg.dev/$PROJECT_ID/email-cleaner/email-cleaner:$SHORT_SHA", "."]
+
+  - id: "Deploy"
+    name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: "gcloud"
+    args:
+      ["run", "deploy", "email-cleaner", "--image", "$LOCATION-docker.pkg.dev/$PROJECT_ID/email-cleaner/email-cleaner:$SHORT_SHA", "--platform", "managed", "--region", "$LOCATION", "--quiet"]
+
+images:
+  - "$LOCATION-docker.pkg.dev/$PROJECT_ID/email-cleaner/email-cleaner:$SHORT_SHA"
+
+=== FIN: ./docs/cloudbuild.yaml ===
+
+=== INICIO: ./docs/TUTORIALS/QUICKSTART.md ===
+# ⚡ Quickstart — Email Cleaner & Smart Notifications
+
+Guía rápida para levantar el entorno local del proyecto y validar el flujo principal de clasificación de correos.
+
+---
+
+## 🚀 1. Requisitos Previos
+
+| Componente        | Versión mínima | Propósito                        |
+| ----------------- | -------------- | -------------------------------- |
+| Node.js           | 18.x LTS       | Backend (Fastify)                |
+| Python            | 3.10+          | Microservicio ML                 |
+| PostgreSQL        | 14+            | Base de datos                    |
+| Docker (opcional) | 24+            | Entorno reproducible             |
+| Gmail API         | v1             | Integración con correo           |
+| n8n (opcional)    | Latest         | Automatización de notificaciones |
+
+---
+
+## ⚙️ 2. Clonar y Configurar
+
+```bash
+git clone https://github.com/gilbertotovar/email-cleaner.git
+cd email-cleaner
+cp .env.example .env
+```
+
+Edita las variables del `.env`:
+
+```
+GOOGLE_CLIENT_ID=xxxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=xxxx
+DB_HOST=localhost
+DB_USER=postgres
+DB_PASS=secret
+DB_NAME=email_cleaner
+```
+
+---
+
+## 🧱 3. Instalación de Dependencias
+
+**Backend (Node.js):**
+```bash
+npm install
+```
+
+**Microservicio ML (Python):**
+```bash
+cd python/classifier
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+---
+
+## 🧩 4. Iniciar los Servicios
+
+**Backend (Fastify):**
+```bash
+npm run dev
+# http://localhost:3000
+```
+
+**Microservicio ML (FastAPI):**
+```bash
+uvicorn main:app --reload --port 8000
+# http://localhost:8000/docs
+```
+
+**(Opcional) Notificaciones n8n:**
+```bash
+docker run -it -p 5678:5678 n8nio/n8n
+```
+
+---
+
+## 📬 5. Flujo Básico de Prueba
+
+1. Iniciar ambos servicios (Node.js + Python).  
+2. Llamar a `/api/v1/emails/test` con un ejemplo de correo JSON.  
+3. Ver la respuesta del clasificador ML (categoría + acción).  
+4. Confirmar persistencia en PostgreSQL.  
+
+Ejemplo de llamada:
+
+```bash
+curl -X POST http://localhost:3000/api/v1/emails/classify -H "Content-Type: application/json" -d '{
+  "from": "facturas@cfe.mx",
+  "subject": "Tu recibo de luz",
+  "body": "Vence el 15 de noviembre. Monto $350."
+}'
+```
+
+---
+
+## 🧪 6. Pruebas Unitarias
+
+**Node.js:**
+```bash
+npm run test
+```
+
+**Python:**
+```bash
+pytest -v
+```
+
+---
+
+## ☁️ 7. Despliegue (resumen)
+
+1. Build de Docker con `gcloud builds submit`.  
+2. Despliegue en Cloud Run.  
+3. Conexión con Cloud SQL.  
+4. Integración con Secret Manager.  
+
+(Ver `despliegue-cloudrun.md` para la guía completa).
+
+---
+
+## 🧾 8. Recursos Relacionados
+
+- `API_REFERENCE.md` — Endpoints disponibles.  
+- `DESIGN_DOCUMENT.md` — Arquitectura y decisiones técnicas.  
+- `architecture.md` — Diagrama de flujo Mermaid.  
+- `migraciones.md` — Esquema y gestión de base de datos.  
+- `seeders.guia.md` — Carga inicial de datos.  
+
+---
+
+**Última actualización:** Julio 2025 — Equipo de Arquitectura  
+=== FIN: ./docs/TUTORIALS/QUICKSTART.md ===
+
+=== INICIO: ./docs/seeders.guia.md ===
+# 🌱 Database Seeder Guide
+
+This guide explains how to create and execute **seeders** using **Sequelize CLI** to populate initial or reference data for **Email Cleaner & Smart Notifications**.
+
+---
+
+## 🎯 Purpose
+
+- Load reproducible reference data (roles, states, templates, etc.).  
+- Simplify local development with realistic datasets.  
+- Eliminate manual SQL scripts and reduce human error.
+
+---
+
+## 🧩 1. Tools
+
+| Tool               | Version | Purpose                      |
+| ------------------ | ------- | ---------------------------- |
+| `sequelize-cli`    | ^7.x    | Generate and execute seeders |
+| `umzug` (optional) | ^4.x    | Run seeders programmatically |
+
+Install as a dev dependency:  
+```bash
+npm install --save-dev sequelize-cli
+```
+
+---
+
+## 📁 2. Directory Structure
+
+```plaintext
+email-cleaner/
+├── seeders/
+│   └── YYYYMMDDHHmmss-create-roles.js
+└── migrations/
+```
+
+Seeders are stored alongside migrations per Sequelize convention.
+
+---
+
+## 🧱 3. Naming Convention
+
+```
+YYYYMMDDHHmmss-description.js
+```
+
+Example:  
+`20250718143000-create-default-roles.js`
+
+Timestamps (UTC) guarantee consistent execution order.
+
+---
+
+## ⚙️ 4. Core Commands
+
+| Action           | Command                                                |
+| ---------------- | ------------------------------------------------------ |
+| Generate seeder  | `npx sequelize-cli seed:generate --name <description>` |
+| Run all seeders  | `npx sequelize-cli db:seed:all --env local`            |
+| Undo last seeder | `npx sequelize-cli db:seed:undo --env local`           |
+| Undo all seeders | `npx sequelize-cli db:seed:undo:all --env local`       |
+
+Add convenient scripts to `package.json`:
+
+```json
+"scripts": {
+  "seed": "sequelize-cli db:seed:all --env local",
+  "seed:undo": "sequelize-cli db:seed:undo:all --env local"
+}
+```
+
+---
+
+## 🧠 5. Best Practices
+
+1. Use only for **reference data**, not user data.  
+2. Prefer `findOrCreate` over plain `bulkInsert` for idempotence.  
+3. Separate seeders by environment (`NODE_ENV`).  
+4. Always implement `down()` for rollback.  
+5. Document purpose and context in each PR.  
+
+---
+
+## 💡 6. Example Seeder
+
+```js
+'use strict';
+module.exports = {
+  async up(queryInterface) {
+    return queryInterface.bulkInsert('Roles', [
+      { name: 'admin', created_at: new Date(), updated_at: new Date() },
+      { name: 'user', created_at: new Date(), updated_at: new Date() },
+      { name: 'viewer', created_at: new Date(), updated_at: new Date() }
+    ]);
+  },
+  async down(queryInterface) {
+    return queryInterface.bulkDelete('Roles', null, {});
+  }
+};
+```
+
+---
+
+## 🔁 7. CI/CD Integration
+
+Optional step for `cloudbuild.yaml` (paired with migrations):
+
+```yaml
+- id: DB Seed
+  name: node:18-alpine
+  entrypoint: sh
+  args:
+    - "-c"
+    - |
+      npm ci --omit=dev
+      npx sequelize-cli db:seed:all --env production
+```
+
+---
+
+## ❓ 8. FAQ
+
+| Question                      | Answer                          |
+| ----------------------------- | ------------------------------- |
+| Can I edit an applied seeder? | 🚫 No — create a new one.        |
+| How are seeders executed?     | Sorted by timestamp ascending.  |
+| Can I run only one seeder?    | Use `db:seed --seed <file>.js`. |
+
+---
+
+**Last updated:** July 2025 — Architecture Team  
+=== FIN: ./docs/seeders.guia.md ===
+
+=== INICIO: ./docs/migraciones.md ===
+# 🗄️ Database Migration Guide
+
+This document explains how to version, create, and deploy schema changes for **Email Cleaner & Smart Notifications** using **Sequelize Migrations**.  
+Aligned with the *Code Style Guide* and *Infrastructure Roadmap*.
+
+---
+
+## 🎯 Purpose
+
+- Maintain consistent database schemas across environments (local, staging, production).  
+- Allow safe rollbacks on deployment errors.  
+- Enable traceable and auditable schema changes via PRs.  
+
+---
+
+## 🧩 1. Tools & Dependencies
+
+| Tool                 | Version | Purpose                       |
+| -------------------- | ------- | ----------------------------- |
+| **Sequelize**        | ^7.x    | ORM                           |
+| **sequelize‑cli**    | ^7.x    | CLI for migration management  |
+| **umzug** (optional) | ^4.x    | Programmatic migration runner |
+
+Install the CLI:  
+```bash
+npm install --save-dev sequelize-cli
+```
+
+---
+
+## 📁 2. Directory Structure
+
+```plaintext
+email-cleaner/
+├── src/
+├── migrations/           # YYYYMMDDHHmmss-descriptive-name.js
+├── seeders/              # Optional initial data
+└── config/
+    └── config.js         # Environment-specific DB configuration
+```
+
+This layout matches Sequelize’s default conventions and supports CI/CD pipelines.
+
+---
+
+## 🧱 3. Naming Convention
+
+```
+YYYYMMDDHHmmss-description.js
+```
+
+Example:  
+`20250718104500-add-column-is_archived-to-emails.js`
+
+Timestamps in UTC ensure proper ordering and deterministic execution.
+
+---
+
+## ⚙️ 4. Core Commands
+
+| Action                   | Command                                                     |
+| ------------------------ | ----------------------------------------------------------- |
+| Generate migration       | `npx sequelize-cli migration:generate --name <description>` |
+| Apply pending migrations | `npx sequelize-cli db:migrate --env local`                  |
+| Undo last migration      | `npx sequelize-cli db:migrate:undo --env local`             |
+| View migration status    | `npx sequelize-cli db:migrate:status`                       |
+
+Recommended `package.json` scripts:
+```json
+"scripts": {
+  "migrate": "sequelize-cli db:migrate --env local",
+  "migrate:undo": "sequelize-cli db:migrate:undo --env local"
+}
+```
+
+---
+
+## 🧠 5. Best Practices
+
+1. **Transactional:** wrap migrations in `queryInterface.sequelize.transaction(...)`.  
+2. **Reversible:** always implement `down()` for rollback.  
+3. **Idempotent:** never modify an applied migration — create a new one.  
+4. **Auditable:** describe each change in PRs and include `db:migrate:status` output.  
+5. **Seeders:** use only for static or reference data, never for user content.
+
+---
+
+## 🔄 6. CI/CD Integration
+
+Include this step before deployment in `cloudbuild.yaml`:
+
+```yaml
+- id: DB Migrate
+  name: node:18-alpine
+  entrypoint: sh
+  args:
+    - "-c"
+    - |
+      npm ci --omit=dev
+      npx sequelize-cli db:migrate --env production
+```
+
+Ensures the database is up-to-date before deploying the service.
+
+---
+
+## 🚧 7. Production Rollback
+
+1. Run `db:migrate:undo --env production`.  
+2. If already deployed, roll back Cloud Run revision.  
+3. Log and document the rollback in the incident record.
+
+---
+
+## 📘 8. Migration Example
+
+```js
+'use strict';
+module.exports = {
+  async up(queryInterface, Sequelize) {
+    return queryInterface.addColumn('Emails', 'is_archived', {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false,
+      allowNull: false
+    });
+  },
+  async down(queryInterface) {
+    return queryInterface.removeColumn('Emails', 'is_archived');
+  }
+};
+```
+
+---
+
+## ❓ 9. FAQ
+
+| Question                         | Answer                                          |
+| -------------------------------- | ----------------------------------------------- |
+| Can I edit an applied migration? | 🚫 No — always create a new one.                 |
+| How do I run a single migration? | Use `--to <timestamp>` with `db:migrate`.       |
+| How do I test migrations in CI?  | Execute `db:migrate` before running unit tests. |
+
+---
+
+**Last updated:** July 2025 — Architecture Team  
+=== FIN: ./docs/migraciones.md ===
+
+=== INICIO: ./docs/despliegue-cloudrun.md ===
+# 🚀 Deployment Guide — Google Cloud Run
+
+This document describes how to package and deploy **Email Cleaner & Smart Notifications** to **Google Cloud Run** following the official architecture and code‑style guidelines.
+
+---
+
+## 🎯 Objective
+
+- Ensure **secure and reproducible** deployments.  
+- Minimize time‑to‑production through automated CI/CD.  
+- Protect secrets and environment variables via **Secret Manager**.
+
+---
+
+## 🧩 1. Prerequisites
+
+| Resource                 | Version / Requirement                           | Notes                                              |
+| ------------------------ | ----------------------------------------------- | -------------------------------------------------- |
+| **gcloud CLI**           | ≥ 475                                           | Install via `brew install --cask google-cloud-sdk` |
+| **Google Cloud Project** | Billing + Cloud Run + Artifact Registry enabled | Use same project as OAuth2 credentials             |
+| **Docker**               | ≥ 24                                            | For local builds                                   |
+| **PostgreSQL**           | Cloud SQL or external                           | Recommended: Cloud SQL with VPC‑SC                 |
+| **.env.prod**            | Encrypted variables                             | See section 4                                      |
+
+---
+
+## 📁 2. Directory Structure
+
+```plaintext
+email-cleaner/
+├── Dockerfile
+├── cloudbuild.yaml        # optional CI/CD pipeline
+└── src/
+```
+
+---
+
+## ⚙️ 3. Reference Dockerfile
+
+```dockerfile
+# Stage 1 – build
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY . .
+RUN npm run build
+
+# Stage 2 – runtime
+FROM node:18-alpine
+WORKDIR /app
+COPY --from=builder /app .
+ENV NODE_ENV=production
+EXPOSE 8080
+CMD ["node", "src/index.js"]
+```
+
+**Rationale:** Multi‑stage builds produce lightweight images with faster startup.
+
+---
+
+## 🔐 4. Environment Variables (`.env.prod`)
+
+| Variable               | Example / Notes               |
+| ---------------------- | ----------------------------- |
+| `PORT`                 | 8080 (automatically injected) |
+| `GOOGLE_CLIENT_ID`     | Stored in Secret Manager      |
+| `GOOGLE_CLIENT_SECRET` | Same as above                 |
+| `DB_HOST`              | `/cloudsql/<CONN_NAME>`       |
+| `DB_USERNAME`          | DB user                       |
+| `DB_PASSWORD`          | Stored in Secret Manager      |
+
+Use **Secret Manager** references at runtime via `--set-secrets`.
+
+---
+
+## 🧰 5. Manual Deployment
+
+```bash
+gcloud init
+gcloud auth application-default login
+gcloud services enable run.googleapis.com artifactregistry.googleapis.com sqladmin.googleapis.com
+gcloud config set project email-cleaner-463600
+gcloud config set run/region us-central1
+
+gcloud builds submit --tag us-central1-docker.pkg.dev/email-cleaner-463600/email-cleaner/email-cleaner:$(git rev-parse --short HEAD)
+
+gcloud run deploy email-cleaner   --image us-central1-docker.pkg.dev/email-cleaner-463600/email-cleaner/email-cleaner:$(git rev-parse --short HEAD)   --platform managed   --allow-unauthenticated=false   --add-cloudsql-instances email-cleaner-463600:us-central1:pg-instance   --set-env-vars NODE_ENV=production   --set-secrets GOOGLE_CLIENT_SECRET=projects/123/secrets/GOOGLE_CLIENT_SECRET:latest   --memory 512Mi --cpu 1 --max-instances 3
+```
+
+**Notes:**  
+- `--allow-unauthenticated=false` → IAM authentication required.  
+- `--add-cloudsql-instances` → mounts Cloud SQL socket.  
+- Adjust CPU/memory per cost/performance needs.
+
+---
+
+## ⚙️ 6. CI/CD — `cloudbuild.yaml`
+
+```yaml
+steps:
+  - id: Build & Push
+    name: gcr.io/cloud-builders/docker
+    args: ["build","-t","$LOCATION-docker.pkg.dev/$PROJECT_ID/email-cleaner/email-cleaner:$SHORT_SHA","."]
+  - id: Deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      ["run","deploy","email-cleaner","--image","$LOCATION-docker.pkg.dev/$PROJECT_ID/email-cleaner/email-cleaner:$SHORT_SHA","--platform","managed","--region","$LOCATION","--quiet"]
+images:
+  - "$LOCATION-docker.pkg.dev/$PROJECT_ID/email-cleaner/email-cleaner:$SHORT_SHA"
+```
+
+Automatically triggers on each push to `main`.
+
+---
+
+## 📊 7. Observability
+
+- **Logs:** Cloud Logging (`service=email-cleaner`)  
+- **Metrics:** Cloud Monitoring (alerts: CPU > 80%, latency p95)  
+- **Tracing:** Cloud Trace for TTFB and request paths  
+
+---
+
+## 🔁 8. Quick Rollback
+
+```bash
+gcloud run revisions list --service email-cleaner
+gcloud run services update-traffic email-cleaner --to-revisions REVISION@latest=0,REVISION@prev=100
+```
+
+Redirects 100% of traffic to the previous revision (blue‑green rollback).
+
+---
+
+## 🔒 9. Security Best Practices
+
+1. Use least‑privilege service accounts.  
+2. Store secrets only in Secret Manager.  
+3. Enable VPC‑SC for sensitive data.  
+4. Use Cloud SQL IAM Auth instead of static passwords.  
+5. Retain logs ≥ 30 days.  
+
+---
+
+## ✅ 10. Summary
+
+1. Multi‑stage Dockerfile.  
+2. `.env.prod` managed via Secret Manager.  
+3. Enable required services and publish to Artifact Registry.  
+4. Deploy via `gcloud builds submit` + `gcloud run deploy`.  
+5. Monitor and rollback when needed.  
+
+---
+
+**Last updated:** July 2025 — Architecture Team  
+=== FIN: ./docs/despliegue-cloudrun.md ===
+
+=== INICIO: ./README.md ===
+# 🧩 Email Cleaner & Smart Notifications
+![Build](https://github.com/gilbertotovar/email-cleaner/actions/workflows/ci.yml/badge.svg)
+![Docs](https://img.shields.io/badge/docs-online-brightgreen)
+
+An intelligent system that automatically classifies your emails, prioritizes what truly matters, and alerts you when action is needed.  
+Built with **Fastify (Node.js)** for backend logic, **FastAPI (Python)** for machine learning, and **n8n** for smart automation.
+
+---
+
+## 🚀 Overview
+
+Managing dozens of emails daily can easily lead to **decision fatigue** and **loss of focus**.  
+This system connects securely to Gmail, classifies messages with ML models, and filters what deserves your attention.
+
+![Email Cleaner Flow](docs/assets/diagram_overview.png)
+
+---
+
+## 🧠 Core Features
+
+- **Smart Classification** — NLP-based categorization of incoming emails.  
+- **Priority Notifications** — Only alerts you for messages that matter.  
+- **Seamless Gmail Integration** — OAuth2-based secure connection.  
+- **Multi-service Architecture** — Node.js backend + Python ML microservice.  
+- **Automation-ready** — n8n workflows for Telegram or Slack notifications.
+
+---
+
+## 🧱 Architecture Overview
+
+| Layer           | Technology         | Purpose                          |
+| --------------- | ------------------ | -------------------------------- |
+| Frontend        | React + Vite       | Web interface and control panel  |
+| Backend API     | Fastify (Node.js)  | Business logic and orchestration |
+| ML Microservice | FastAPI (Python)   | Email classification engine      |
+| Database        | PostgreSQL         | Data persistence                 |
+| Infrastructure  | Docker + Cloud Run | Deployment and scalability       |
+
+---
+
+## ⚙️ Setup Instructions
+
+> ⚠️ **Requirements:** Node.js ≥ 20.0  •  Python ≥ 3.10  •  Docker (optional)  
+> Ensure you have both environments active before running the backend and ML microservice.
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/gilbertotovar/email-cleaner.git
+cd email-cleaner
+```
+
+### 2. Environment Setup
+
+Copy the environment example and fill in your Gmail credentials:
+
+```bash
+cp .env.example .env
+```
+
+### 3. Install Dependencies
+
+**Backend:**
+```bash
+npm install
+```
+
+**ML Microservice:**
+```bash
+cd python/classifier
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 4. Run the Services
+
+**Fastify Backend:**
+```bash
+npm run dev
+# http://localhost:3000
+```
+
+**Python Classifier (FastAPI):**
+```bash
+uvicorn main:app --reload --port 8000
+# http://localhost:8000/docs
+```
+
+---
+
+## 🧪 Testing the Pipeline
+
+To test classification end-to-end:
+
+```bash
+curl -X POST http://localhost:3000/api/v1/emails/classify -H "Content-Type: application/json" -d '{
+  "from": "invoices@cfe.mx",
+  "subject": "Your electricity bill is ready",
+  "body": "Due date: November 15. Amount: $350."
+}'
+```
+
+Expected result:
+```json
+{
+  "category": "Finance/Utilities/CFE",
+  "action": "archive",
+  "confidence": 0.93
+}
+```
+# Trigger notification test
+curl -X POST http://localhost:5678/webhook/telegram-test
+
+---
+
+## 📦 Related Documentation
+
+| File                     | Description                           |
+| ------------------------ | ------------------------------------- |
+| [`DESIGN_DOCUMENT.md`](https://gtovar.github.io/email-cleaner-fastify/DESIGN_DOCUMENT.html) | Technical design rationale |
+| `API_REFERENCE.md`       | REST API specification                |
+| `architecture.md`        | Mermaid architecture diagram          |
+| `despliegue-cloudrun.md` | Deployment guide for Google Cloud Run |
+| `migraciones.md`         | Database migration guide              |
+| `seeders.guia.md`        | Seeder reference                      |
+
+---
+
+## 🧰 Tech Stack Summary
+
+- **Backend:** Node.js (Fastify), PostgreSQL  
+- **ML Service:** Python (FastAPI, scikit‑learn)  
+- **Infra:** Docker, Cloud Run, Secret Manager  
+- **Notifications:** n8n + Telegram integration
+- **CI/CD:** GitHub Actions (build + deploy + lint)
+- **Monitoring:** ELK Stack / Prometheus (optional phase 4)
+
+---
+
+## 🧾 License and Maintainers
+
+Maintained by **Gilberto Tovar**  
+📧 gilbertotovar.dev@gmail.com  
+🌐 [www.gilbertotovar.com](https://www.gilbertotovar.com)
+
+---
+# pre-commit hook
+sed -i "s/Last updated:.*/Last updated: $(date '+%B %Y')/" README.md
+
+
+=== FIN: ./README.md ===
+
+=== INICIO: ./.gitignore ===
+/node_modules
+.env
+.env.*
+/logs
+*.log
+*.DS_Store
+.idea/
+.vscode/
+*.swp
+python.zip
+src.zip
+nodejs_src.zip
+git_diff.txt
+exportar_proyecto.sh
+
+=== FIN: ./.gitignore ===
+
+=== INICIO: ./package.json ===
+{
+  "name": "email-cleaner-fastify",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/cors": "^11.0.1",
+    "@fastify/swagger": "^9.5.1",
+    "@fastify/swagger-ui": "^5.2.3",
+    "dotenv": "^16.5.0",
+    "fastify": "^5.4.0",
+    "fastify-env": "^2.2.0",
+    "fastify-plugin": "^5.0.1",
+    "googleapis": "^150.0.1",
+    "node-fetch": "^3.3.2",
+    "pg": "^8.16.2",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.7"
+  },
+  "devDependencies": {
+    "sequelize-cli": "^6.6.3"
+  }
+}
+
+=== FIN: ./package.json ===
+
+=== INICIO: ./.github/workflows/ci.yml ===
+name: CI
+on: [push, pull_request]
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: apps/api } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 'lts/*' }
+      - run: npm ci
+      - run: npm run lint && npm test
+
+  ml:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: apps/ml } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install -r requirements.txt
+      - run: pytest -q
+
+  web:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: apps/web } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 'lts/*' }
+      - run: npm ci
+      - run: npm run build
+
+=== FIN: ./.github/workflows/ci.yml ===
+
+=== INICIO: ./ops/Makefile ===
+up:
+\tdocker compose -f ops/docker-compose.yml up --build
+down:
+\tdocker compose -f ops/docker-compose.yml down
+test:
+\t# aquí puedes encadenar npm test / pytest en contenedores
+
+=== FIN: ./ops/Makefile ===
+
+=== INICIO: ./ops/docker-compose.yml ===
+version: "3.9"
+services:
+  api:
+    build: ./apps/api
+    env_file: ./apps/api/.env
+    ports: ["3000:3000"]
+    command: npm run dev
+    depends_on: [ml]
+
+  ml:
+    build: ./apps/ml
+    env_file: ./apps/ml/.env
+    ports: ["5055:5055"]
+    command: uvicorn app:app --reload --host 0.0.0.0 --port 5055
+
+  web:
+    build: ./apps/web
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    ports: ["5173:5173"]
+    command: npm run dev -- --host
+    depends_on: [api]
+
+=== FIN: ./ops/docker-compose.yml ===
+
+=== INICIO: ./DESIGN_DOCUMENT.md ===
+# 🧠 Design & Architecture Document  
+### Project: Email Cleaner & Smart Notifications  
+> “Designed to understand your inbox — and declutter your mind.”
+
+---
+
+## 1. 🧭 System Vision and Context
+
+### 1.1 Problem
+Modern inboxes cause **information overload and cognitive fatigue**, forcing users to waste time filtering irrelevant messages instead of focusing on real work.
+
+### 1.2 Proposed Solution
+A platform that **automatically organizes and prioritizes emails** using AI, securely integrates with Gmail, and alerts users only when truly relevant messages arrive.
+
+The system combines **Fastify (Node.js)** for high‑performance I/O, **FastAPI (Python)** for ML‑based classification, and **n8n** as a notification orchestrator.
+
+---
+
+## 2. 🧩 System Architecture
+
+### 2.1 Technology Stack
+
+| Layer           | Technology         | Purpose                                |
+| --------------- | ------------------ | -------------------------------------- |
+| Frontend        | React + Vite       | User dashboard and visualization       |
+| Backend API     | Fastify (Node.js)  | Core business logic and routing        |
+| ML Microservice | FastAPI (Python)   | Email classification model             |
+| Infrastructure  | Docker + Terraform | Consistent and reproducible deployment |
+
+### 2.2 Design Principles
+
+1. **Single Responsibility Principle (SRP)**  
+   Each component has a single, well‑defined purpose.  
+2. **Modular Scalability**  
+   Plugin‑based architecture with isolated services.  
+3. **Interoperability**  
+   Communication between Node.js ↔ Python via REST.  
+4. **Security First**  
+   Encrypted OAuth2 tokens; no credential storage.
+
+---
+
+## 3. ⚙️ Critical Data Flow — Email Classification
+
+**Objective:** Automatically process, classify, and label incoming emails.
+
+### Pipeline Stages
+
+1. **Start:** Gmail API fetches new emails via OAuth2.  
+2. **Pre‑Processing:** Fastify normalizes payloads and builds JSON structure.  
+3. **POST Request:** Backend sends the payload to the ML service.  
+4. **Classification:** FastAPI applies the ML model and returns category + action.  
+5. **End:** Fastify saves the result in PostgreSQL and triggers n8n notifications.
+
+*(See `architecture.md` for the corresponding Mermaid flow diagram.)*
+
+---
+
+## 4. 🧠 Key Design Decisions
+
+### 4.1 Why Fastify Instead of Express
+Fastify’s plugin system and performance allow cleaner modularization, lower latency, and simpler dependency injection.
+
+### 4.2 Separate ML Microservice
+Keeping ML logic in a standalone Python service allows independent scaling, optimized libraries (e.g., scikit‑learn), and easier updates without redeploying the backend.
+
+### 4.3 n8n for Automation
+n8n simplifies integration pipelines and event‑based notifications with no additional backend code.
+
+---
+
+## 5. 📂 Backend Directory Layout (Fastify)
+
+```
+src/
+├── plugins/          # Dependency registration (DB, Gmail, etc.)
+├── services/         # Business logic and rules
+├── routes/           # REST endpoints
+├── controllers/      # Request orchestrators
+├── utils/            # Shared helpers
+└── app.js            # Main entry point
+```
+
+Pattern: **Service + Plugin Architecture**  
+Benefit: scalable, testable, and easily extendable structure.
+
+---
+
+## 6. 🔐 Security and Authentication
+
+- OAuth2 with Gmail (read‑only scope).  
+- AES‑256 encryption for secrets.  
+- Role‑scoped permissions (read / write).  
+- Schema validation with AJV.  
+
+---
+
+## 7. 📈 Scalability and Performance
+
+- **Fastify:** efficient concurrency with minimal overhead.  
+- **Cloud Run autoscaling:** handles traffic bursts.  
+- **Redis (optional):** caching for frequent rule sets.  
+- **Cloud SQL (PostgreSQL):** managed and secure database.
+
+---
+
+## 8. 🧪 Testing & CI/CD
+
+- **Jest:** Node.js unit tests.  
+- **Pytest:** ML service testing.  
+- **GitHub Actions / Cloud Build:** automated CI/CD pipeline.  
+- **ESLint + Prettier:** enforce code quality and formatting.
+
+---
+
+## 9. 🚀 Deployment Environments
+
+| Environment | Purpose      | Infrastructure                         |
+| ----------- | ------------ | -------------------------------------- |
+| Local       | Development  | Docker Compose                         |
+| Staging     | QA / Testing | Cloud Run + Temporary DB               |
+| Production  | End users    | Cloud Run + Cloud SQL + Secret Manager |
+
+---
+
+## 10. 📚 Related Documentation
+
+- `API_REFERENCE.md` — REST API reference  
+- `despliegue-cloudrun.md` — Cloud Run deployment guide  
+- `architecture.md` — System data‑flow diagram  
+
+---
+
+**Last updated:** July 2025  
+**Author:** Gilberto Tovar — Technical Architecture & Design  
+=== FIN: ./DESIGN_DOCUMENT.md ===
+
+=== INICIO: ./src/config/config.cjs ===
+require('dotenv').config();
+
+module.exports = {
+  development: {
+    username: process.env.DB_USERNAME || 'postgres',
+    password: process.env.DB_PASSWORD || null,
+    database: process.env.DB_DATABASE || 'email_cleaner',
+    host: process.env.DB_HOST || '127.0.0.1',
+    dialect: 'postgres'
+  }
+};
+
+=== FIN: ./src/config/config.cjs ===
+
+=== INICIO: ./src/swagger.yaml ===
+openapi: 3.0.0
+info:
+  title: Email Cleaner API
+  version: 1.0.0
+  description: API para listar correos de Gmail con filtros personalizados.
+servers:
+  - url: http://localhost:3000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Email:
+      type: object
+      properties:
+        id:
+          type: string
+        subject:
+          type: string
+        from:
+          type: string
+        date:
+          type: string
+        labels:
+          type: array
+          items:
+            type: string
+        hasAttachment:
+          type: boolean
+        size:
+          type: integer
+    EmailSuggestion:
+      type: object
+      properties:
+        id:
+          type: string
+        from:
+          type: string
+        subject:
+          type: string
+        date:
+          type: string
+        isRead:
+          type: boolean
+        category:
+          type: string
+        attachmentSizeMb:
+          type: number
+        suggestions:
+          type: array
+          items:
+            type: object
+            properties:
+              action:
+                type: string
+              category:
+                type: string
+              confidence_score:
+                type: number
+    ConfirmActionsRequest:
+      type: object
+      required: [ids, action]
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+        action:
+          type: string
+          enum: [accept, reject]
+    ConfirmActionsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        processed:
+          type: integer
+        action:
+          type: string
+    ActionHistoryItem:
+      type: object
+      properties:
+        userId:
+          type: string
+        emailId:
+          type: string
+        action:
+          type: string
+          enum: [accept, reject, delete, archive, move]
+        timestamp:
+          type: string
+          format: date-time
+        details:
+          type: object
+    ActionHistoryList:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        perPage:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionHistoryItem'
+
+paths:
+  /api/mails:
+    get:
+      tags:
+        - Mails
+      summary: Listar correos con filtros personalizados
+      description: Devuelve correos del usuario autenticado aplicando filtros.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: unread
+          schema:
+            type: boolean
+        - in: query
+          name: olderThan
+          schema:
+            type: integer
+            example: 30
+        - in: query
+          name: category
+          schema:
+            type: string
+            enum: [promotions, social, updates, forums, primary]
+        - in: query
+          name: minAttachmentSize
+          schema:
+            type: integer
+            example: 2
+        - in: query
+          name: pageToken
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de correos filtrados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mails:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Email'
+                  nextPageToken:
+                    type: string
+                    nullable: true
+                  total:
+                    type: integer
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno
+
+  /suggestions:
+    get:
+      tags:
+        - Sugerencias
+      summary: Sugerir acciones automáticas para limpieza
+      description: Devuelve sugerencias de acciones (eliminar, archivar, mover) para los correos del usuario autenticado.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de sugerencias
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  emails:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EmailSuggestion'
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  /notifications/summary:
+    get:
+      tags:
+        - Notificaciones
+      summary: Obtener resumen de sugerencias a limpiar
+      description: Devuelve sugerencias agrupadas por fecha.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum: [daily, weekly]
+      responses:
+        '200':
+          description: Resumen de sugerencias
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmailSuggestion'
+        '401':
+          description: No autorizado
+
+  /notifications/confirm:
+    post:
+      tags:
+        - Notificaciones
+      summary: Confirmar acciones sugeridas
+      description: Confirma o rechaza sugerencias sobre correos.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmActionsRequest'
+      responses:
+        '200':
+          description: Resultado de la confirmación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmActionsResponse'
+        '400':
+          description: Datos inválidos
+        '401':
+          description: No autorizado
+
+  /notifications/history:
+    get:
+      tags:
+        - Notificaciones
+      summary: Consultar historial de acciones
+      description: Muestra el historial de decisiones tomadas.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: perPage
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Historial de acciones
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionHistoryList'
+        '401':
+          description: No autorizado
+
+=== FIN: ./src/swagger.yaml ===
+
+=== INICIO: ./src/plugins/sequelize.js ===
+import fp from 'fastify-plugin';
+import { Sequelize, DataTypes } from 'sequelize';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
+import 'dotenv/config';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+async function dbConnector(fastify, options) {
+  const sequelize = new Sequelize(
+    process.env.DB_DATABASE,
+    process.env.DB_USERNAME,
+    process.env.DB_PASSWORD,
+    {
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT || 5432,
+      dialect: 'postgres',
+      logging: false,
+    }
+  );
+
+  try {
+    await sequelize.authenticate();
+    fastify.log.info('Conexión a PostgreSQL exitosa');
+  } catch (err) {
+    fastify.log.error('Error conectando a DB:', err);
+    throw err;
+  }
+
+  const Token = (await import(path.join(__dirname, '../models/token.js'))).default(sequelize, DataTypes);
+  const ActionHistory = (await import(path.join(__dirname, '../models/actionHistory.js'))).default(sequelize, DataTypes);
+
+  fastify.decorate('sequelize', sequelize);
+  fastify.decorate('models', { Token, ActionHistory });
+}
+
+export default fp(dbConnector);
+=== FIN: ./src/plugins/sequelize.js ===
+
+=== INICIO: ./src/middlewares/authMiddleware.js ===
+// src/middlewares/authMiddleware.js (ES Module)
+export default async function (request, reply) {
+  const authHeader = request.headers['authorization'] || request.headers['Authorization'];
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    reply.code(401).send({ error: 'Falta token o formato inválido' });
+    return;
+  }
+  // Solo para pruebas: extrae el access_token del header
+  const token = authHeader.replace('Bearer ', '').trim();
+  request.user = {
+    googleAccessToken: token
+  };
+}
+
+=== FIN: ./src/middlewares/authMiddleware.js ===
+
+=== INICIO: ./src/index.js ===
+import Fastify from 'fastify';
+import dbPlugin from './plugins/sequelize.js';
+import swagger from '@fastify/swagger';
+import swaggerUI from '@fastify/swagger-ui';
+import authRoutes from './routes/authRoutes.js';
+import mailRoutes from './routes/mailRoutes.js';
+import suggestionRoutes from './routes/suggestionRoutes.js';
+import notificationsRoutes from './routes/notificationsRoutes.js';
+import cors from '@fastify/cors';
+
+
+// Carga dotenv antes que nada
+import 'dotenv/config';
+
+// Instancia de fastify
+const fastify = Fastify({ logger: true });
+
+// Swagger setup (no uses require, usa import)
+
+await fastify.register(swagger, {
+  openapi: {
+    info: {
+      title: 'Email Cleaner API',
+      version: '1.0.0',
+      description: 'API para listar correos de Gmail con filtros personalizados.'
+    },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      }
+    },
+    security: [{ bearerAuth: [] }]
+  }
+});
+
+await fastify.register(swaggerUI, {
+  routePrefix: '/docs'
+});
+
+// Registro de plugins y rutas (nota los imports dinámicos)
+await fastify.register(dbPlugin);
+await fastify.register(authRoutes);
+await fastify.register(mailRoutes);
+await fastify.register(suggestionRoutes);
+await fastify.register(notificationsRoutes);
+
+
+// Healthcheck
+fastify.get('/', async (request, reply) => {
+  return { message: '¡Email Cleaner Fastify corriendo OK con arquitectura modular!' };
+});
+
+const start = async () => {
+  try {
+    await fastify.listen({ port: 3000 });
+    console.log('Servidor Fastify listo en http://localhost:3000');
+  } catch (err) {
+    fastify.log.error(err);
+    process.exit(1);
+  }
+};
+
+await fastify.register(cors, {
+  origin: 'http://localhost:5173', // Solo acepta peticiones desde el frontend
+  credentials: true
+});
+
+
+start();
+
+
+=== FIN: ./src/index.js ===
+
+=== INICIO: ./src/utils/filters.js ===
+// src/utils/filters.js
+function buildGmailQuery(filters) {
+  let q = '';
+  if (filters.unread === 'true') q += ' is:unread';
+  if (filters.category) q += ` category:${filters.category}`;
+  if (filters.olderThan) q += ` older_than:${filters.olderThan}`;
+  // Más reglas...
+  return q.trim();
+}
+
+async function filterByAttachment(messages, gmail, auth) {
+  // Requiere llamadas adicionales para revisar adjuntos
+  const result = [];
+  for (const msg of messages) {
+    const { data } = await gmail.users.messages.get({ userId: 'me', id: msg.id });
+    if (data.payload && data.payload.parts) {
+      const hasAttachment = data.payload.parts.some(
+        part => part.filename && part.body.attachmentId
+      );
+      if (hasAttachment) result.push(msg);
+    }
+  }
+  return result;
+}
+
+module.exports = { buildGmailQuery, filterByAttachment };
+
+=== FIN: ./src/utils/filters.js ===
+
+=== INICIO: ./src/models/notification.js ===
+// src/models/notification.js
+export default (sequelize, DataTypes) => {
+  const Notification = sequelize.define('Notification', {
+    emailId: DataTypes.STRING,
+    subject: DataTypes.STRING,
+    from: DataTypes.STRING,
+    action: DataTypes.STRING, // 'archive', 'delete', etc.
+    category: DataTypes.STRING,
+    confidenceScore: DataTypes.FLOAT,
+    confirmed: DataTypes.BOOLEAN, // true si el usuario la aceptó
+    confirmedAt: DataTypes.DATE
+  });
+
+  return Notification;
+};
+
+=== FIN: ./src/models/notification.js ===
+
+=== INICIO: ./src/models/token.js ===
+import { DataTypes } from 'sequelize';
+
+export default (sequelize) => {
+  const Token = sequelize.define('Token', {
+    email: { type: DataTypes.STRING, allowNull: false, unique: true },
+    access_token: { type: DataTypes.TEXT, allowNull: false },
+    refresh_token: { type: DataTypes.TEXT },
+    expiry_date: { type: DataTypes.DATE }
+  });
+  return Token;
+};
+
+=== FIN: ./src/models/token.js ===
+
+=== INICIO: ./src/models/actionHistory.js ===
+// src/models/actionHistory.js
+export default (sequelize, DataTypes) => {
+  return sequelize.define('ActionHistory', {
+    userId: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    emailId: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    action: {
+      type: DataTypes.ENUM('accept', 'reject', 'delete', 'archive', 'move'),
+      allowNull: false
+    },
+    timestamp: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
+    },
+    details: {
+      type: DataTypes.JSONB,
+      defaultValue: {}
+    }
+  });
+};
+=== FIN: ./src/models/actionHistory.js ===
+
+=== INICIO: ./src/controllers/suggestionController.js ===
+// src/controllers/suggestionController.js
+
+import { GmailService } from '../services/gmailService.js';
+import { google } from 'googleapis';
+import { suggestActions } from '../services/emailSuggester.js';
+
+/**
+ * Controlador para Fastify: sugiere acciones automáticas para correos (sin ejecutarlas).
+ */
+export async function getSuggestedEmails(request, reply) {
+    try {
+        // 1. Autenticación: Prepara el cliente Gmail usando el token del usuario autenticado
+        const oauth2Client = new google.auth.OAuth2();
+        oauth2Client.setCredentials({ access_token: request.user.googleAccessToken });
+
+        // 2. Instancia de Gmail API
+        const gmailClient = google.gmail({ version: 'v1', auth: oauth2Client });
+        const gmailService = new GmailService(gmailClient);
+
+        // 3. Llama al método del servicio para obtener correos (puedes ajustar filtros aquí)
+        const emails = await gmailService.listMessages({
+            maxResults: 20
+            // Puedes agregar más filtros: filter, dateBefore, combine, etc.
+        });
+
+        // 4. Espera el resultado de las sugerencias
+        const { emails: enrichedEmails } = await suggestActions(emails);
+
+        // 5. Responde con la estructura que espera Swagger
+        reply
+            .type('application/json')
+            .send(JSON.stringify({ emails: enrichedEmails }));
+
+    } catch (err) {
+        request.log.error(err, 'Error obteniendo sugerencias');
+        reply.status(500).send({ error: 'Error procesando sugerencias de correo' });
+    }
+}
+
+=== FIN: ./src/controllers/suggestionController.js ===
+
+=== INICIO: ./src/controllers/emailController.js ===
+
+=== FIN: ./src/controllers/emailController.js ===
+
+=== INICIO: ./src/controllers/historyController.js ===
+import { actionHistoryService } from '../services/actionHistoryService.js';
+
+export async function getHistory(request, reply) {
+  const userId = request.user?.id || 'demo-user';
+  const page = parseInt(request.query.page) || 1;
+  const perPage = parseInt(request.query.perPage) || 20;
+
+  const service = actionHistoryService(request.server.models); // ✅ correcto
+
+  const result = await service.getHistory({ userId, page, perPage });
+
+  return reply.send(result);
+}
+
+
+=== FIN: ./src/controllers/historyController.js ===
+
+=== INICIO: ./src/controllers/actionHistoryController.js ===
+import { actionHistoryService } from '../services/actionHistoryService.js';
+
+export async function getHistory(request, reply) {
+  const { page = 1, perPage = 20 } = request.query;
+  const userId = request.user?.id || 'demo-user';
+
+  const service = actionHistoryService(request.server.models); // ✅ importante
+  const history = await service.getHistory({ userId, page, perPage });
+
+  return reply.send(history);
+};
+
+=== FIN: ./src/controllers/actionHistoryController.js ===
+
+=== INICIO: ./src/controllers/authController.js ===
+import { google } from 'googleapis';
+
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GOOGLE_REDIRECT_URI
+);
+
+export async function initiateGoogleAuth(request, reply) {
+  const scopes = [
+    'https://www.googleapis.com/auth/gmail.readonly',
+    'openid',
+    'email'
+  ];
+  const url = oauth2Client.generateAuthUrl({
+    access_type: 'offline',
+    prompt: 'consent',
+    scope: scopes,
+  });
+  reply.redirect(url);
+}
+
+export async function googleAuthCallback(request, reply) {
+  const { code } = request.query;
+  if (!code) return reply.status(400).send('No code provided');
+
+  try {
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+    console.log('TOKENS OBTENIDOS:', tokens);
+
+    let email = null;
+    if (tokens.id_token) {
+      try {
+        const jwt = JSON.parse(Buffer.from(tokens.id_token.split('.')[1], 'base64').toString());
+        email = jwt.email;
+      } catch (e) {
+        reply.log.error('Error decodificando id_token:', e);
+      }
+    }
+
+    if (!email) {
+      const fetch = (await import('node-fetch')).default;
+      const resp = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+        headers: { Authorization: `Bearer ${tokens.access_token}` }
+      });
+      const userinfo = await resp.json();
+      email = userinfo.email;
+    }
+
+    if (!email) return reply.status(500).send('No se pudo obtener el email del usuario.');
+
+    // Accede al modelo Token vía Fastify
+    const Token = request.server.models.Token;
+    await Token.upsert({
+      email,
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+      expiry_date: tokens.expiry_date ? new Date(tokens.expiry_date) : null
+    });
+
+    reply.type('text/html').send(`
+      <h2>Autenticación exitosa</h2>
+      <p>El token fue almacenado en la base de datos para <b>${email}</b>.</p>
+      <p>Ya puedes usar la API de Gmail de forma segura.</p>
+    `);
+  } catch (err) {
+    reply.log.error(err);
+    reply.status(500).send('Error autenticando con Google: ' + err.message);
+  }
+}
+
+=== FIN: ./src/controllers/authController.js ===
+
+=== INICIO: ./src/controllers/notificationsController.js ===
+// notificationsController.js
+import { notificationsService } from '../services/notificationsService.js';
+
+// GET /notifications/summary
+export async function getSummary(request, reply) {
+    // TODO: Extraer usuario autenticado (request.user o token)
+    // TODO: Lógica para obtener sugerencias no confirmadas agrupadas por fecha
+    const service = notificationsService(request.server.models);
+    const userId = request.user?.id || 'demo-user';
+    const summary = await service.getSummary(userId);
+    return reply.send(summary);
+}
+
+// POST /notifications/confirm
+export async function confirmActions(request, reply) {
+    // TODO: Validar payload (ids, acción)
+    // TODO: Ejecutar acción (aceptar/rechazar), actualizar Gmail y registrar historial
+    // Ejemplo de payload: { ids: [string], action: 'accept' | 'reject' }
+    const { ids, action } = request.body;
+    const userId = request.user?.id || 'demo-user';
+
+    const service = notificationsService(request.server.models); // ✅ esto es clave
+
+    const result = await service.confirmActions({ ids, action, userId });
+    return reply.send(result);
+}
+
+
+export async function confirmSuggestion(req, reply) {
+  try {
+    const { emailId, subject, from, action, category, confidenceScore, confirmed } = req.body;
+
+    const saved = await Notification.create({
+      emailId,
+      subject,
+      from,
+      action,
+      category,
+      confidenceScore,
+      confirmed,
+      confirmedAt: new Date()
+    });
+
+    reply.send({ success: true, id: saved.id });
+  } catch (err) {
+    console.error("❌ Error al guardar confirmación:", err);
+    reply.code(500).send({ error: 'No se pudo guardar la confirmación.' });
+  }
+}
+
+
+=== FIN: ./src/controllers/notificationsController.js ===
+
+=== INICIO: ./src/controllers/mailController.js ===
+import { google } from 'googleapis';
+import { suggestActions } from '../services/emailSuggester.js';
+
+
+/**
+ * Lista correos de Gmail aplicando filtros personalizados.
+ */
+export async function listEmails(req, reply) {
+  const { unread, olderThan, category, minAttachmentSize, pageToken } = req.query;
+  const user = req.user;
+
+  const oauth2Client = new google.auth.OAuth2();
+  oauth2Client.setCredentials({ access_token: user.googleAccessToken });
+
+  const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+
+  let query = [];
+  if (unread) query.push('is:unread');
+  if (olderThan) query.push(`older_than:${olderThan}d`);
+  if (category) query.push(`category:${category}`);
+  if (minAttachmentSize) query.push(`larger:${minAttachmentSize}M`);
+
+  try {
+    const res = await gmail.users.messages.list({
+      userId: 'me',
+      q: query.join(' '),
+      pageToken,
+      maxResults: 20,
+    });
+
+    const mails = await Promise.all(
+      (res.data.messages || []).map(async (msg) => {
+        const mail = await gmail.users.messages.get({ userId: 'me', id: msg.id });
+        const headers = mail.data.payload.headers;
+        return {
+          id: msg.id,
+          subject: headers.find(h => h.name === 'Subject')?.value,
+          from: headers.find(h => h.name === 'From')?.value,
+          date: headers.find(h => h.name === 'Date')?.value,
+          labels: mail.data.labelIds,
+          isRead: !mail.data.labelIds.includes('UNREAD'), // necesario para sugerencias
+          attachmentSizeMb: mail.data.sizeEstimate / (1024 * 1024),
+          category: category || 'general', // fallback para testing
+        };
+      })
+    );
+
+    const mailsWithSuggestions = await suggestActions(mails);
+
+    reply.send({
+      mails: mailsWithSuggestions,
+      nextPageToken: res.data.nextPageToken,
+      total: res.data.resultSizeEstimate,
+    });
+
+  } catch (err) {
+    req.log.error(err);
+    reply.code(500).send({ error: 'No se pudo obtener los correos.' });
+  }
+}
+
+=== FIN: ./src/controllers/mailController.js ===
+
+=== INICIO: ./src/routes/authRoutes.js ===
+export default async function authRoutes(fastify, options) {
+  const controller = await import('../controllers/authController.js');
+  fastify.get('/auth/google', controller.initiateGoogleAuth);
+  fastify.get('/auth/google/callback', controller.googleAuthCallback);
+}
+
+=== FIN: ./src/routes/authRoutes.js ===
+
+=== INICIO: ./src/routes/mailRoutes.js ===
+// src/routes/mailRoutes.js
+import { listEmails } from '../controllers/mailController.js';
+import authMiddleware from '../middlewares/authMiddleware.js';
+
+export default async function (fastify, opts) {
+  // Registra el esquema Email global una vez
+  fastify.addSchema({
+    $id: 'Email',
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      subject: { type: 'string' },
+      from: { type: 'string' },
+      date: { type: 'string' },
+      labels: { type: 'array', items: { type: 'string' } },
+      hasAttachment: { type: 'boolean' },
+      size: { type: 'integer' }
+    }
+  });
+
+  fastify.get('/api/mails', {
+    preHandler: [authMiddleware],
+    schema: {
+      description: 'Lista correos con filtros personalizados',
+      tags: ['Mails'],
+      summary: 'Listar correos de Gmail',
+      security: [{ bearerAuth: [] }],
+      querystring: {
+        type: 'object',
+        properties: {
+          unread: { type: 'boolean', description: 'Solo correos no leídos' },
+          olderThan: { type: 'integer', description: 'Más viejos que N días', minimum: 1},
+          category: {
+            type: 'string',
+            enum: ['promotions', 'social', 'updates', 'forums', 'primary'],
+            description: 'Categoría de Gmail'
+          },
+          minAttachmentSize: { type: 'integer', description: 'Adjuntos > N MB', minimum: 1},
+          pageToken: { type: 'string', description: 'Token para paginación' }
+        }
+      },
+      response: {
+        200: {
+          description: 'Lista de correos',
+          type: 'object',
+          properties: {
+            mails: { type: 'array', items: { $ref: 'Email#' } },
+            nextPageToken: { type: 'string', nullable: true },
+            total: { type: 'integer' }
+          }
+        },
+        401: { description: 'No autorizado' },
+        500: { description: 'Error interno' }
+      }
+    }
+  }, listEmails);
+}
+
+=== FIN: ./src/routes/mailRoutes.js ===
+
+=== INICIO: ./src/routes/notificationsRoutes.js ===
+// src/routes/notificationsRoutes.js
+import { getSummary, confirmActions } from '../controllers/notificationsController.js';
+import { getHistory } from '../controllers/actionHistoryController.js';
+import authMiddleware from '../middlewares/authMiddleware.js';
+
+export default async function (fastify, opts) {
+  // Schema global para sugerencia de correo (si no está registrado ya)
+  fastify.addSchema({
+    $id: 'EmailSuggestion',
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      from: { type: 'string' },
+      subject: { type: 'string' },
+      date: { type: 'string' },
+      isRead: { type: 'boolean' },
+      category: { type: 'string' },
+      attachmentSizeMb: { type: 'number' },
+      suggestions: { type: 'array', items: { type: 'string' } }
+    }
+  });
+
+  // ConfirmActionsRequest schema
+  fastify.addSchema({
+    $id: 'ConfirmActionsRequest',
+    type: 'object',
+    required: ['ids', 'action'],
+    properties: {
+      ids: { type: 'array', items: { type: 'string' } },
+      action: { type: 'string', enum: ['accept', 'reject'] }
+    }
+  });
+
+  // ConfirmActionsResponse schema
+  fastify.addSchema({
+    $id: 'ConfirmActionsResponse',
+    type: 'object',
+    properties: {
+      success: { type: 'boolean' },
+      processed: { type: 'integer' },
+      action: { type: 'string' }
+    }
+  });
+
+  // Historial de acciones (item y listado)
+  fastify.addSchema({
+    $id: 'ActionHistoryItem',
+    type: 'object',
+    properties: {
+      userId: { type: 'string' },
+      emailId: { type: 'string' },
+      action: { type: 'string', enum: ['accept', 'reject', 'delete', 'archive', 'move'] },
+      timestamp: { type: 'string', format: 'date-time' },
+      details: { type: 'object' }
+    }
+  });
+  fastify.addSchema({
+    $id: 'ActionHistoryList',
+    type: 'object',
+    properties: {
+      total: { type: 'integer' },
+      page: { type: 'integer' },
+      perPage: { type: 'integer' },
+      data: { type: 'array', items: { $ref: 'ActionHistoryItem#' } }
+    }
+  });
+
+  // GET /notifications/summary
+  fastify.get('/notifications/summary', {
+    preHandler: [authMiddleware],
+    schema: {
+      tags: ['Notificaciones'],
+      summary: 'Obtener resumen de sugerencias a limpiar',
+      security: [{ bearerAuth: [] }],
+      querystring: {
+        type: 'object',
+        properties: {
+          period: { type: 'string', enum: ['daily', 'weekly'], description: 'Periodo de resumen' }
+        }
+      },
+      response: {
+        200: {
+          type: 'array',
+          items: { $ref: 'EmailSuggestion#' }
+        },
+        401: { description: 'No autorizado' }
+      }
+    }
+  }, getSummary);
+
+  // POST /notifications/confirm
+  fastify.post('/notifications/confirm', {
+    preHandler: [authMiddleware],
+    schema: {
+      tags: ['Notificaciones'],
+      summary: 'Confirmar acciones sugeridas',
+      security: [{ bearerAuth: [] }],
+      body: { $ref: 'ConfirmActionsRequest#' },
+      response: {
+        200: { $ref: 'ConfirmActionsResponse#' },
+        400: { description: 'Datos inválidos' },
+        401: { description: 'No autorizado' }
+      }
+    }
+  }, confirmActions);
+
+  // GET /notifications/history
+  fastify.get('/notifications/history', {
+    preHandler: [authMiddleware],
+    schema: {
+      tags: ['Notificaciones'],
+      summary: 'Consultar historial de acciones',
+      security: [{ bearerAuth: [] }],
+      querystring: {
+        type: 'object',
+        properties: {
+          page: { type: 'integer', default: 1 },
+          perPage: { type: 'integer', default: 20 }
+        }
+      },
+      response: {
+        200: { $ref: 'ActionHistoryList#' },
+        401: { description: 'No autorizado' }
+      }
+    }
+  }, getHistory);
+}
+
+=== FIN: ./src/routes/notificationsRoutes.js ===
+
+=== INICIO: ./src/routes/suggestionRoutes.js ===
+// src/routes/suggestionRoutes.js
+
+import { getSuggestedEmails } from '../controllers/suggestionController.js';
+import authMiddleware from '../middlewares/authMiddleware.js';
+
+// Registra el esquema global para sugerencias (si no lo tienes ya)
+const emailSuggestionSchema = {
+  $id: 'EmailSuggestion',
+  type: 'object',
+  properties: {
+    id: { type: 'string' },
+    from: { type: 'string' },
+    subject: { type: 'string' },
+    date: { type: 'string' },
+    isRead: { type: 'boolean' },
+    category: { type: 'string' },
+    attachmentSizeMb: { type: 'number' },
+    suggestions: {
+      type: 'array',
+      items: { type: 'string' }
+    }
+  }
+};
+
+export default async function (fastify, opts) {
+  // Solo registra el esquema una vez
+  if (!fastify.getSchema('EmailSuggestion')) {
+    fastify.addSchema(emailSuggestionSchema);
+  }
+
+  fastify.get('/suggestions', {
+    preHandler: [authMiddleware], // Si tu endpoint requiere auth
+    schema: {
+      description: 'Obtiene sugerencias automáticas de acción para correos (no ejecuta acciones, solo recomienda)',
+      tags: ['Sugerencias'],
+      response: {
+        200: {
+          description: 'Lista de sugerencias para limpieza',
+          type: 'object',
+          properties: {
+            emails: {
+              type: 'array',
+              items: { $ref: 'EmailSuggestion#' }
+            }
+          },
+          example: {
+            emails: [
+              {
+                id: "abc123",
+                from: "notificaciones@ejemplo.com",
+                subject: "Promoción especial",
+                date: "2024-07-01T12:00:00Z",
+                isRead: false,
+                category: "promotions",
+                attachmentSizeMb: 2.5,
+                suggestions: ["suggested-archive"]
+              }
+            ]
+          }
+        }
+      },
+      security: [{ bearerAuth: [] }] // Si quieres requerir JWT
+    },
+    handler: getSuggestedEmails
+  });
+}
+
+=== FIN: ./src/routes/suggestionRoutes.js ===
+
+=== INICIO: ./src/services/emailSuggester.js ===
+// src/services/emailSuggester.js
+
+import fetch from 'node-fetch'; // o usa globalThis.fetch si estás en Node 18+
+
+const CLASSIFIER_URL = 'http://127.0.0.1:5055/suggest';
+
+/**
+ * Llama al microservicio Python para obtener sugerencias.
+ * @param {Array<Object>} emails - Lista de correos con metadatos.
+ * @returns {Object} - Objeto con clave "emails" y lista de correos con sugerencias.
+ */
+export async function suggestActions(emails) {
+  try {
+    const response = await fetch(CLASSIFIER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(emails)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Clasificador Python falló: ${response.status}`);
+    }
+
+    const suggestionMap = await response.json();
+
+    console.log("📬 MAPA DE RESPUESTA ↓↓↓");
+    console.dir(suggestionMap, { depth: null });
+
+    // 💡 NUEVO: Log de tipos para depurar malformaciones
+    console.log("✅ Tipado original de sugerencias:");
+    for (const [id, suggestions] of Object.entries(suggestionMap)) {
+      console.log(id, '→', Array.isArray(suggestions) ? suggestions.map(s => typeof s) : typeof suggestions);
+    }
+
+    // Enriquecer cada email con sus sugerencias, parseando si vienen mal
+    const enriched = emails.map(email => {
+      let suggestions = suggestionMap[email.id] || [];
+
+      if (Array.isArray(suggestions)) {
+        suggestions = suggestions.map(s => {
+          if (typeof s === 'string') {
+            try {
+              s = JSON.parse(s);
+            } catch (err) {
+              console.warn(`❌ No se pudo parsear la sugerencia malformada para ${email.id}:`, s);
+              return null;
+            }
+          }
+
+          return {
+            action: s?.action || '',
+            category: s?.category || '',
+            confidence_score: s?.confidence_score || 0
+          };
+        }).filter(Boolean); // elimina nulls
+      } else {
+        suggestions = [];
+      }
+
+      console.log(`🔍 Enriquecido: ${email.id} →`, suggestions);
+      return {
+        ...email,
+        suggestions
+      };
+    });
+
+    return { emails: enriched };
+
+  } catch (err) {
+    console.error('Error llamando al clasificador:', err);
+
+    return {
+      emails: emails.map(email => ({
+        ...email,
+        suggestions: []
+      }))
+    };
+  }
+}
+
+=== FIN: ./src/services/emailSuggester.js ===
+
+=== INICIO: ./src/services/actionExecutor.js ===
+// src/services/actionExecutor.js
+export async function executeGmailAction(emailId) {
+    // En producción llamaría a gmail.users.messages.modify
+    // Por ahora esto es un stub que simula Gmail API:
+    return { simulated: true, emailId, action: 'ARCHIVE' };
+}
+
+
+=== FIN: ./src/services/actionExecutor.js ===
+
+=== INICIO: ./src/services/googleAuthService.js ===
+
+=== FIN: ./src/services/googleAuthService.js ===
+
+=== INICIO: ./src/services/notificationsService.js ===
+// src/services/notificationsService.js
+import { actionHistoryService } from './actionHistoryService.js';
+import { executeGmailAction } from './actionExecutor.js';
+
+export const notificationsService = (models) => ({
+  async getSummary(/* userId */) {
+    return [
+      {
+        id: "test1",
+        from: "noti@demo.com",
+        subject: "¡Prueba HU4!",
+        date: new Date().toISOString(),
+        isRead: false,
+        category: "demo",
+        attachmentSizeMb: 0.1,
+        suggestions: ["archive"]
+      }
+    ];
+  },
+
+  async confirmActions({ ids, action, userId }) {
+    const results = [];
+    const historyService = actionHistoryService(models); // ✅ inicialización correcta
+
+    for (const emailId of ids) {
+      let gmailResult = null;
+
+      if (action === 'accept') {
+        gmailResult = await executeGmailAction(emailId);
+      }
+
+      const history = {
+        userId,
+        emailId,
+        action,
+        timestamp: new Date().toISOString(),
+        details: {
+          gmailResponse: gmailResult,
+          note: action === 'accept' ? 'Ejecutado' : 'Ignorado'
+        }
+      };
+
+      await historyService.record(history);
+      results.push(history);
+    }
+
+    return {
+      success: true,
+      processed: results.length,
+      data: results
+    };
+  }
+});
+
+=== FIN: ./src/services/notificationsService.js ===
+
+=== INICIO: ./src/services/ruleBasedSuggester.js ===
+// src/services/ruleBasedSuggester.js
+
+/**
+ * Lógica para sugerir acciones automáticas sobre correos electrónicos.
+ * Extensible para reglas personalizadas y ML en el futuro.
+ * ⚠️ DEPRECADO: Este archivo representa el sistema de reglas manuales antes de migrar a Python.
+ * Se conserva como fallback y para fines comparativos.
+ */
+
+export const SUGGESTION_LABELS = {
+  DELETE:    'suggested-delete',
+  ARCHIVE:   'suggested-archive',
+  MOVE_BIG:  'suggested-move-big-attachments',
+  REVIEW:    'suggested-review-recent'   // <- NUEVA etiqueta temporal
+};
+
+/**
+ * Sugerencias según reglas básicas.
+ * @param {Array<Object>} emails - Lista de correos.
+ * @returns {Array<Object>} - Correos con sugerencias.
+ */
+export function suggestActions(emails) {
+  const now = new Date();
+
+  return emails.map(email => {
+    const suggestions = [];
+
+    // No leído y >1 año
+    if (!email.isRead && monthsAgo(email.date, now) >= 12) {
+      suggestions.push(SUGGESTION_LABELS.DELETE);
+    }
+    // Promociones viejas
+    if (email.category === 'promotions' && monthsAgo(email.date, now) >= 6) {
+      suggestions.push(SUGGESTION_LABELS.ARCHIVE);
+    }
+    // Adjunto grande y viejo
+    if (email.attachmentSizeMb > 10 && monthsAgo(email.date, now) >= 12) {
+      suggestions.push(SUGGESTION_LABELS.MOVE_BIG);
+    }
+    // NUEVA: todos los correos recientes (últimos 3 días)
+    if (daysAgo(email.date, now) <= 3) {
+      suggestions.push(SUGGESTION_LABELS.REVIEW);
+    }
+
+    return {
+      ...email,
+      suggestions
+    };
+  });
+}
+
+function monthsAgo(date, now) {
+  const d = new Date(date);
+  return (
+    (now.getFullYear() - d.getFullYear()) * 12 +
+    (now.getMonth() - d.getMonth())
+  );
+}
+
+function daysAgo(date, now) {
+  const d = new Date(date);
+  return Math.floor((now - d) / (1000 * 60 * 60 * 24));
+}
+
+=== FIN: ./src/services/ruleBasedSuggester.js ===
+
+=== INICIO: ./src/services/gmailService.js ===
+// src/services/gmailService.js
+
+export class GmailService {
+    constructor(gmailClient) {
+        this.gmail = gmailClient;
+    }
+
+    /**
+     * Lista mensajes con filtros personalizados de Gmail.
+     * @param {Object} options - Opciones de filtrado.
+     * @param {String} [options.filter] - Filtro simple ('unread', 'promotions', 'attachments', 'old').
+     * @param {String} [options.dateBefore] - Fecha límite para correos viejos, formato YYYY/MM/DD.
+     * @param {Number} [options.maxResults] - Máximo de resultados.
+     * @param {Array} [options.combine] - Combinación de filtros.
+     * @returns {Promise<Array>} Lista de metadatos de mensajes.
+     */
+    async listMessages({ filter, dateBefore, maxResults, combine }) {
+        const query = this._buildQuery({ filter, dateBefore, combine });
+
+        const res = await this.gmail.users.messages.list({
+            userId: 'me',
+            q: query,
+            maxResults: maxResults || 20,
+        });
+
+        const messages = res.data.messages || [];
+        return this._fetchMetadataForMessages(messages);
+    }
+
+    _buildQuery({ filter, dateBefore, combine }) {
+        let queries = [];
+        const combined = combine || [];
+        if (filter) combined.push(filter);
+
+        if (combined.includes('unread')) queries.push('is:unread');
+        if (combined.includes('promotions')) queries.push('category:promotions');
+        if (combined.includes('attachments')) queries.push('has:attachment larger:2M');
+        if (combined.includes('old'))
+            queries.push(`before:${dateBefore ? dateBefore.replace(/-/g, '/') : '2023/01/01'}`);
+
+        return queries.join(' ') || '';
+    }
+
+    async _fetchMetadataForMessages(messages) {
+        // Trae solo metadatos de cada mensaje (id, subject, from, date, snippet, adjunto, size)
+        const results = [];
+        for (const msg of messages) {
+            const msgData = await this.gmail.users.messages.get({
+                userId: 'me',
+                id: msg.id,
+                format: 'metadata',
+                metadataHeaders: ['Subject', 'From', 'Date'],
+            });
+            const payload = msgData.data.payload || {};
+            const headers = (payload.headers || []).reduce((acc, h) => {
+                acc[h.name.toLowerCase()] = h.value;
+                return acc;
+            }, {});
+
+            function detectCategoryFromLabels(labels) {
+                if (labels.includes('CATEGORY_PROMOTIONS')) return 'promotions';
+                if (labels.includes('CATEGORY_SOCIAL')) return 'social';
+                if (labels.includes('CATEGORY_UPDATES')) return 'updates';
+                if (labels.includes('CATEGORY_FORUMS')) return 'forums';
+                if (labels.includes('INBOX')) return 'primary';
+                return undefined;
+            }
+            results.push({
+                id: msg.id,
+                subject: headers.subject || '',
+                from: headers.from || '',
+                date: headers.date || '',
+                isRead: !(msgData.data.labelIds?.includes('UNREAD')),
+                category: detectCategoryFromLabels(msgData.data.labelIds || []),
+                attachmentSizeMb: 0,
+                snippet: msgData.data.snippet,
+                hasAttachment: (payload.parts || []).some(part => part.filename && part.filename !== ''),
+                size: msgData.data.sizeEstimate,
+            });
+        }
+        return results;
+    }
+
+
+}
+
+=== FIN: ./src/services/gmailService.js ===
+
+=== INICIO: ./src/services/pythonSuggester.js ===
+// src/services/pythonSuggester.js
+export async function suggestActionsFromPython(emails) {
+  const res = await fetch('http://localhost:5000/classify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ emails })
+  });
+  return await res.json();
+}
+
+=== FIN: ./src/services/pythonSuggester.js ===
+
+=== INICIO: ./src/services/actionHistoryService.js ===
+export const actionHistoryService = (models) => ({
+  async record(historyItem) {
+    await models.ActionHistory.create(historyItem);
+  },
+
+  async getHistory({ userId, page = 1, perPage = 20 }) {
+    const offset = (page - 1) * perPage;
+
+    const { rows, count } = await models.ActionHistory.findAndCountAll({
+      where: { userId },
+      order: [['timestamp', 'DESC']],
+      limit: perPage,
+      offset
+    });
+
+    return {
+      total: count,
+      page,
+      perPage,
+      data: rows
+    };
+  }
+});
+
+=== FIN: ./src/services/actionHistoryService.js ===
+
