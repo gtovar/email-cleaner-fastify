@@ -1,5 +1,6 @@
 # 🧩 Email Cleaner & Smart Notifications
-![Build](https://github.com/gtovar/email-cleaner/actions/workflows/ci.yml/badge.svg)
+
+![Build](https://github.com/gtovar/email-cleaner-fastify/actions/workflows/ci.yml/badge.svg)
 ![Docs](https://img.shields.io/badge/docs-online-brightgreen)
 
 An intelligent system that automatically classifies your emails, prioritizes what truly matters, and alerts you when action is needed.  
@@ -11,8 +12,6 @@ Built with **Fastify (Node.js)** for backend logic, **FastAPI (Python)** for mac
 
 Managing dozens of emails daily can easily lead to **decision fatigue** and **loss of focus**.  
 This system connects securely to Gmail, classifies messages with ML models, and filters what deserves your attention.
-
-![Email Cleaner Flow](docs/assets/diagram_overview.png)
 
 ---
 
@@ -46,8 +45,8 @@ This system connects securely to Gmail, classifies messages with ML models, and 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/gtovar/email-cleaner.git
-cd email-cleaner
+git clone https://github.com/gtovar/email-cleaner-fastify.git
+cd email-cleaner-fastify
 ```
 
 ### 2. Environment Setup
@@ -94,11 +93,7 @@ uvicorn main:app --reload --port 8000
 To test classification end-to-end:
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/emails/classify -H "Content-Type: application/json" -d '{
-  "from": "invoices@cfe.mx",
-  "subject": "Your electricity bill is ready",
-  "body": "Due date: November 15. Amount: $350."
-}'
+curl -X POST http://localhost:3000/api/v1/emails/classify -H "Content-Type: application/json" -d '{"from": "invoices@cfe.mx", "subject": "Your electricity bill is ready", "body": "Due date: November 15. Amount: $350."}'
 ```
 
 Expected result:
@@ -109,8 +104,13 @@ Expected result:
   "confidence": 0.93
 }
 ```
-# Trigger notification test
+
+**Trigger notification test:**  
+Tests Telegram notification webhook from n8n flow.
+
+```bash
 curl -X POST http://localhost:5678/webhook/telegram-test
+```
 
 ---
 
@@ -118,12 +118,14 @@ curl -X POST http://localhost:5678/webhook/telegram-test
 
 | File                     | Description                           |
 | ------------------------ | ------------------------------------- |
-| [`DESIGN_DOCUMENT.md`](https://gtovar.github.io/email-cleaner-fastify/DESIGN_DOCUMENT.html) | Technical design rationale |
+| `DESIGN_DOCUMENT.md`     | Technical design rationale            |
 | `API_REFERENCE.md`       | REST API specification                |
 | `architecture.md`        | Mermaid architecture diagram          |
 | `despliegue-cloudrun.md` | Deployment guide for Google Cloud Run |
 | `migraciones.md`         | Database migration guide              |
 | `seeders.guia.md`        | Seeder reference                      |
+
+📘 **Full documentation:** [https://gtovar.github.io/email-cleaner-site/](https://gtovar.github.io/email-cleaner-site/)
 
 ---
 
@@ -132,19 +134,31 @@ curl -X POST http://localhost:5678/webhook/telegram-test
 - **Backend:** Node.js (Fastify), PostgreSQL  
 - **ML Service:** Python (FastAPI, scikit‑learn)  
 - **Infra:** Docker, Cloud Run, Secret Manager  
-- **Notifications:** n8n + Telegram integration
-- **CI/CD:** GitHub Actions (build + deploy + lint)
-- **Monitoring:** ELK Stack / Prometheus (optional phase 4)
+- **Notifications:** n8n + Telegram integration  
+- **CI/CD:** GitHub Actions (build + deploy + lint)  
+- **Monitoring:** ELK Stack / Prometheus (optional phase 4)
 
 ---
 
-## 🧾 License and Maintainers
+## 🧾 Maintainers
 
 Maintained by **Gilberto Tovar**  
-📧 contacto@gilbertotovar.com
+📧 contacto@gilbertotovar.com  
 🌐 [www.gilbertotovar.com](https://www.gilbertotovar.com)
 
+> 🧩 **Note:** The GitHub username for this project is `gtovar`, which differs from the maintainer's domain name (gilbertotovar.com).
+
 ---
-# pre-commit hook
+
+## 🧩 Developer Tools
+
+**pre-commit hook:** updates the "Last updated" footer automatically.
+
+```bash
 sed -i "s/Last updated:.*/Last updated: $(date '+%B %Y')/" README.md
+```
+
+---
+
+**Last updated:** November 2025
 
