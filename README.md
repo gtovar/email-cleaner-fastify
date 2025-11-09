@@ -161,4 +161,3 @@ sed -i "s/Last updated:.*/Last updated: $(date '+%B %Y')/" README.md
 ---
 
 **Last updated:** November 2025
-
