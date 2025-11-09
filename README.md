@@ -125,7 +125,7 @@ curl -X POST http://localhost:5678/webhook/telegram-test
 | `migraciones.md`         | Database migration guide              |
 | `seeders.guia.md`        | Seeder reference                      |
 
-📘 **Full documentation:** [https://gtovar.github.io/email-cleaner-site/](https://gtovar.github.io/email-cleaner-site/)
+📘 **Full documentation:** [https://gtovar.github.io/email-cleaner-fastify/](https://gtovar.github.io/email-cleaner-fastify/)
 
 ---
 
@@ -145,8 +145,6 @@ curl -X POST http://localhost:5678/webhook/telegram-test
 Maintained by **Gilberto Tovar**  
 📧 contacto@gilbertotovar.com  
 🌐 [www.gilbertotovar.com](https://www.gilbertotovar.com)
-
-> 🧩 **Note:** The GitHub username for this project is `gtovar`, which differs from the maintainer's domain name (gilbertotovar.com).
 
 ---
 
