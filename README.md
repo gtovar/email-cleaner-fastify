@@ -1,7 +1,10 @@
+📘 Full docs: https://gtovar.github.io/email-cleaner-fastify/
+
 # 🧩 Email Cleaner & Smart Notifications
 
-![Build](https://github.com/gtovar/email-cleaner-fastify/actions/workflows/ci.yml/badge.svg)
-![Docs](https://img.shields.io/badge/docs-online-brightgreen)
+[![Docs](https://img.shields.io/badge/docs-MkDocs%20Material-brightgreen)](https://gtovar.github.io/email-cleaner-fastify/)
+[![Pages](https://github.com/gtovar/email-cleaner-fastify/actions/workflows/docs.yml/badge.svg)](../../actions/workflows/docs.yml)
+
 
 An intelligent system that automatically classifies your emails, prioritizes what truly matters, and alerts you when action is needed.  
 Built with **Fastify (Node.js)** for backend logic, **FastAPI (Python)** for machine learning, and **n8n** for smart automation.
