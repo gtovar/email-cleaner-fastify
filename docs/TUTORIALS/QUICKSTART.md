@@ -20,8 +20,8 @@ Guía rápida para levantar el entorno local del proyecto y validar el flujo pri
 ## ⚙️ 2. Clonar y Configurar
 
 ```bash
-git clone https://github.com/gilbertotovar/email-cleaner.git
-cd email-cleaner
+git clone https://github.com/gilbertotovar/email-cleaner-fastify.git
+cd email-cleaner-fastify
 cp .env.example .env
 ```
 

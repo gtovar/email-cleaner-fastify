@@ -89,7 +89,75 @@ uvicorn main:app --reload --port 8000
 # http://localhost:8000/docs
 ```
 
+### 5. Database
+```bash
+npm run db:migrate
+npm run db:seed      # opcional
+# rollback:
+npm run db:rollback  # opcional
+```
+
+### 6. Docker (local)
+
+```bash
+  docker compose -f ops/docker-compose.yml up --build
+```
+
+### Smoke test
+```bash
+curl -s http://localhost:3000/api/v1/health/db
+curl -s http://localhost:3000/api/v1/notifications/summary -H "Authorization: Bearer dummy"
+curl -s http://localhost:3000/api/v1/notifications/history -H "Authorization: Bearer dummy"
+```
+
+## Repository layout
+
+- src/                    # Fastify app (API v1)
+- python/classifier/      # FastAPI microservice (ML)
+- migrations/             # Sequelize migrations & seeds
+- ops/
+  └─ docker-compose.yml   # Orquestación local (DB, n8n, Fastify, FastAPI)
+- docs/                   # Fuente de la documentación (MkDocs)
+- .github/workflows/      # CI/CD (GitHub Actions)
+- README.md               # Guía principal (fuente de verdad junto con docs/)
+
+### Environment variables
+| Variable | Descripción | Obligatoria | Ejemplo |
+|---|---|---:|---|
+| DATABASE_URL | Cadena de conexión PostgreSQL | Sí | postgres://user:pass@localhost:5432/email_cleaner |
+| DB_HOST | Host de la base | No* | 127.0.0.1 |
+| DB_PORT | Puerto DB | No* | 5432 |
+| DB_USERNAME | Usuario DB | No* | postgres |
+| DB_PASSWORD | Password DB | No* | secret |
+| DB_DATABASE | Nombre DB | No* | email_cleaner |
+| GOOGLE_CLIENT_ID | OAuth 2.0 Client ID | Sí | xxx.apps.googleusercontent.com |
+| GOOGLE_CLIENT_SECRET | OAuth 2.0 Client Secret | Sí | supersecret |
+| GOOGLE_REDIRECT_URI | Redirect (OAuth) | Sí | http://localhost:3000/oauth/google/callback |
+| INTERNAL_JWT_SECRET| Inter-service / Security | No | xxxxx|
+| FASTAPI_URL | URL del microservicio ML | Sí | http://localhost:8000 |
+| PORT | Puerto del backend | Sí | 3000 |
+| N8N_WEBHOOK_URL | Webhook para pruebas | No | http://localhost:5678/webhook/telegram-test |
+| TELEGRAM_BOT_TOKEN | Telegram | No | xxxxx |
+
+> *Usa `DATABASE_URL` o los `DB_*`. No ambos a la vez.
+⚠️ Los endpoints que consultan Gmail (`/mails`, `/suggestions`) requieren un token Google válido.
+Para probar sin OAuth real, use el flujo de **Notificaciones** con un token dummy (`Authorization: Bearer dummy`).
+
+## 🧠 Especificación oficial de la API
+La documentación de la API se genera directamente desde el código (esquemas definidos en las rutas y en `src/index.js`) y se muestra en **/docs** al ejecutar el servidor.
+
 ---
+
+### OAuth modes
+- `OAUTH_MODE=mock` → flujo simulado (recomendado si aun no tienes configurado GCP OAuth)
+- `OAUTH_MODE=google` → requiere configurar GCP OAuth (ver docs/operations/oauth-google.md).
+  - `GOOGLE_CLIENT_ID`
+  - `GOOGLE_CLIENT_SECRET`
+  - `GOOGLE_REDIRECT_URI` (p. ej., `http://localhost:3000/oauth/google/callback`)
+  - Pasos detallados: ver `docs/operations/oauth-google.md`.
+
+> Nota: El modo `mock` se implementará en una iteración futura. Por ahora solo se documenta el comportamiento deseado para asegurar reproducibilidad en local sin secretos.
+
 
 ## 🧪 Testing the Pipeline
 
@@ -121,12 +189,12 @@ curl -X POST http://localhost:5678/webhook/telegram-test
 
 | File                     | Description                           |
 | ------------------------ | ------------------------------------- |
-| `DESIGN_DOCUMENT.md`     | Technical design rationale            |
-| `API_REFERENCE.md`       | REST API specification                |
-| `architecture.md`        | Mermaid architecture diagram          |
-| `despliegue-cloudrun.md` | Deployment guide for Google Cloud Run |
-| `migraciones.md`         | Database migration guide              |
-| `seeders.guia.md`        | Seeder reference                      |
+| [Design Document.md](docs//DESIGN_DOCUMENT.md) | Technical architecture and key decisions |
+| [API Reference.md](docs/API_REFERENCE.md) | REST endpoints and examples |
+| [architecture.md](docs/architecture.md) | REST endpoints and examples |
+| [despliegue-cloudrun.md](docs/despliegue-cloudrun.md) | Deployment guide for Google Cloud Run | 
+| [migraciones.md](docs/migraciones.md) | Sequelize migration workflow |
+| [seeders.guia.md](docs/seeders.guia.md) | Load initial or reference data |
 
 📘 **Full documentation:** [https://gtovar.github.io/email-cleaner-fastify/](https://gtovar.github.io/email-cleaner-fastify/)
 

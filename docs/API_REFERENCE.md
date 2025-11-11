@@ -1,10 +1,17 @@
-# 📡 Emails API Reference (v1)
+# Emails API Reference (v1)
 
-> Base URL: `/api/v1`
+> - **Base URL**: `/api/v1`
+
+> **Estatus**
+> - **Oficiales v1**: contrato estable, cubierto por pruebas.
+> - **Experimental**: sujeto a cambios; uso bajo tu propio riesgo.
+> **Especificación oficial de la API**
+> Se genera desde el código (esquemas en las rutas y en `src/index.js`). El archivo `src/swagger.yaml` no se usa en tiempo de ejecución.
 
 ---
+## Emails API — Oficiales v1
 
-## 1️⃣ Create a New Classification Rule
+## Create a New Classification Rule
 
 **Method:** `POST /api/v1/emails/rules`
 
@@ -44,7 +51,7 @@ Creates a new **classification rule** to be applied to incoming emails (by subje
 
 ---
 
-## 2️⃣ Retrieve Classified Emails
+## Retrieve Classified Emails
 
 **Method:** `GET /api/v1/emails`
 
@@ -90,7 +97,7 @@ Returns a paginated list of classified emails, including categories and suggeste
 
 ---
 
-## 3️⃣ Update an Existing Rule
+## Update an Existing Rule
 
 **Method:** `PATCH /api/v1/emails/rules/:ruleId`
 
@@ -117,6 +124,48 @@ Partially updates an existing rule (e.g., change priority or toggle `enabled`).
 ```
 
 ---
+## Suggest
+
+**Method:** `POST /api/v1/emails/suggest`
+
+**Description:**  
+This is a microservice and expose a endpoint POST `/suggest` for recive metadata from email and return suggests of clean.
+
+
+### Example Request Body
+```json
+{
+  "from": "invoices@cfe.mx", 
+  "subject": "Your electricity bill is ready", 
+  "body": "Due date: November 15. Amount: $350."
+}
+```
+
+### Example Response
+```json
+{
+  "category": "billing",
+  "action": "pay",
+  "confidence": 0.93
+}
+```
+
+
+---
+## Rules API — Experimental
+
+Method: GET /api/v1/emails/rules
+
+**Description:**
+Lista reglas de clasificación. Experimental: el esquema puede cambiar.
+
+### 200 Response
+```json
+[
+  { "id": 1, "pattern": "cfe.mx", "label": "billing" }
+]
+
+```
 
 ## 🧩 Implementation Notes (Fastify)
 

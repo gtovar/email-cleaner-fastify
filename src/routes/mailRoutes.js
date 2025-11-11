@@ -18,11 +18,11 @@ export default async function (fastify, opts) {
     }
   });
 
-  fastify.get('/api/mails', {
+  fastify.get('/api/v1/mails', {
     preHandler: [authMiddleware],
     schema: {
       description: 'Lista correos con filtros personalizados',
-      tags: ['Mails'],
+      tags: ['official-v1','Mails'],
       summary: 'Listar correos de Gmail',
       security: [{ bearerAuth: [] }],
       querystring: {

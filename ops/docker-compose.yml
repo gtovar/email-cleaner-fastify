@@ -1,22 +1,44 @@
 version: "3.9"
 services:
-  api:
-    build: ./apps/api
-    env_file: ./apps/api/.env
-    ports: ["3000:3000"]
-    command: npm run dev
-    depends_on: [ml]
-
-  ml:
-    build: ./apps/ml
-    env_file: ./apps/ml/.env
-    ports: ["5055:5055"]
-    command: uvicorn app:app --reload --host 0.0.0.0 --port 5055
-
-  web:
-    build: ./apps/web
+  db:
+    image: postgres:15
     environment:
-      - VITE_API_URL=http://localhost:3000
-    ports: ["5173:5173"]
-    command: npm run dev -- --host
-    depends_on: [api]
+      POSTGRES_USER: email
+      POSTGRES_PASSWORD: email
+      POSTGRES_DB: email_cleaner
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+
+  fastapi:
+    build:
+      context: ./python/classifier
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    ports: ["8000:8000"]
+    environment:
+      # if needed, pass model paths/envs
+    depends_on: ["db"]
+
+  fastify:
+    build:
+      context: .
+    command: npm run dev
+    ports: ["3000:3000"]
+    environment:
+      DATABASE_URL: postgres://email:email@db:5432/email_cleaner
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: email
+      DB_PASSWORD: email
+      DB_DATABASE: email_cleaner
+      FASTAPI_URL: http://fastapi:8000
+      INTERNAL_JWT_SECRET: change-me
+    depends_on: ["db","fastapi"]
+
+  n8n:
+    image: n8nio/n8n:latest
+    ports: ["5678:5678"]
+    environment:
+      GENERIC_TIMEZONE: America/Monterrey
+
+volumes:
+  pgdata:

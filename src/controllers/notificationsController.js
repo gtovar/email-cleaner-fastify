@@ -28,7 +28,8 @@ export async function confirmActions(request, reply) {
 
 export async function confirmSuggestion(req, reply) {
   try {
-    const { emailId, subject, from, action, category, confidenceScore, confirmed } = req.body;
+    const {Notification} = req.server.models;
+    const {emailId, subject, from, action, category, confidenceScore, confirmed } = req.body;
 
     const saved = await Notification.create({
       emailId,
@@ -41,10 +42,10 @@ export async function confirmSuggestion(req, reply) {
       confirmedAt: new Date()
     });
 
-    reply.send({ success: true, id: saved.id });
+    return reply.code(201).send({ ok: true, id: saved.id });
   } catch (err) {
     console.error("❌ Error al guardar confirmación:", err);
-    reply.code(500).send({ error: 'No se pudo guardar la confirmación.' });
+    return reply.code(500).send({ ok: false, error: 'No se pudo guardar la confirmación.' });
   }
 }
 

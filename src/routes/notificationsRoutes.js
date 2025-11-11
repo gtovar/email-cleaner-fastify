@@ -66,10 +66,10 @@ export default async function (fastify, opts) {
   });
 
   // GET /notifications/summary
-  fastify.get('/notifications/summary', {
+  fastify.get('/api/v1/notifications/summary', {
     preHandler: [authMiddleware],
     schema: {
-      tags: ['Notificaciones'],
+      tags: ['official-v1','Notificaciones'],
       summary: 'Obtener resumen de sugerencias a limpiar',
       security: [{ bearerAuth: [] }],
       querystring: {
@@ -89,10 +89,10 @@ export default async function (fastify, opts) {
   }, getSummary);
 
   // POST /notifications/confirm
-  fastify.post('/notifications/confirm', {
+  fastify.post('/api/v1/notifications/confirm', {
     preHandler: [authMiddleware],
     schema: {
-      tags: ['Notificaciones'],
+      tags: ['official-v1','Notificaciones'],
       summary: 'Confirmar acciones sugeridas',
       security: [{ bearerAuth: [] }],
       body: { $ref: 'ConfirmActionsRequest#' },
@@ -105,10 +105,10 @@ export default async function (fastify, opts) {
   }, confirmActions);
 
   // GET /notifications/history
-  fastify.get('/notifications/history', {
+  fastify.get('/api/v1/notifications/history', {
     preHandler: [authMiddleware],
     schema: {
-      tags: ['Notificaciones'],
+      tags: ['official-v1','Notificaciones'],
       summary: 'Consultar historial de acciones',
       security: [{ bearerAuth: [] }],
       querystring: {

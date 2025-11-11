@@ -36,26 +36,54 @@ flowchart LR
 
 1. **Clone the repo**
    ```bash
-   git clone https://github.com/gtovar/email-cleaner.git
-   cd email-cleaner
+   git clone https://github.com/gtovar/email-cleaner-fastify.git
+   cd email-cleaner-fastify
    ```
 
-2. **Run locally**
+2. Configure environment
+
+cp .env.example .env
+
+| Variable | Descripción | Obligatoria | Ejemplo |
+|---|---|---:|---|
+| DATABASE_URL | Cadena de conexión PostgreSQL | Sí | postgres://user:pass@localhost:5432/email_cleaner |
+| GMAIL_CLIENT_ID | OAuth 2.0 Client ID | Sí | xxx.apps.googleusercontent.com |
+| GMAIL_CLIENT_SECRET | OAuth 2.0 Client Secret | Sí | supersecret |
+| GMAIL_REDIRECT_URI | Redirect (OAuth) | Sí | http://localhost:3000/oauth/google/callback |
+|INTERNAL_JWT_SECRET| Inter-service / Security | No | xxxxx|
+| FASTAPI_URL | URL del microservicio ML | Sí | http://localhost:8000 |
+| PORT | Puerto del backend | Sí | 3000 |
+| N8N_WEBHOOK_URL | Webhook para pruebas | No | http://localhost:5678/webhook/telegram-test |
+| TELEGRAM_BOT_TOKEN | Telegram | No | xxxxx |
+
+3. **Run locally** (Node/Fastify)
    ```bash
    npm install
-   npm run dev
+   npm run dev # http://localhost:3000
    ```
 
-3. **Start ML microservice**
+4. **Run ML microservice** (Python/FastAPI)
    ```bash
    cd python/classifier
    python -m venv venv
    source venv/bin/activate
    pip install -r requirements.txt
-   uvicorn main:app --reload --port 8000
+   uvicorn main:app --reload --port 8000 # http://localhost:8000/docs
    ```
 
-4. **Open API docs**
+5. Database
+npm run db:migrate
+npm run db:seed (optional)
+npm run db:rollback (optional)
+
+Test
+curl -X POST http://localhost:3000/api/v1/emails/classify
+
+-H "Content-Type: application/json"
+-d '{"from":"invoices@cfe.mx
+","subject":"Your electricity bill is ready","body":"Due date..."}'
+
+6. **Open API docs**
    - Fastify API → [http://localhost:3000/docs](http://localhost:3000/docs)  
    - FastAPI ML Service → [http://localhost:8000/docs](http://localhost:8000/docs)
 

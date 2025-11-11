@@ -1,3 +1,2 @@
 # Scrum
-
-_TBD_
+smoke test, docker compose up, curl health, db:migrate

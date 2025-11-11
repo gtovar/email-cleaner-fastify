@@ -1,4 +1,4 @@
-teps:
+steps:
   - id: "Build & Push"
     name: "gcr.io/cloud-builders/docker"
     args: ["build", "-t", "$LOCATION-docker.pkg.dev/$PROJECT_ID/email-cleaner/email-cleaner:$SHORT_SHA", "."]

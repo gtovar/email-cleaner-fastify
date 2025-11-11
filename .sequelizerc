@@ -1,0 +1,12 @@
+// .sequelizerc  (raíz del repo)
+const path = require('path');
+
+module.exports = {
+  // Ruta real a tu archivo de configuración de Sequelize
+  'config': path.resolve('src/config/config.cjs'),
+
+  // Rutas a tus carpetas reales
+  'models-path': path.resolve('src/models'),
+  'migrations-path': path.resolve('migrations'),
+  'seeders-path': path.resolve('seeders')
+};

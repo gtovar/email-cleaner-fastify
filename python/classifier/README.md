@@ -1,6 +1,6 @@
 # Clasificador de correos (Microservicio Python)
 
-Este microservicio expone un endpoint POST `/classify` que recibe metadatos de correos y devuelve sugerencias de limpieza.
+Este microservicio expone un endpoint POST `/suggest` que recibe metadatos de correos y devuelve sugerencias de limpieza.
 
 ## Ejecutar local
 

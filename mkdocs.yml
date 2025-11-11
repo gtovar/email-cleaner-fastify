@@ -29,6 +29,9 @@ nav:
       - Scrum: scrum.md
   - API:
       - Reference: API_REFERENCE.md
+  - Operations:
+      - Local (Docker): operations/local.md
+      - OAuth Google: operations/oauth-google.md
   - Deployment:
       - Cloud Run: despliegue-cloudrun.md
   - Database:

@@ -1,5 +1,5 @@
 // src/utils/filters.js
-function buildGmailQuery(filters) {
+export function buildGmailQuery(filters) {
   let q = '';
   if (filters.unread === 'true') q += ' is:unread';
   if (filters.category) q += ` category:${filters.category}`;
@@ -8,7 +8,7 @@ function buildGmailQuery(filters) {
   return q.trim();
 }
 
-async function filterByAttachment(messages, gmail, auth) {
+export async function filterByAttachment(messages, gmail, auth) {
   // Requiere llamadas adicionales para revisar adjuntos
   const result = [];
   for (const msg of messages) {
@@ -22,5 +22,3 @@ async function filterByAttachment(messages, gmail, auth) {
   }
   return result;
 }
-
-module.exports = { buildGmailQuery, filterByAttachment };

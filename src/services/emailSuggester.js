@@ -2,7 +2,8 @@
 
 import fetch from 'node-fetch'; // o usa globalThis.fetch si estás en Node 18+
 
-const CLASSIFIER_URL = 'http://127.0.0.1:5055/suggest';
+const BASE = (process.env.FASTAPI_URL || 'http://localhost:8000').replace(/\/$/, '');
+const CLASSIFIER_URL = `${BASE}/suggest`; // <-- unificado
 
 /**
  * Llama al microservicio Python para obtener sugerencias.

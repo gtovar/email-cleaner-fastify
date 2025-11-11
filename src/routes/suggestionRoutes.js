@@ -28,11 +28,11 @@ export default async function (fastify, opts) {
     fastify.addSchema(emailSuggestionSchema);
   }
 
-  fastify.get('/suggestions', {
+  fastify.get('/api/v1/suggestions', {
     preHandler: [authMiddleware], // Si tu endpoint requiere auth
     schema: {
       description: 'Obtiene sugerencias automáticas de acción para correos (no ejecuta acciones, solo recomienda)',
-      tags: ['Sugerencias'],
+      tags: ['official-v1','Sugerencias'],
       response: {
         200: {
           description: 'Lista de sugerencias para limpieza',
