@@ -25,11 +25,6 @@ services:
     ports: ["3000:3000"]
     environment:
       DATABASE_URL: postgres://email:email@db:5432/email_cleaner
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USERNAME: email
-      DB_PASSWORD: email
-      DB_DATABASE: email_cleaner
       FASTAPI_URL: http://fastapi:8000
       INTERNAL_JWT_SECRET: change-me
     depends_on: ["db","fastapi"]
