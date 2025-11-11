@@ -33,8 +33,10 @@ jobs:
       - name: Build MkDocs
         run: mkdocs build --strict
 
-      - name: smoke
-        run: make smoke
+      - name: docs smoke
+        run: |
+          test -d site
+          test -f site/index.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
