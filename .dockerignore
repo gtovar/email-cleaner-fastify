@@ -1,0 +1,8 @@
+.git
+node_modules
+python/classifier/venv
+__pycache__
+*.pyc
+dist
+build
+.env
