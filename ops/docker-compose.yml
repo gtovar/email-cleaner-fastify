@@ -1,7 +1,11 @@
-version: "3.9"
 services:
   db:
     image: postgres:15
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U email -d email_cleaner"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     environment:
       POSTGRES_USER: email
       POSTGRES_PASSWORD: email
@@ -11,21 +15,24 @@ services:
 
   fastapi:
     build:
-      context: ./python/classifier
-    command: uvicorn main:app --host 0.0.0.0 --port 8000
+      context: ..
+      dockerfile: python/classifier/Dockerfile
+    command: uvicorn app:app --host 0.0.0.0 --port 8000
     ports: ["8000:8000"]
-    environment:
-      # if needed, pass model paths/envs
     depends_on: ["db"]
 
   fastify:
     build:
-      context: .
+      context: ..
+      dockerfile: Dockerfile
     command: npm run dev
     ports: ["3000:3000"]
     environment:
       DATABASE_URL: postgres://email:email@db:5432/email_cleaner
       FASTAPI_URL: http://fastapi:8000
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}
       INTERNAL_JWT_SECRET: change-me
     depends_on: ["db","fastapi"]
 
@@ -34,6 +41,13 @@ services:
     ports: ["5678:5678"]
     environment:
       GENERIC_TIMEZONE: America/Monterrey
+      # Si usas SQLite (default local), define pool > 0:
+      DB_SQLITE_POOL_SIZE: "5"
+      # Opcional, endurece seguridad de env access en Code Node (lee doc antes):
+      # N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"
+      # Desactiva bare repos en Git Node (seguridad):
+      N8N_GIT_NODE_DISABLE_BARE_REPOS: "true"
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
 
 volumes:
   pgdata:
