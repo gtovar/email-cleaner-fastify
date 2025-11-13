@@ -130,4 +130,11 @@ pytest -v
 
 ---
 
+### 9. Docker (local)
+
+```bash
+  docker compose -f ops/docker-compose.yml up --build
+```
+---
+
 **Última actualización:** Julio 2025 — Equipo de Arquitectura  
