@@ -8,23 +8,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function dbConnector(fastify, options) {
-  const sequelize = new Sequelize(
-    process.env.DB_DATABASE,
-    process.env.DB_USERNAME,
-    process.env.DB_PASSWORD,
-    {
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT || 5432,
-      dialect: 'postgres',
-      logging: false,
-    }
-  );
+  const sequelize = new Sequelize(process.env.DATABASE_URL);
 
   try {
     await sequelize.authenticate();
-    fastify.log.info('Conexión a PostgreSQL exitosa');
+    fastify.log.info('Connection has been established successfully.');
   } catch (err) {
-    fastify.log.error('Error conectando a DB:', err);
+    fastify.log.error('Unable to connect to the database:', err);
     throw err;
   }
 
