@@ -188,3 +188,35 @@
 
 ---
 
+
+
+
+
+
+# PROJECT_STATE
+
+## 🎯 Objetivo actual
+
+Preparar HU11 (pendiente): migración del test runner a Jest para mejorar experiencia de testing y presentación en entrevistas.
+
+## ✅ Última tarea completada
+
+- HU3 cerrada el 2025-11-14:
+  - Backend Fastify con `/api/v1/notifications/{summary,confirm,history}` funcional.
+  - Migraciones aplicadas (`ActionHistories`, `Notifications`, `Tokens`).
+  - Endpoints probados vía `curl` con token real de Google.
+  - Tests de servicio (`notifications.test.js`) y utilidades (`filters.test.js`) en verde usando `node:test`.
+  - Documentación actualizada en `docs/API_REFERENCE.md`.
+
+## 🔜 Próximo paso acordado
+
+- Hacer merge de `feature/hu3-notifications-tests-docs` → `develop` → `main`.
+- Registrar HU11 en `Features & Roadmap` (migrar de `node:test` a Jest).
+- Crear ADR específico para la adopción de Jest (cuando se arranque HU11).
+
+## 🧩 Contexto adicional
+
+- Test runner actual: `node:test` (Node 18).
+- `sequelize-cli` está ahora en `dependencies` para que exista dentro del contenedor Fastify.
+- `make migrate` ejecuta `npm run db:migrate` correctamente dentro del contenedor.
+
