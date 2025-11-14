@@ -1,25 +1,35 @@
 # Emails API Reference (v1)
 
-> - **Base URL**: `/api/v1`
-
-> **Estatus**
-> - **Oficiales v1**: contrato estable, cubierto por pruebas.
-> - **Experimental**: sujeto a cambios; uso bajo tu propio riesgo.
-> **Especificación oficial de la API**
-> Se genera desde el código (esquemas en las rutas y en `src/index.js`). El archivo `src/swagger.yaml` no se usa en tiempo de ejecución.
+> Base URL: /api/v1
 
 ---
-## Emails API — Oficiales v1
 
-## Create a New Classification Rule
+## API Notes
 
-**Method:** `POST /api/v1/emails/rules`
+* Official Status (v1): Stable contract, covered by unit and integration tests.
+* Experimental Status: Subject to change without notice; use at your own risk.
+* Official Specification: Generated dynamically from the code (schemas in routes). The src/swagger.yaml file is not used at runtime.
 
-**Description:**  
-Creates a new **classification rule** to be applied to incoming emails (by subject, sender, or body content) and defines the corresponding action (label, archive, notify, etc.).
+### Implementation Notes (Fastify)
 
-### Request Body (JSON)
-```json
+* Always version APIs under /api/v1.
+* Validate all payloads with @fastify/ajv.
+* Return correct HTTP status codes (200, 201, 400, 404).
+* Always include pagination metadata: page, limit, total, and items.
+* Ensure PATCH operations are idempotent.
+
+---
+
+## Emails API — Official v1
+
+### 1. Create a New Classification Rule
+
+Method: POST /api/v1/emails/rules
+
+Description:
+Creates a new classification rule to be applied to incoming emails (by subject, sender, or body content) and defines the corresponding action (label, archive, notify, etc.).
+
+#### Request Body (JSON)
 {
   "name": "CFE Invoice Rule",
   "match": {
@@ -35,10 +45,8 @@ Creates a new **classification rule** to be applied to incoming emails (by subje
   "enabled": true,
   "priority": 10
 }
-```
 
-### Successful Response
-```json
+#### Successful Response (201 Created)
 {
   "id": "rul_01HZXQ6W6F",
   "name": "CFE Invoice Rule",
@@ -47,30 +55,26 @@ Creates a new **classification rule** to be applied to incoming emails (by subje
   "createdAt": "2025-11-06T02:21:34.000Z",
   "updatedAt": "2025-11-06T02:21:34.000Z"
 }
-```
 
----
+### 2. Retrieve Classified Emails
 
-## Retrieve Classified Emails
+Method: GET /api/v1/emails
 
-**Method:** `GET /api/v1/emails`
-
-**Description:**  
+Description:
 Returns a paginated list of classified emails, including categories and suggested actions.
 
-### Query Parameters
+#### Query Parameters
 
-| Parameter | Type    | Required | Description                |
-| --------- | ------- | -------- | -------------------------- |
-| `page`    | integer | No       | Current page (default 1).  |
-| `limit`   | integer | No       | Page size (default 20).    |
-| `label`   | string  | No       | Filter by category or tag. |
-| `from`    | string  | No       | Filter by sender.          |
-| `since`   | string  | No       | Minimum date (ISO 8601).   |
-| `until`   | string  | No       | Maximum date (ISO 8601).   |
+| Parameter | Type    | Required | Description                     |
+| :-------- | :------ | :------- | :------------------------------ |
+| page    | integer | No       | Current page (default 1).       |
+| limit   | integer | No       | Page size (default 20).         |
+| label   | string  | No       | Filter by category or tag.      |
+| from    | string  | No       | Filter by sender.               |
+| since   | string  | No       | Minimum date (ISO 8601).        |
+| until   | string  | No       | Maximum date (ISO 8601).        |
 
-### Example Response
-```json
+#### Example Response (200 OK)
 {
   "page": 1,
   "limit": 20,
@@ -93,27 +97,21 @@ Returns a paginated list of classified emails, including categories and suggeste
     }
   ]
 }
-```
 
----
+### 3. Update an Existing Rule
 
-## Update an Existing Rule
+Method: PATCH /api/v1/emails/rules/:ruleId
 
-**Method:** `PATCH /api/v1/emails/rules/:ruleId`
+Description:
+Partially updates an existing rule (e.g., change priority or toggle enabled).
 
-**Description:**  
-Partially updates an existing rule (e.g., change priority or toggle `enabled`).
-
-### Example Request Body
-```json
+#### Example Request Body
 {
   "enabled": false,
   "priority": 20
 }
-```
 
-### Example Response
-```json
+#### Example Response (200 OK)
 {
   "id": "rul_01HZXQ6W6F",
   "name": "CFE Invoice Rule",
@@ -121,60 +119,121 @@ Partially updates an existing rule (e.g., change priority or toggle `enabled`).
   "priority": 20,
   "updatedAt": "2025-11-06T02:28:11.000Z"
 }
-```
 
----
-## Suggest
+### 4. Classification Suggestion
 
-**Method:** `POST /api/v1/emails/suggest`
+Method: POST /api/v1/emails/suggest
 
-**Description:**  
-This is a microservice and expose a endpoint POST `/suggest` for recive metadata from email and return suggests of clean.
+Description:
+This microservice receives email metadata and returns classification or cleanup suggestions.
 
-
-### Example Request Body
-```json
+#### Example Request Body
 {
   "from": "invoices@cfe.mx", 
   "subject": "Your electricity bill is ready", 
   "body": "Due date: November 15. Amount: $350."
 }
-```
 
-### Example Response
-```json
+#### Example Response (200 OK)
 {
   "category": "billing",
   "action": "pay",
   "confidence": 0.93
 }
-```
-
 
 ---
+
+## Notifications API
+
+> Base URL: /api/v1/notifications
+>
+> Required Header: Authorization: Bearer <token_oauth_google>
+
+### 1. Retrieve Notifications Summary
+
+Method: GET /api/v1/notifications/summary
+
+Description:
+Returns the list of suggested notifications for the authenticated user.
+
+#### Query Parameters
+
+| Parameter | Type   | Required | Description               |
+| :-------- | :----- | :------- | :------------------------ |
+| period  | string | No       | Period filter (e.g., daily). |
+
+#### Response (200 OK)
+[
+  {
+    "id": "test1",
+    "from": "noti@demo.com",
+    "subject": "¡Prueba HU4!",
+    "date": "2025-11-14T06:59:21.250Z",
+    "isRead": false,
+    "category": "demo",
+    "attachmentSizeMb": 0.1,
+    "suggestions": ["archive"]
+  }
+]
+
+### 2. Confirm Notifications
+
+Method: POST /api/v1/notifications/confirm
+
+Description:
+Confirms one or more notifications and logs the action taken (currently `accept` or `reject`).
+
+#### Request Body (JSON)
+{
+  "ids": ["test1"],
+  "action": "accept"
+}
+
+#### Response (200 OK)
+{
+  "success": true,
+  "processed": 1
+}
+
+### 3. Retrieve Actions History
+
+Method: GET /api/v1/notifications/history
+
+Description:
+Returns the paginated history of actions performed on notifications.
+
+#### Response (200 OK)
+{
+  "total": 2,
+  "page": 1,
+  "perPage": 20,
+  "data": [
+    {
+      "userId": "demo-user",
+      "emailId": "test1",
+      "action": "accept",
+      "timestamp": "2025-11-14T07:11:20.364Z",
+      "details": {}
+    }
+  ]
+}
+
+---
+
 ## Rules API — Experimental
+
+### 1. List Classification Rules
 
 Method: GET /api/v1/emails/rules
 
-**Description:**
-Lista reglas de clasificación. Experimental: el esquema puede cambiar.
+Description:
+Lists classification rules. Experimental: the schema may change.
 
-### 200 Response
-```json
+#### Response (200 OK)
 [
   { "id": 1, "pattern": "cfe.mx", "label": "billing" }
 ]
 
-```
-
-## 🧩 Implementation Notes (Fastify)
-
-- Always version APIs under `/api/v1`.  
-- Validate all payloads with `@fastify/ajv`.  
-- Return correct HTTP status codes (`200`, `201`, `400`, `404`).  
-- Always include pagination metadata: `page`, `limit`, `total`, and `items`.  
-- Ensure `PATCH` operations are idempotent.  
-
 ---
 
-**Last updated:** July 2025  
+Last Updated: July 2025
