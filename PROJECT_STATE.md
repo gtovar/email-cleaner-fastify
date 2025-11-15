@@ -142,7 +142,10 @@
 1. **OAuth Google en local y en producción**
    - Necesita estrategia clara de mock / entorno de pruebas.
 2. **Contrato Node ↔ Python**
-   - Definir esquema de request/response y tests de contrato.
+   - Node side: request/response schema and contract tests are in place
+     (`emailSuggester.js`, `/api/v1/suggestions`, notifications routes).
+   - Pending: end-to-end tests against the real FastAPI classifier and
+     Docker Compose orchestration (Fastify ↔ FastAPI ↔ DB).
 3. **Cobertura de pruebas**
    - Jest está integrado, pero el número de casos aún es pequeño.
 
@@ -150,10 +153,12 @@
 
 ## 5. 🎯 Objetivo actual
 
-- Consolidar HU1 (OAuth) y HU5 (integración Python) como siguientes candidatos
-  de priorización.
-- Mantener HU4–HU10 en `BACKLOG_FASE_2` hasta cerrar flujo técnico base:
-  Gmail ↔ Fastify ↔ Python ↔ DB.
+
+- Priorizar HU1 (OAuth Google) y HU6 (React suggestions UI) as the next candidates
+  for implementation.
+- HU5 (Python classifier integration) is closed at the Fastify–Node contract level;
+  remaining work is end-to-end integration (FastAPI + Docker) and optional
+  Python-side contract tests.
 
 ---
 
@@ -165,3 +170,9 @@
    - HU5 (formalizar contrato y flujo con el clasificador Python).
 
 
+
+notas: o único “detalle nerd” que vale la pena notar (no arreglar todavía, solo tener en el radar):
+
+En EmailSuggestion, suggestions está tipado como string[].
+
+Pero en la documentación de emailSuggester y del clasificador Python, la forma “ideal” de cada sugerencia es un objeto { action, category, confidence_score }.

@@ -108,3 +108,26 @@ Formalizar y probar el contrato Fastify ↔ Python (FastAPI) para clasificación
 
 - Estado actual: HU5 cerrada a nivel contrato/documentación; pendientes tests de contrato y flujo end-to-end.
 
+## Sprint S-02 — HU5 Integración Python (Classifier)
+
+- Objetivo: consolidar el contrato Fastify ↔ Python a nivel de servicio y preparar pruebas de integración.
+
+### Hecho
+
+- Servicio `emailSuggester.js` y tests unitarios (`tests/emailSuggester.test.js`).
+- Fastify contract tests:
+  - `tests/suggestionsRoutes.test.js` para `/api/v1/suggestions` con controlador mockeado.
+  - `tests/notificationsRoutes.test.js` para summary/confirm/history.
+  - `tests/authMiddleware.test.js` para el contrato Bearer y `request.user`.
+- Suite de Jest estable: 8 test suites, 22 tests en verde (`npm test`).
+
+### Pendiente inmediato
+
+- Verificar flujo end-to-end (Fastify ↔ FastAPI ↔ DB) usando Docker Compose.
+- (Opcional) Agregar contract tests del lado Python con `fastapi.testclient`.
+
+### Riesgos
+
+- FastAPI aún no está orquestado automáticamente en todos los entornos.
+- Flujo OAuth Google todavía no está integrado en el ciclo e2e.
+

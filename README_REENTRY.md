@@ -1,46 +1,33 @@
 # Reentrada rápida (5 minutos)
 
-Este documento permite retomar el proyecto en cualquier momento, incluso después de días o semanas.
-
 ## 1) Último objetivo trabajado
-- HU3: Notificaciones — pruebas, migraciones y validación de endpoints.
+- HU5: Fastify–Python contract for email suggestions
+  - Added `/api/v1/suggestions` as an authenticated Fastify route.
+  - Added Jest contract tests for suggestions and notifications routes.
+  - Confirmed emailSuggester integration and classifier fallback behaviour.
 
 ## 2) Próxima tarea recomendada (≤ 90 min)
-- Finalizar pruebas del endpoint `/notifications/confirm` en `notifications.test.js`.
+- Kick off HU6: React suggestions panel.
+  - Consume `/api/v1/suggestions` from the frontend.
+  - Render suggested actions (action/category/confidence_score) per email.
+  - Keep all destructive actions manual (no auto-delete) while iterating on UX.
 
 ## 3) Comandos de arranque
 
 ```bash
-make up
-````
-
-Servicios:
-
-* Backend Fastify: [http://localhost:3000/health](http://localhost:3000/health)
-* Frontend React: [http://localhost:5173](http://localhost:5173)
-* ML Python (si aplica): [http://localhost:8000/docs](http://localhost:8000/docs)
-
-## 4) Verificación rápida
-
-* `/api/v1/notifications/summary` responde.
-* `/api/v1/notifications/history` responde.
-* Frontend compila sin errores.
-
-## 5) Cierre del bloque
-
-* Ejecutar `npm test`
-* Actualizar `PROJECT_STATE.md`
-* Registrar avance en `Sprint_Log.md`
-
+npm install
+npm test        # Run backend contract and service tests
+npm run dev     # Fastify backend on http://localhost:3000
+# Frontend: start according to the main README instructions
 ```
-Actualizar README_REENTRY.md (además de la frase que pusiste)
 
-Dejar clarísimo, por ejemplo:
+4) Endpoints a verificar rápido
+GET /api/v1/notifications/summary
 
-Última HU cerrada: HU3.
+GET /api/v1/notifications/history
 
-Rama principal: main.
+GET /api/v1/suggestions
 
-Próximo objetivo: HU11 (tests con Jest).
+Con eso, si te vas una semana, en 5 minutos recuerdas:
 
-Referencia cruzada a PROJECT_STATE.md y Sprint_log.md.
+- “Ah, HU5 ya está; sigue React HU6 y el contrato ya está probado.”
