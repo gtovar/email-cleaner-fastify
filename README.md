@@ -110,6 +110,20 @@ curl -s http://localhost:3000/api/v1/notifications/summary -H "Authorization: Be
 curl -s http://localhost:3000/api/v1/notifications/history -H "Authorization: Bearer dummy"
 ```
 
+## 🧪 Ejecutar pruebas
+
+Este proyecto usa [Jest](https://jestjs.io/) como test runner principal.
+
+Comandos disponibles:
+
+```bash
+npm test         # Ejecuta la suite una sola vez
+npm run test:watch # Modo interactivo de Jest
+npm run coverage   # Reporte de cobertura en ./coverage
+```
+> Jest se ejecuta en modo ESM con `NODE_OPTIONS=--experimental-vm-modules` para mantener la compatibilidad con `type: "module"`.
+> Nota: el script de npm test ya incluye las opciones necesarias para ejecutar Jest con módulos ECMAScript en Node, por lo que no necesitas exportar variables extra manualmente.
+
 ## Repository layout
 
 - src/                    # Fastify app (API v1)

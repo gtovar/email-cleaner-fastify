@@ -33,4 +33,14 @@ Servicios:
 * Registrar avance en `Sprint_Log.md`
 
 ```
+Actualizar README_REENTRY.md (además de la frase que pusiste)
 
+Dejar clarísimo, por ejemplo:
+
+Última HU cerrada: HU3.
+
+Rama principal: main.
+
+Próximo objetivo: HU11 (tests con Jest).
+
+Referencia cruzada a PROJECT_STATE.md y Sprint_log.md.
