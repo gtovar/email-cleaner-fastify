@@ -70,9 +70,10 @@
 
 ### HU5 – Integración con microservicio de clasificación en Python
 
-- **Estado:** BACKLOG_FASE_2
-- **Evidencia:** servicio Python y referencia en `emailSuggester.js`.
-- **Pendientes:** definir contrato formal Fastify ↔ FastAPI y tests de contrato.
+- **Estado:** EN_CURSO (Sprint S-03 — HU5 Contrato Fastify ↔ Python classifier).
+- **Evidencia:** servicio Python, referencia en `emailSuggester.js` y sección 5 de `docs/API_REFERENCE.md`.
+- **Pendientes:** tests de contrato (Fastify ↔ FastAPI) y verificación end-to-end con Docker Compose.
+- ✅ Última tarea completada: contrato Fastify ↔ Python documentado en `docs/API_REFERENCE.md`.
 
 ### HU6–HU10
 

@@ -141,6 +141,131 @@ This microservice receives email metadata and returns classification or cleanup 
   "confidence": 0.93
 }
 
+### 5. Sugerencias de limpieza (Fastify ↔ Python classifier)
+
+#### 5.1 Endpoint público Fastify
+
+**Method:** `GET /api/v1/suggestions`  
+**Auth:** `Bearer <token>` (JWT)  
+
+Este endpoint devuelve una lista de correos enriquecidos con sugerencias automáticas de limpieza.  
+Es el punto de entrada “oficial” del backend Fastify hacia el microservicio de IA en Python.
+
+**Ejemplo de respuesta (200 OK)**
+
+```json
+{
+  "emails": [
+    {
+      "id": "abc123",
+      "from": "notificaciones@ejemplo.com",
+      "subject": "Promoción especial",
+      "date": "2024-07-01T12:00:00Z",
+      "isRead": false,
+      "category": "promotions",
+      "attachmentSizeMb": 2.5,
+      "suggestions": [
+        {
+          "action": "archive",
+          "category": "promotions",
+          "confidence_score": 0.91
+        }
+      ]
+    }
+  ]
+}
+```
+
+Internamente, esta ruta delega en el controlador `getSuggestedEmails`, que a su vez usa el servicio `suggestActions` (`src/services/emailSuggester.js`).
+
+---
+
+#### 5.2 Contrato Fastify → Python (microservicio clasificador)
+
+El servicio `suggestActions(emails)` arma la petición al microservicio Python:
+
+* **URL base:** `FASTAPI_URL` (variable de entorno)
+* **Endpoint completo:** `POST ${FASTAPI_URL}/suggest`
+* **Headers:** `Content-Type: application/json`
+* **Body:** *array* de correos con metadatos mínimos:
+
+```json
+[
+  {
+    "id": "abc123",
+    "from": "notificaciones@ejemplo.com",
+    "subject": "Promoción especial",
+    "date": "2024-07-01T12:00:00Z",
+    "isRead": false,
+    "category": "promotions",
+    "attachmentSizeMb": 2.5
+  }
+]
+```
+
+#### 5.3 Contrato Python → Fastify (respuesta esperada)
+
+El microservicio Python devuelve un **mapa de sugerencias** por `id` de correo:
+
+```json
+{
+  "abc123": [
+    {
+      "action": "archive",
+      "category": "promotions",
+      "confidence_score": 0.91
+    }
+  ],
+  "def456": [
+    "{\"action\":\"keep\",\"category\":\"inbox\",\"confidence_score\":0.42}"
+  ]
+}
+```
+
+Notas importantes:
+
+* El backend es tolerante a “sugerencias mal formadas”:
+
+  * Si viene un string JSON, se hace `JSON.parse(...)`.
+  * Si el parse falla, se ignora esa sugerencia puntual.
+* Cada sugerencia se normaliza al shape:
+
+```ts
+{
+  action: string;
+  category: string;
+  confidence_score: number;
+}
+```
+
+#### 5.4 Comportamiento en error
+
+Si el clasificador Python:
+
+* responde con un status **no 2xx**, o
+* hay error de red / timeout,
+
+el servicio `suggestActions` **no rompe el flujo**. En su lugar:
+
+```json
+{
+  "emails": [
+    {
+      "id": "abc123",
+      "from": "notificaciones@ejemplo.com",
+      "subject": "Promoción especial",
+      "date": "2024-07-01T12:00:00Z",
+      "isRead": false,
+      "category": "promotions",
+      "attachmentSizeMb": 2.5,
+      "suggestions": []
+    }
+  ]
+}
+```
+
+Es decir: el usuario recibe igual los correos, pero sin sugerencias (lista vacía), y el error queda logueado en el backend.
+
 ---
 
 ## Notifications API

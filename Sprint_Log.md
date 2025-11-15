@@ -77,3 +77,34 @@ Migrar el runner de pruebas de `node:test` a Jest y dejar la suite estable.
 
 - Jest se adopta como test runner estándar del proyecto.
 
+
+
+## Sprint S-03 — HU5 Contrato Fastify ↔ Python classifier
+
+**Periodo:** 2025-11-14
+
+### Objetivo
+
+Formalizar y probar el contrato Fastify ↔ Python (FastAPI) para clasificación avanzada de correos.
+
+### Hecho
+
+- Rama `feature/hu5-fastify-python-contract` creada desde `develop`.
+- Alcance de HU5 definido y documentado en `PROJECT_STATE.md`.
+
+### Pendiente
+
+- Documentar contrato en `docs/API_REFERENCE.md` y `docs/TUTORIALS/QUICKSTART.md`.
+- Agregar y/o ajustar tests de contrato en Jest.
+- (Opcional) Agregar tests de contrato en Python con `fastapi.testclient`.
+- Verificar flujo end-to-end con Docker compose (Fastify ↔ FastAPI ↔ DB).
+
+### Riesgos
+
+- Estado actual del código en `python/` aún no completamente auditado.
+- Cambios futuros en el microservicio pueden romper el contrato si no se actualizan los tests.
+
+### Día / sprint
+
+- Estado actual: HU5 cerrada a nivel contrato/documentación; pendientes tests de contrato y flujo end-to-end.
+
