@@ -1,35 +1,42 @@
 {
-  "name": "email-cleaner-fastify",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "dev": "node src/index.js",
-    "lint": "eslint .",
-    "db:migrate": "sequelize-cli db:migrate",
-    "db:seed": "sequelize-cli db:seed:all",
-    "db:rollback": "sequelize-cli db:migrate:undo",
-    "test": "node --test"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@fastify/cors": "^11.0.1",
-    "@fastify/swagger": "^9.5.1",
-    "@fastify/swagger-ui": "^5.2.3",
-    "dotenv": "^16.5.0",
-    "fastify": "^5.4.0",
-    "fastify-env": "^2.2.0",
-    "fastify-plugin": "^5.0.1",
-    "googleapis": "^150.0.1",
-    "node-fetch": "^3.3.2",
-    "pg": "^8.16.2",
-    "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.7",
-    "sequelize-cli": "^6.6.3"
-  },
-  "devDependencies": {
-  }
+    "name": "email-cleaner-fastify",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "dev": "node src/index.js",
+        "lint": "eslint .",
+        "db:migrate": "sequelize-cli db:migrate",
+        "db:seed": "sequelize-cli db:seed:all",
+        "db:rollback": "sequelize-cli db:migrate:undo",
+        "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+        "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
+        "coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@fastify/cors": "^11.0.1",
+        "@fastify/swagger": "^9.5.1",
+        "@fastify/swagger-ui": "^5.2.3",
+        "dotenv": "^16.5.0",
+        "fastify": "^5.4.0",
+        "fastify-env": "^2.2.0",
+        "fastify-plugin": "^5.0.1",
+        "googleapis": "^150.0.1",
+        "node-fetch": "^3.3.2",
+        "pg": "^8.16.2",
+        "pg-hstore": "^2.3.4",
+        "sequelize": "^6.37.7",
+        "sequelize-cli": "^6.6.3"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0"
+    },
+    "jest": {
+        "testEnvironment": "node",
+        "transform": {}
+    }
 }

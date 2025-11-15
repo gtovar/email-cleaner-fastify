@@ -1,8 +1,14 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
+import { describe, test, expect } from '@jest/globals';
 import { buildGmailQuery } from '../src/utils/filters.js';
 
-test('buildGmailQuery with unread and category', () => {
-  const q = buildGmailQuery({ unread: 'true', category: 'promotions' });
-  assert.equal(q, 'is:unread category:promotions');
+describe('buildGmailQuery', () => {
+  test('combines unread and category filters', () => {
+    const q = buildGmailQuery({ unread: 'true', category: 'promotions' });
+    expect(q).toBe('is:unread category:promotions');
+  });
+
+  test('returns trimmed string without optional filters', () => {
+    const q = buildGmailQuery({});
+    expect(q).toBe('');
+  });
 });

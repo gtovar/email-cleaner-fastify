@@ -1,6 +1,7 @@
 # PROJECT_STATE – Email Cleaner & Smart Notifications
 
-> Documento de estado vivo. Solo debe contener información **comprobable** a partir de código, tests y documentación actual.
+> Documento de estado vivo. Solo debe contener información **comprobable**
+> a partir de código, tests y documentación actual.
 
 ---
 
@@ -8,97 +9,104 @@
 
 - **Repositorio:** email-cleaner-fastify
 - **Backend principal:** Node.js + Fastify
-- **Infra:** Docker Compose (Fastify, DB, FastAPI, n8n), Makefile, Cloud Build (según docs), MkDocs para documentación.
-- **Fecha de este snapshot:** 2025-11-13 (sincronización de ramas `main` y `develop` a partir de `docs/bootstrap`).
+- **Servicios extra:** FastAPI (Python classifier), PostgreSQL, n8n
+- **Infra:** Docker Compose (`ops/docker-compose.yml`), `ops/Makefile`,
+  Cloud Build / Cloud Run (documentados), MkDocs para docs.
+- **Fecha de este snapshot:** 2025-11-14
 
 ### 1.1. Ramas
 
 - `main`  
-  - Rama estable actual.  
-  - Contiene: backend Fastify completo, infra Docker, documentación MkDocs, modelos y migraciones.
+  - Rama estable actual.
 
 - `develop`  
-  - Rama de trabajo activo.  
-  - Actualmente tiene **los mismos commits** que `main`.  
-  - A partir de ahora, nuevas historias de usuario deben abrirse desde aquí.
+  - Rama de trabajo activo (se crea feature branches desde aquí).
 
-- Ramas históricas (ya integradas a este estado y no usadas para trabajo futuro):  
-  - `docs/bootstrap`  
-  - `feature/initial-fastify-setup`
+- `feature/hu11-jest-runner`  
+  - Rama usada para migrar el test runner a Jest.  
+  - Debe mergearse a `develop` y luego a `main` al cerrar la HU11.
 
 ---
 
 ## 2. Estado por Historias de Usuario (HU)
 
-> Nota: estos estados se basan en código y documentos reales que ya fueron verificados.
+> Estados posibles: `DONE`, `EN_CURSO`, `BACKLOG_FASE_2`, `NO_INICIADA`.
 
 ### HU1 – Autenticación con Gmail
 
-- **Estado:** ✅ Implementada conceptualmente y reflejada en la arquitectura Fastify.
+- **Estado:** EN_CURSO (implementada a nivel de código base, falta cierre formal).
 - **Evidencia:**
-  - Integración con Google APIs en dependencias (`googleapis`, `google-auth-library`).
-  - Configuración de credenciales y tokens en `.env.example` y plugins de OAuth.
-- **Pendientes / Riesgos:**
-  - Validar que el flujo OAuth completo en Fastify tenga tests y mocks adecuados.
-  - Confirmar que no haya credenciales sensibles hardcodeadas.
+  - Rutas `/auth/google` y `/auth/google/callback` en `authRoutes.js`.
+  - Controlador `authController.js` usando `googleapis` + modelo `Token`.  
+- **Pendientes:**
+  - Tests de integración del flujo OAuth.
+  - Mock/estrategia clara para entorno local sin secretos reales.
 
 ### HU2 – Limpieza básica de correos
 
-- **Estado:** ✅ Completada.
+- **Estado:** DONE
 - **Evidencia:**
-  - Endpoint de clasificación de correos expuesto desde Fastify (vía `/emails` o similar).
-  - Persistencia en Postgres (modelos + migraciones).
-  - Documentado en `docs/TUTORIALS/QUICKSTART.md` y `docs/API_REFERENCE.md`.
-- **Pendientes:**
-  - Ampliar cobertura de tests unitarios/integración para los filtros y la lógica de clasificación.
+  - Controlador `mailController.js` que lista correos de Gmail con filtros.
+  - Utilidad `buildGmailQuery` en `src/utils/filters.js`.
+  - Documentación en `docs/API_REFERENCE.md` y `docs/TUTORIALS/QUICKSTART.md`.
 
-### HU3 – Notificaciones (acciones sugeridas sobre correos)
+### HU3 – Notificaciones (summary / confirm / history)
 
-- **Estado:** 🟡 En curso.
+- **Estado:** DONE
 - **Evidencia:**
-  - Modelos `Notification` y `ActionHistory` ya existen.
-  - Rutas / servicios para:
-    - obtener resumen de notificaciones,
-    - confirmar acciones (archivar/borrar/etc.),
-    - consultar historial de acciones.
-  - Integración inicial con frontend React (componentes tipo `SuggestionList` y `ConfirmButton.jsx` que llaman a `/notifications/confirm`).
-- **Pendientes para marcarla como ✅ DONE:**
-  - Tests unitarios e integración para:
-    - `/notifications/summary`
-    - `/notifications/confirm`
-    - `/notifications/history`
-  - Documentar estos endpoints en `docs/API_REFERENCE.md` (request/response, códigos de error).
-  - Smoke test end-to-end: UI React → Fastify → DB → registro en `ActionHistory`.
+  - Modelos `Notification` y `ActionHistory`.
+  - Rutas `/api/v1/notifications/summary`, `/confirm`, `/history`
+    en `src/routes/notificationsRoutes.js`.
+  - Servicios `notificationsService` y `actionHistoryService`.
+  - Pruebas en `tests/notifications.test.js` (Jest) pasando en verde.
+- **Notas:**
+  - Flujo pensado para demo con usuario `demo-user` y token dummy.
 
-### HU4 – Panel UI de usuario
+### HU4 – Panel UI de usuario (React)
 
-- **Estado:** 🟡 Iniciada.
-- **Evidencia:**
-  - Existen componentes React para listar sugerencias y ejecutar acciones.
-- **Pendientes:**
-  - Diseñar y documentar el flujo completo de usuario:
-    - filtros,
-    - paginación,
-    - estados de carga/errores,
-    - vista de historial.
-  - Tests de UI (al menos básicos) o plan de pruebas manual detallado.
+- **Estado:** BACKLOG_FASE_2
+- **Evidencia:** componentes React existen, pero la HU no está formalmente
+  cerrada ni completamente documentada.
 
 ### HU5 – Integración con microservicio de clasificación en Python
 
-- **Estado:** 🟡 Iniciada.
-- **Evidencia:**
-  - Estructura y referencia a servicio Python (FastAPI) en `docker-compose.yml` y/o configs.
-- **Pendientes:**
-  - Orquestación real: Fastify llamando al microservicio Python para clasificación avanzada.
-  - Endpoint/documentación que explique cuándo se usa clasificación simple vs. IA.
-  - Tests de contrato entre Node (Fastify) y Python (FastAPI).
+- **Estado:** BACKLOG_FASE_2
+- **Evidencia:** servicio Python y referencia en `emailSuggester.js`.
+- **Pendientes:** definir contrato formal Fastify ↔ FastAPI y tests de contrato.
 
 ### HU6–HU10
 
-- **Estado:** ⛔ No iniciadas.
-- **Evidencia:**  
-  - No se encontraron rutas, modelos ni docs claramente asociados a HU6–HU10.
-  - Se mantienen como espacio para futuras funcionalidades (ej.: reglas avanzadas, n8n, etc.).
+- **Estado:** BACKLOG_FASE_2
+- Reservadas para:
+  - Reglas avanzadas
+  - Integración n8n real
+  - Mejora de UI / UX
+  - Observabilidad / métricas
+  - Hardening de seguridad
+
+### HU11 – Migración de Test Runner a Jest
+
+- **Estado:** DONE
+- **Evidencia:**
+  - `package.json` con scripts:
+    - `npm test`
+    - `npm run test:watch`
+    - `npm run coverage`
+  - Config de Jest en `package.json`:
+    ```json
+    "jest": {
+      "testEnvironment": "node",
+      "transform": {}
+    }
+    ```
+  - Pruebas migradas y en verde:
+    - `tests/filters.test.js`
+    - `tests/emailSuggester.test.js`
+    - `tests/mailService.test.js`
+    - `tests/notifications.test.js`
+  - Documentación en `docs/testing.md`.
+  - ADR-003 en `docs/adr/003-adoption-jest.md` con estado `accepted`.
+  - `Sprint_Log.md` con Sprint S-02 documentando HU11.
 
 ---
 
@@ -106,117 +114,53 @@
 
 ### 3.1. Backend Fastify
 
-- **Status:** 🟢 Funcional y documentado.
-- **Tiene:**
-  - Config base (CORS, Swagger, healthcheck).
-  - Plugins para DB (Sequelize / Postgres).
-  - Rutas de emails, sugerencias y notificaciones.
-- **Riesgos:**
-  - Cobertura de tests todavía limitada.
-  - Validar que todos los endpoints documentados existan y viceversa.
+- **Status:** 🟢 Funcional.
+- Plugins, rutas y servicios principales operativos.
+- Healthcheck `/api/v1/health/db` y Swagger en `/docs`.
 
 ### 3.2. Microservicio Python (clasificador)
 
-- **Status:** 🟡 En consolidación.
-- **Tiene:**
-  - Directorio `python/` con estructura de servicio.
-  - Referencias en Docker / infra.
-- **Riesgos:**
-  - Estado del código no completamente auditado.
-  - Necesario decidir si se versiona limpio, se refactoriza o se regenera.
-  - Tests y contrato API a definir.
+- **Status:** 🟡 Usable como demo, pendiente endurecer contrato y tests.
+- Se llama vía `src/services/emailSuggester.js` → `FASTAPI_URL /suggest`.
 
 ### 3.3. Frontend React
 
-- **Status:** 🟡 En curso.
-- **Tiene:**
-  - Listado de sugerencias.
-  - Botones de confirmación que llaman a backend (acciones sobre correos).
-- **Riesgos:**
-  - Aún no hay documentación unificada de los flujos UI.
-  - Sin estrategia clara de pruebas (unitarias/E2E).
+- **Status:** 🟡 En curso (panel de notificaciones y confirmaciones).
+- Falta consolidar historia HU4 y documentar flujos completos.
 
 ### 3.4. n8n / Orquestación
 
-- **Status:** 🔵 Planeado / Esbozado.
-- **Tiene:**
-  - Referencias en Docker Compose.
-- **Riesgos:**
-  - Falta diseño detallado del uso real de n8n y su interacción con el sistema.
-
-### 3.5. Infraestructura y CI/CD
-
-- **Status:** 🟢 Bien encaminada.
-- **Tiene:**
-  - `ops/docker-compose.yml` para levantar stack local.
-  - `ops/Makefile` con comandos de desarrollo (`up`, `down`, `logs`, `migrate`, etc.).
-  - Pipeline de documentación (MkDocs) via GitHub Actions.
-- **Riesgos:**
-  - Validar que los comandos funcionan en limpio en otra máquina (reproducibilidad).
+- **Status:** 🔵 Planeado.
+- Servicio definido en `ops/docker-compose.yml`, integración funcional básica
+  pendiente de diseño detallado.
 
 ---
 
 ## 4. Riesgos y decisiones abiertas
 
-1. **OAuth Google y manejo de credenciales**
-   - Revisión de seguridad pendiente.
-   - Necesario definir mock/entorno de pruebas.
-
-2. **Estado del microservicio Python (`python/`)**
-   - Debe decidirse si:
-     - se integra tal cual,
-     - se refactoriza,
-     - o se rehace con una especificación más clara.
-
-3. **Cobertura de tests**
-   - Tests existentes son insuficientes para claims de “producción”.
-   - Prioridad inmediata: HU3 (notificaciones) y contrato Fastify ↔ Python.
+1. **OAuth Google en local y en producción**
+   - Necesita estrategia clara de mock / entorno de pruebas.
+2. **Contrato Node ↔ Python**
+   - Definir esquema de request/response y tests de contrato.
+3. **Cobertura de pruebas**
+   - Jest está integrado, pero el número de casos aún es pequeño.
 
 ---
 
-## 5. Próximo objetivo acordado
+## 5. 🎯 Objetivo actual
 
-> **Objetivo actual:** Cerrar HU3 – Notificaciones
-
-### Tareas inmediatas:
-
-1. Crear tests para endpoints de notificaciones (summary, confirm, history).  
-2. Documentar dichos endpoints en `docs/API_REFERENCE.md`.  
-3. Validar flujo end-to-end:
-   - Leer notificaciones → Confirmar acción → Ver action history.
-4. Dejar anotada en este archivo la fecha en que HU3 cambie de 🟡 En curso a ✅ Completada.
+- Consolidar HU1 (OAuth) y HU5 (integración Python) como siguientes candidatos
+  de priorización.
+- Mantener HU4–HU10 en `BACKLOG_FASE_2` hasta cerrar flujo técnico base:
+  Gmail ↔ Fastify ↔ Python ↔ DB.
 
 ---
 
+## 6. Próximo paso recomendado
 
+1. Hacer merge de `feature/hu11-jest-runner` → `develop` → `main`.
+2. Decidir en `Features & Roadmap` si la siguiente HU prioritaria será:
+   - HU1 (cerrar completamente OAuth Google con tests), o
+   - HU5 (formalizar contrato y flujo con el clasificador Python).
 
-
-
-
-# PROJECT_STATE
-
-## 🎯 Objetivo actual
-
-Preparar HU11 (pendiente): migración del test runner a Jest para mejorar experiencia de testing y presentación en entrevistas.
-
-## ✅ Última tarea completada
-
-- HU3 cerrada el 2025-11-14:
-  - Backend Fastify con `/api/v1/notifications/{summary,confirm,history}` funcional.
-  - Migraciones aplicadas (`ActionHistories`, `Notifications`, `Tokens`).
-  - Endpoints probados vía `curl` con token real de Google.
-  - Tests de servicio (`notifications.test.js`) y utilidades (`filters.test.js`) en verde usando `node:test`.
-  - Documentación actualizada en `docs/API_REFERENCE.md`.
-
-## 🔜 Próximo paso acordado
-
-- Hacer merge de `feature/hu3-notifications-tests-docs` → `develop` → `main`.
-- Registrar HU11 en `Features & Roadmap` (migrar de `node:test` a Jest).
-- Crear ADR específico para la adopción de Jest (cuando se arranque HU11).
-
-## 🧩 Contexto adicional
-
-- Test runner actual: `node:test` (Node 18).
-- `sequelize-cli` está ahora en `dependencies` para que exista dentro del contenedor Fastify.
-- `make migrate` ejecuta `npm run db:migrate` correctamente dentro del contenedor.
 
