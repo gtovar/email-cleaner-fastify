@@ -1,140 +1,232 @@
+````txt
 # ⚡ Quickstart — Email Cleaner & Smart Notifications
-
-Guía rápida para levantar el entorno local del proyecto y validar el flujo principal de clasificación de correos.
-
----
-
-## 🚀 1. Requisitos Previos
-
-| Componente        | Versión mínima | Propósito                        |
-| ----------------- | -------------- | -------------------------------- |
-| Node.js           | 18.x LTS       | Backend (Fastify)                |
-| Python            | 3.10+          | Microservicio ML                 |
-| PostgreSQL        | 14+            | Base de datos                    |
-| Docker (opcional) | 24+            | Entorno reproducible             |
-| Gmail API         | v1             | Integración con correo           |
-| n8n (opcional)    | Latest         | Automatización de notificaciones |
+> Guía rápida para levantar y probar el proyecto  
+> Actualizado tras la corrección de HU12 (Fastify ↔ ML)
 
 ---
 
-## ⚙️ 2. Clonar y Configurar
+# 🚀 Objetivo del Quickstart
+Levantar el backend Fastify y el microservicio ML (FastAPI), obtener un token de Gmail, probar los endpoints reales y validar que la integración funciona.
 
-```bash
-git clone https://github.com/gilbertotovar/email-cleaner-fastify.git
-cd email-cleaner-fastify
-cp .env.example .env
-```
-
-Edita las variables del `.env`:
-
-```
-GOOGLE_CLIENT_ID=xxxx.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=xxxx
-DB_HOST=localhost
-DB_USER=postgres
-DB_PASS=secret
-DB_NAME=email_cleaner
-```
+Este documento te permite levantar todo el sistema en minutos.
 
 ---
 
-## 🧱 3. Instalación de Dependencias
+# 🧩 Requisitos previos
 
-**Backend (Node.js):**
+- Node.js 18+  
+- Python 3.10+  
+- Gmail OAuth configurado  
+- Uvicorn instalado (para FastAPI)
+- npm o yarn
+- Postman / Curl opcional
+
+---
+
+# 📦 1. Instalar dependencias
+
+## Fastify backend
 ```bash
 npm install
-```
+````
 
-**Microservicio ML (Python):**
+## Microservicio ML (Python)
+
 ```bash
 cd python/classifier
-python -m venv venv
-source venv/bin/activate
 pip install -r requirements.txt
 ```
 
 ---
 
-## 🧩 4. Iniciar los Servicios
+# ⚙️ 2. Variables de entorno
 
-**Backend (Fastify):**
+Crea un archivo `.env` en el raíz del proyecto:
+
+```env
+# Config ML
+ML_BASE_URL=http://localhost:8000
+ML_TIMEOUT_MS=5000
+
+# (Opcional) URL para Docker
+FASTAPI_URL=http://fastapi:8000
+```
+
+> Nota: FASTAPI_URL es usada en escenarios Docker;
+> ML_BASE_URL es usada localmente por mlClient.
+
+---
+
+# 🟢 3. Levantar Fastify
+
 ```bash
 npm run dev
-# http://localhost:3000
 ```
 
-**Microservicio ML (FastAPI):**
-```bash
-uvicorn main:app --reload --port 8000
-# http://localhost:8000/docs
-```
+Escuchando en:
 
-**(Opcional) Notificaciones n8n:**
-```bash
-docker run -it -p 5678:5678 n8nio/n8n
+```
+http://localhost:3000
 ```
 
 ---
 
-## 📬 5. Flujo Básico de Prueba
-
-1. Iniciar ambos servicios (Node.js + Python).  
-2. Llamar a `/api/v1/emails/test` con un ejemplo de correo JSON.  
-3. Ver la respuesta del clasificador ML (categoría + acción).  
-4. Confirmar persistencia en PostgreSQL.  
-
-Ejemplo de llamada:
+# 🔵 4. Levantar el microservicio ML (FastAPI)
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/emails/classify -H "Content-Type: application/json" -d '{
-  "from": "facturas@cfe.mx",
-  "subject": "Tu recibo de luz",
-  "body": "Vence el 15 de noviembre. Monto $350."
-}'
+cd python/classifier
+uvicorn app:app --reload --host 0.0.0.0 --port 8000
+```
+
+Escuchando en:
+
+```
+http://localhost:8000
 ```
 
 ---
 
-## 🧪 6. Pruebas Unitarias
+# 🔐 5. Obtener token de Gmail
 
-**Node.js:**
-```bash
-npm run test
-```
+Este proyecto usa OAuth2 de Google.
 
-**Python:**
-```bash
-pytest -v
-```
+Pasos:
 
----
-
-## ☁️ 7. Despliegue (resumen)
-
-1. Build de Docker con `gcloud builds submit`.  
-2. Despliegue en Cloud Run.  
-3. Conexión con Cloud SQL.  
-4. Integración con Secret Manager.  
-
-(Ver `despliegue-cloudrun.md` para la guía completa).
-
----
-
-## 🧾 8. Recursos Relacionados
-
-- `API_REFERENCE.md` — Endpoints disponibles.  
-- `DESIGN_DOCUMENT.md` — Arquitectura y decisiones técnicas.  
-- `architecture.md` — Diagrama de flujo Mermaid.  
-- `migraciones.md` — Esquema y gestión de base de datos.  
-- `seeders.guia.md` — Carga inicial de datos.  
-
----
-
-### 9. Docker (local)
+1. En navegador, autentícate con Gmail.
+2. Copia el access_token.
+3. Úsalo en headers como:
 
 ```bash
-  docker compose -f ops/docker-compose.yml up --build
+-H "Authorization: Bearer <ACCESS_TOKEN>"
 ```
+
 ---
 
-**Última actualización:** Julio 2025 — Equipo de Arquitectura  
+# 📬 6. Probar endpoints reales
+
+## 🔸 Prueba: obtener correos base (sin IA)
+
+```bash
+curl -X GET "http://localhost:3000/api/v1/mails" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+
+Respuesta esperada:
+
+```json
+{
+  "mails": [
+    {
+      "id": "18c8f6e...",
+      "from": "facturas@cfe.mx",
+      "subject": "Tu recibo de luz",
+      "snippet": "Vence el 15 de noviembre...",
+      "date": "2025-11-18T02:32:11Z"
+    }
+  ],
+  "nextPageToken": null,
+  "total": 1
+}
+```
+
+---
+
+## 🔸 Prueba: obtener correos con IA (sugerencias)
+
+```bash
+curl -X GET "http://localhost:3000/api/v1/suggestions" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+
+Respuesta esperada:
+
+```json
+{
+  "emails": [
+    {
+      "id": "18c8f6e...",
+      "from": "facturas@cfe.mx",
+      "subject": "Tu recibo de luz",
+      "snippet": "Vence el 15 de noviembre...",
+      "date": "2025-11-18T02:32:11Z",
+      "suggestions": [
+        {
+          "action": "archive",
+          "reason": "low_priority"
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Caso ML caído
+
+```json
+{
+  "emails": [
+    {
+      "id": "...",
+      "suggestions": []
+    }
+  ]
+}
+```
+
+> El backend nunca truena si el ML falla.
+> Simplemente devuelve `suggestions: []`.
+
+---
+
+# 🧪 7. Probar todo el pipeline
+
+### Pipeline completo:
+
+```bash
+npm test
+```
+
+Resultados esperados:
+
+```
+33 passed, 0 failed
+```
+
+Esto asegura:
+
+* mlClient funciona (errores, timeout, URL)
+* emailSuggester funciona (normalización + fallback)
+* suggestionsRoutes funciona
+* mailsRoutes funciona
+
+---
+
+# 🛠 8. Notas importantes para desarrollo
+
+* `/api/v1/mails` → Gmail base
+* `/api/v1/suggestions` → Gmail base + IA
+* No usar `/api/v1/emails` (endpoint eliminado)
+* Fastify usa ESM
+* ML usa FastAPI con JSON puro
+* Las sugerencias siempre se normalizan a objetos `{ action, reason? }`
+
+---
+
+# 🧭 9. Siguiente paso recomendado (HU6)
+
+* Implementar UI real de sugerencias en React
+* Consumir `/suggestions` desde frontend
+* Mostrar acciones sugeridas
+* Preparar endpoints futuros para accionamientos reales
+  (archivar, eliminar, marcar leído)
+
+---
+
+# FIN DEL ARCHIVO
+
+```
+
+---
+
+```
+

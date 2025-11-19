@@ -1,73 +1,103 @@
-import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals';
+// tests/emailSuggester.test.js
+// Tests para src/services/emailSuggester.js
 
-const fetchMock = jest.fn();
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  jest
+} from '@jest/globals';
 
-jest.unstable_mockModule('node-fetch', () => ({
-  default: fetchMock
+// Mock del cliente ML
+const classifyEmailsMock = jest.fn();
+
+jest.unstable_mockModule('../src/services/mlClient.js', () => ({
+  classifyEmails: classifyEmailsMock
 }));
 
+// Import dinámico del módulo bajo prueba (para que el mock ya esté aplicado)
 const { suggestActions } = await import('../src/services/emailSuggester.js');
 
 describe('suggestActions', () => {
-  const originalEnv = process.env.FASTAPI_URL;
+  const originalTimeout = process.env.ML_TIMEOUT_MS;
 
   beforeEach(() => {
-    fetchMock.mockReset();
-    delete process.env.FASTAPI_URL;
+    classifyEmailsMock.mockReset();
+    delete process.env.ML_TIMEOUT_MS;
   });
 
-  afterEach(() => {
-    process.env.FASTAPI_URL = originalEnv;
+  afterAll(() => {
+    if (originalTimeout !== undefined) {
+      process.env.ML_TIMEOUT_MS = originalTimeout;
+    } else {
+      delete process.env.ML_TIMEOUT_MS;
+    }
   });
 
-  it('enriches emails with parsed suggestions from classifier service', async () => {
+  it('enriches emails with normalized suggestions from ML', async () => {
     const emails = [
-      { id: '1', subject: 'Hello', suggestions: [] },
-      { id: '2', subject: 'Promo', suggestions: [] }
+      { id: '1', subject: 'Hello' },
+      { id: '2', subject: 'Promo' }
     ];
 
-    fetchMock.mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        1: [
-          JSON.stringify({ action: 'archive', category: 'promotions', confidence_score: 0.91 })
+    classifyEmailsMock.mockResolvedValue({
+      suggestionsById: {
+        '1': [
+          '{"action":"archive","reason":"low_priority"}',
+          { action: 'keep', reason: 'important_contact' },
+          123
         ],
-        2: [{ action: 'keep', category: 'inbox', confidence_score: 0.42 }]
-      })
+        '2': ['delete']
+      }
     });
 
+    process.env.ML_TIMEOUT_MS = '3000';
+
     const result = await suggestActions(emails);
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:8000/suggest',
-      expect.objectContaining({
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      })
-    );
+    expect(classifyEmailsMock).toHaveBeenCalledTimes(1);
+    expect(classifyEmailsMock).toHaveBeenCalledWith(emails, { timeoutMs: 3000 });
 
     expect(result.emails).toHaveLength(2);
-    expect(result.emails[0].suggestions).toEqual([
-      { action: 'archive', category: 'promotions', confidence_score: 0.91 }
-    ]);
-    expect(result.emails[1].suggestions).toEqual([
-      { action: 'keep', category: 'inbox', confidence_score: 0.42 }
-    ]);
+
+    const [first, second] = result.emails;
+
+    expect(first).toEqual({
+      id: '1',
+      subject: 'Hello',
+      suggestions: [
+        { action: 'archive', reason: 'low_priority' },
+        { action: 'keep', reason: 'important_contact' },
+        { action: '123' }
+      ]
+    });
+
+    expect(second).toEqual({
+      id: '2',
+      subject: 'Promo',
+      suggestions: [
+        { action: 'delete' }
+      ]
+    });
   });
 
-  it('returns empty suggestions when classifier request fails', async () => {
+  it('falls back to empty suggestions when ML fails', async () => {
     const emails = [{ id: '1', subject: 'Hello' }];
-    fetchMock.mockRejectedValue(new Error('network down'));
+
+    classifyEmailsMock.mockRejectedValue(new Error('network down'));
 
     const result = await suggestActions(emails);
 
-    expect(result.emails).toEqual([
-      {
-        id: '1',
-        subject: 'Hello',
-        suggestions: []
-      }
-    ]);
+    expect(result).toEqual({
+      emails: [
+        { id: '1', subject: 'Hello', suggestions: [] }
+      ]
+    });
+  });
+
+  it('throws TypeError when emails is not an array', async () => {
+    await expect(suggestActions(null)).rejects.toThrow(TypeError);
   });
 });
+
