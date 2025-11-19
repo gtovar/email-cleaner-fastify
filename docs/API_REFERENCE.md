@@ -1,239 +1,223 @@
+
+---
+
+# ✅ **API_REFERENCE.md (formato TXT)**
+
+````txt
 # Emails API Reference (v1)
-
-> Base URL: /api/v1
-
----
-
-## API Notes
-
-* Official Status (v1): Stable contract, covered by unit and integration tests.
-* Experimental Status: Subject to change without notice; use at your own risk.
-* Official Specification: Generated dynamically from the code (schemas in routes). The src/swagger.yaml file is not used at runtime.
-
-### Implementation Notes (Fastify)
-
-* Always version APIs under /api/v1.
-* Validate all payloads with @fastify/ajv.
-* Return correct HTTP status codes (200, 201, 400, 404).
-* Always include pagination metadata: page, limit, total, and items.
-* Ensure PATCH operations are idempotent.
+> Documentación oficial de la API — Email Cleaner & Smart Notifications  
+> Actualizado tras la corrección de HU12 (Fastify ↔ ML)
 
 ---
 
-## Emails API — Official v1
+# 📚 Índice
 
-### 1. Create a New Classification Rule
+1. Autenticación  
+2. GET /api/v1/mails  
+3. GET /api/v1/suggestions  
+4. Errores comunes  
+5. Notas de desarrollo  
+6. Última actualización  
 
-Method: POST /api/v1/emails/rules
+---
 
-Description:
-Creates a new classification rule to be applied to incoming emails (by subject, sender, or body content) and defines the corresponding action (label, archive, notify, etc.).
+# 🔐 1. Autenticación
 
-#### Request Body (JSON)
+Todos los endpoints requieren un **Bearer token** de OAuth Google válido.
+
+Ejemplo:
+
+```bash
+-H "Authorization: Bearer <ACCESS_TOKEN>"
+````
+
+Si el token expira, Gmail y Fastify devolverán errores de autorización.
+
+---
+
+# ✉️ 2. GET /api/v1/mails
+
+> Devuelve la lista de correos base SIN procesar por IA.
+
+### Descripción
+
+Endpoint para obtener correos crudos desde Gmail.
+Este endpoint NO llama a ML, NO genera sugerencias y NO aplica clasificación automática.
+
+Este es el equivalente a “inbox real”.
+
+### Request
+
+```
+GET /api/v1/mails
+Authorization: Bearer <token>
+```
+
+### Response 200
+
+```json
 {
-  "name": "CFE Invoice Rule",
-  "match": {
-    "from": ["invoices@cfe.mx", "alerts@cfe.mx"],
-    "subjectContains": ["bill", "electricity", "CFE"],
-    "bodyContainsAny": ["due", "payment"]
-  },
-  "action": {
-    "label": "Finance/Utilities/CFE",
-    "notify": ["telegram"],
-    "archive": true
-  },
-  "enabled": true,
-  "priority": 10
-}
-
-#### Successful Response (201 Created)
-{
-  "id": "rul_01HZXQ6W6F",
-  "name": "CFE Invoice Rule",
-  "enabled": true,
-  "priority": 10,
-  "createdAt": "2025-11-06T02:21:34.000Z",
-  "updatedAt": "2025-11-06T02:21:34.000Z"
-}
-
-### 2. Retrieve Classified Emails
-
-Method: GET /api/v1/emails
-
-Description:
-Returns a paginated list of classified emails, including categories and suggested actions.
-
-#### Query Parameters
-
-| Parameter | Type    | Required | Description                     |
-| :-------- | :------ | :------- | :------------------------------ |
-| page    | integer | No       | Current page (default 1).       |
-| limit   | integer | No       | Page size (default 20).         |
-| label   | string  | No       | Filter by category or tag.      |
-| from    | string  | No       | Filter by sender.               |
-| since   | string  | No       | Minimum date (ISO 8601).        |
-| until   | string  | No       | Maximum date (ISO 8601).        |
-
-#### Example Response (200 OK)
-{
-  "page": 1,
-  "limit": 20,
-  "total": 132,
-  "items": [
+  "mails": [
     {
-      "id": "msg_01HZXT0W1E",
-      "from": "invoices@cfe.mx",
-      "subject": "Your electricity bill is ready",
-      "receivedAt": "2025-11-02T14:10:05.000Z",
-      "labels": ["Finance", "Utilities", "CFE"],
-      "classification": {
-        "category": "Finance/Utilities/CFE",
-        "confidence": 0.94
-      },
-      "actions": {
-        "suggested": ["label", "archive", "notify:telegram"],
-        "applied": ["label"]
-      }
+      "id": "18c8f6e...",
+      "from": "facturas@cfe.mx",
+      "subject": "Tu recibo de luz",
+      "snippet": "Vence el 15 de noviembre...",
+      "date": "2025-11-18T02:32:11.000Z"
+    }
+  ],
+  "nextPageToken": "xyz...",
+  "total": 25
+}
+```
+
+### Notas
+
+* Paginación depende de `nextPageToken`.
+* Se usa Gmail API internamente.
+* No hay sugerencias ni IA en este endpoint.
+
+---
+
+# 🤖 3. GET /api/v1/suggestions
+
+> Devuelve correos enriquecidos CON IA (clasificación y sugerencias).
+
+### Descripción
+
+Este endpoint aplica inteligencia artificial sobre los correos.
+Fastify obtiene los correos base → llama a `emailSuggester` → que delega en `mlClient` → que llama al microservicio ML en Python.
+
+Resultado: correos con sugerencias automáticas.
+
+### Request
+
+```
+GET /api/v1/suggestions
+Authorization: Bearer <token>
+```
+
+### Respuesta 200 (ejemplo)
+
+```json
+{
+  "emails": [
+    {
+      "id": "18c8f6e...",
+      "from": "facturas@cfe.mx",
+      "subject": "Tu recibo de luz",
+      "snippet": "Vence el 15 de noviembre...",
+      "date": "2025-11-18T02:32:11.000Z",
+      "suggestions": [
+        {
+          "action": "archive",
+          "reason": "low_priority"
+        }
+      ]
     }
   ]
 }
+```
 
-### 3. Update an Existing Rule
+### Caso ML caído o con error (timeout, 5xx, fallas de red)
 
-Method: PATCH /api/v1/emails/rules/:ruleId
+La API NO truena.
+Devuelve:
 
-Description:
-Partially updates an existing rule (e.g., change priority or toggle enabled).
-
-#### Example Request Body
+```json
 {
-  "enabled": false,
-  "priority": 20
-}
-
-#### Example Response (200 OK)
-{
-  "id": "rul_01HZXQ6W6F",
-  "name": "CFE Invoice Rule",
-  "enabled": false,
-  "priority": 20,
-  "updatedAt": "2025-11-06T02:28:11.000Z"
-}
-
-### 4. Classification Suggestion
-
-Method: POST /api/v1/emails/suggest
-
-Description:
-This microservice receives email metadata and returns classification or cleanup suggestions.
-
-#### Example Request Body
-{
-  "from": "invoices@cfe.mx", 
-  "subject": "Your electricity bill is ready", 
-  "body": "Due date: November 15. Amount: $350."
-}
-
-#### Example Response (200 OK)
-{
-  "category": "billing",
-  "action": "pay",
-  "confidence": 0.93
-}
-
----
-
-## Notifications API
-
-> Base URL: /api/v1/notifications
->
-> Required Header: Authorization: Bearer <token_oauth_google>
-
-### 1. Retrieve Notifications Summary
-
-Method: GET /api/v1/notifications/summary
-
-Description:
-Returns the list of suggested notifications for the authenticated user.
-
-#### Query Parameters
-
-| Parameter | Type   | Required | Description               |
-| :-------- | :----- | :------- | :------------------------ |
-| period  | string | No       | Period filter (e.g., daily). |
-
-#### Response (200 OK)
-[
-  {
-    "id": "test1",
-    "from": "noti@demo.com",
-    "subject": "¡Prueba HU4!",
-    "date": "2025-11-14T06:59:21.250Z",
-    "isRead": false,
-    "category": "demo",
-    "attachmentSizeMb": 0.1,
-    "suggestions": ["archive"]
-  }
-]
-
-### 2. Confirm Notifications
-
-Method: POST /api/v1/notifications/confirm
-
-Description:
-Confirms one or more notifications and logs the action taken (currently `accept` or `reject`).
-
-#### Request Body (JSON)
-{
-  "ids": ["test1"],
-  "action": "accept"
-}
-
-#### Response (200 OK)
-{
-  "success": true,
-  "processed": 1
-}
-
-### 3. Retrieve Actions History
-
-Method: GET /api/v1/notifications/history
-
-Description:
-Returns the paginated history of actions performed on notifications.
-
-#### Response (200 OK)
-{
-  "total": 2,
-  "page": 1,
-  "perPage": 20,
-  "data": [
+  "emails": [
     {
-      "userId": "demo-user",
-      "emailId": "test1",
-      "action": "accept",
-      "timestamp": "2025-11-14T07:11:20.364Z",
-      "details": {}
+      "id": "18c8f6e...",
+      "from": "facturas@cfe.mx",
+      "subject": "Tu recibo de luz",
+      "snippet": "Vence el 15 de noviembre...",
+      "date": "2025-11-18T02:32:11.000Z",
+      "suggestions": []
     }
   ]
 }
+```
+
+### Notas técnicas
+
+* `suggestions` siempre es un arreglo.
+* Fastify NO detiene la respuesta si ML falla.
+* `emailSuggester` normaliza strings, números y objetos en formato uniforme.
+* La lógica robusta está en:
+
+  * `src/services/mlClient.js`
+  * `src/services/emailSuggester.js`
 
 ---
 
-## Rules API — Experimental
+# ⚠️ 4. Errores comunes
 
-### 1. List Classification Rules
+### 401 — Unauthorized
 
-Method: GET /api/v1/emails/rules
+Token inválido o expirado.
 
-Description:
-Lists classification rules. Experimental: the schema may change.
+### 503 — ML unavailable (solo interno, no al cliente)
 
-#### Response (200 OK)
-[
-  { "id": 1, "pattern": "cfe.mx", "label": "billing" }
-]
+Fastify captura este error y NO devuelve 503 al cliente.
+En su lugar devuelve suggestions vacías.
+
+### 422 — Validation error
+
+Fastify devolverá error si payloads esperados no cumplen formato.
 
 ---
 
-Last Updated: July 2025
+# 🧪 5. Pruebas asociadas
+
+Rutas:
+
+* `tests/mailsRoutes.test.js`
+* `tests/suggestionsRoutes.test.js`
+
+Servicios:
+
+* `tests/mlClient.test.js`
+* `tests/emailSuggester.test.js`
+
+Todos los tests pasan en verde:
+
+```
+33 passed — 0 failed
+```
+
+---
+
+# 🛠 6. Notas de desarrollo
+
+* El backend usa ESM (import/export).
+* Gmail API se accede mediante servicios internos.
+* ML está desacoplado vía mlClient.
+* No se exponen tokens en logs (seguridad obligatoria).
+* Timeout configurable:
+
+  ```
+  ML_TIMEOUT_MS=5000
+  ```
+* URL configurable:
+
+  ```
+  ML_BASE_URL=http://localhost:8000
+  ```
+
+---
+
+# 📅 Última actualización
+
+Julio 2025
+Equipo de Arquitectura (actualizado automáticamente por ChatGPT)
+
+---
+
+# FIN DEL ARCHIVO
+
+```
+
+---
+
+```

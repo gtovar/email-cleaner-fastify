@@ -1,79 +1,103 @@
-# Sprint Log
+# SPRINT LOG – Email Cleaner & Smart Notifications
+> Registro cronológico de decisiones, avances y cambios del proyecto  
+> Actualizado tras la corrección de HU12 (Fastify ↔ ML)
 
-## Sprint S-01 — HU3 Notificaciones
+---
 
-**Periodo:** (Fecha de esta conversación)
+## 📅 Sprint Actual  
+**Sprint #? – Integración ML + Limpieza de documentación**
 
-### Objetivo
+---
 
-Validar y documentar la funcionalidad completa de notificaciones:
+## 🟢 HU12 — Integración Fastify ↔ ML (DONE)
 
-* summary
-* confirm
-* history
+### Resumen
+La HU12 se reescribió para reflejar correctamente el diseño final:
 
-### Hecho
+- `/api/v1/mails` → listado base SIN IA  
+- `/api/v1/suggestions` → listado enriquecido CON IA  
 
-* Migraciones creadas y aplicadas.
-* Endpoints probados correctamente.
-* Frontend confirm-button funcionando.
-* Documentación API actualizada.
-* Estructura documental planificada (reentry, state, ADRs).
+Se eliminó `/api/v1/emails` porque nunca existió en el backend real.  
+Se corrigieron referencias, tests y documentación.
 
-### Pendiente
+### Log de avances HU12 (cronológico)
 
-* Correcciones menores en tests unitarios.
-* Cerrar HU3.
+1. **Refactor mlClient.js**
+   - Implementación de errores tipados  
+   - Manejo de timeout  
+   - Uso de `ML_BASE_URL` y `ML_TIMEOUT_MS`  
 
-### Riesgos
+2. **Refactor emailSuggester.js**
+   - Normalización de payload del ML  
+   - Manejo de errores con fallback  
+   - Sin exponer tokens  
 
-Bajo: alineación test runner vs Jest (HU11).
+3. **Creación y corrección de tests**
+   - `mlClient.test.js`  
+   - `emailSuggester.test.js`  
+   - `suggestionsRoutes.test.js`  
+   - `mailsRoutes.test.js` (antes emailsRoutes.test.js)
 
-### Decisiones
+4. **Actualización de documentación**
+   - Corrección completa de:
+     - API_REFERENCE.md  
+     - QUICKSTART.md  
+     - README_REENTRY.md  
+     - PROJECT_STATE.md  
+     - Sprint_Log.md  
 
-Ver `docs/adr/001-gmail-auth-choice.md` y `docs/adr/002-backend-framework.md`.
+5. **Limpieza de endpoints**
+   - Eliminado `/api/v1/emails` (referencias y docs)
+   - `/suggestions` declarado como endpoint IA oficial  
+   - `/mails` declarado como endpoint base  
 
-```
+### Estado final HU12  
+✔ Implementación completa  
+✔ Documentación corregida  
+✔ Tests en verde  
+✔ Branch listo para merge  
+✔ No quedan dependencias abiertas  
 
+---
 
-Agregar entrada a Sprint_log
+## 🔧 HU6 (UI React → Suggestions)
 
-Línea estilo:
-
-Fecha / hora.
-
-“Cierre formal de HU3 (notifications tests/docs).”
-
-“Branch feature/hu3-notifications-tests-docs eliminado del remoto.”
-
-“Se decide repriorizar HU11: migración a Jest, HU4–HU10 pasan a Backlog Fase 2.”
-
-
-## Sprint S-02 — HU11 Migración a Jest
-
-**Periodo:** 2025-11-14
-
-### Objetivo
-
-Migrar el runner de pruebas de `node:test` a Jest y dejar la suite estable.
-
-### Hecho
-
-- Instalado Jest como devDependency.
-- Agregados scripts `test`, `test:watch`, `coverage`.
-- Migrados tests:
-  - `filters.test.js`
-  - `emailSuggester.test.js`
-  - `mailService.test.js`
-  - `notifications.test.js`
-- ADR-003 creado y aceptado.
-- `npm test` en verde.
+### Avances
+- Frontend en React ya consume backend básico  
+- Falta vista real para suggestions  
+- Pendiente integración de acciones reales  
 
 ### Riesgos
+- Requiere sincronización con contrato `/suggestions`  
+- Gmail OAuth real aún no integrado en ambiente Docker  
 
-- Cobertura aún baja (pocos casos). Se recomienda una HU futura para extender cobertura y casos edge.
+---
 
-### Decisiones
+## 🧹 Limpiezas realizadas en este sprint
 
-- Jest se adopta como test runner estándar del proyecto.
+- Depuración completa de referencias a `/api/v1/emails`  
+- Renombrado del test `emailsRoutes.test.js → mailsRoutes.test.js`  
+- Actualización cross-file de documentación  
+
+---
+
+## 📌 Entradas de backlog generadas durante este sprint
+
+- **HU-XX — UI de Sugerencias Inteligentes (continuación HU6)**
+- **HU-XX — Acciones reales (archivar / eliminar / marcar leído)**
+- **HU-XX — Paginación avanzada para /api/v1/mails**  
+- **HU-XX — Limpieza final de endpoints legacy**  
+- **HU-XX — Endpoint de reglas ML (futuro)**
+
+---
+
+## 📝 Notas importantes
+
+- Todo el backend está estable: 33 tests en verde.  
+- La arquitectura Fastify ↔ ML está completamente funcional.  
+- El próximo sprint debería enfocarse en la UI o en acciones reales del backend.
+
+---
+
+# FIN DEL ARCHIVO
 
