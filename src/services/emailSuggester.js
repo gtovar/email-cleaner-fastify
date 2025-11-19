@@ -1,64 +1,110 @@
 // src/services/emailSuggester.js
+// Servicio de alto nivel para pedir sugerencias de acción al microservicio de ML.
+//
+// Responsabilidad:
+// - Recibir una lista de correos normalizados desde el backend.
+// - Llamar al microservicio de ML (vía mlClient).
+// - Enriquecer cada correo con un arreglo de "suggestions" normalizadas.
+// - En caso de error, devolver los correos con suggestions vacías (fallback seguro).
 
-import fetch from 'node-fetch'; // o usa globalThis.fetch si estás en Node 18+
-
-const BASE = (process.env.FASTAPI_URL || 'http://localhost:8000').replace(/\/$/, '');
-const CLASSIFIER_URL = `${BASE}/suggest`; // <-- unificado
+import { classifyEmails } from './mlClient.js';
 
 /**
- * Llama al microservicio Python para obtener sugerencias.
- * @param {Array<Object>} emails - Lista de correos con metadatos.
- * @returns {Object} - Objeto con clave "emails" y lista de correos con sugerencias.
+ * Normaliza la estructura global devuelta por el microservicio de ML.
+ *
+ * Acepta:
+ * - Un objeto directamente de la forma { [emailId]: suggestions[] }
+ * - Un objeto con la forma { suggestionsById: { [emailId]: suggestions[] } }
+ * - Cualquier otra cosa se normaliza a {}.
+ *
+ * @param {any} raw
+ * @returns {Record<string, unknown[]>}
  */
-export async function suggestActions(emails) {
-  try {
-    const response = await fetch(CLASSIFIER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(emails)
-    });
+function normalizeSuggestionMap(raw) {
+  if (!raw) {
+    return {};
+  }
 
-    if (!response.ok) {
-      throw new Error(`Clasificador Python falló: ${response.status}`);
-    }
+  if (
+    typeof raw === 'object' &&
+    raw !== null &&
+    !Array.isArray(raw) &&
+    typeof raw.suggestionsById === 'object' &&
+    raw.suggestionsById !== null
+  ) {
+    return raw.suggestionsById;
+  }
 
-    const suggestionMap = await response.json();
+  if (typeof raw === 'object' && raw !== null && !Array.isArray(raw)) {
+    return raw;
+  }
 
-    console.log("📬 MAPA DE RESPUESTA ↓↓↓");
-    console.dir(suggestionMap, { depth: null });
+  return {};
+}
 
-    // 💡 NUEVO: Log de tipos para depurar malformaciones
-    console.log("✅ Tipado original de sugerencias:");
-    for (const [id, suggestions] of Object.entries(suggestionMap)) {
-      console.log(id, '→', Array.isArray(suggestions) ? suggestions.map(s => typeof s) : typeof suggestions);
-    }
+/**
+ * Normaliza una lista de sugerencias para un email.
+ *
+ * Acepta:
+ * - Arreglos de strings (se intentan parsear como JSON y si no, se envuelven como { action: string }).
+ * - Arreglos de objetos (se devuelven tal cual).
+ * - Valores primitivos (se convierten en { action: String(valor) }).
+ *
+ * @param {unknown} list
+ * @returns {Array<Record<string, unknown>>}
+ */
+function normalizeSuggestionList(list) {
+  if (!Array.isArray(list)) {
+    return [];
+  }
 
-    // Enriquecer cada email con sus sugerencias, parseando si vienen mal
-    const enriched = emails.map(email => {
-      let suggestions = suggestionMap[email.id] || [];
-
-      if (Array.isArray(suggestions)) {
-        suggestions = suggestions.map(s => {
-          if (typeof s === 'string') {
-            try {
-              s = JSON.parse(s);
-            } catch (err) {
-              console.warn(`❌ No se pudo parsear la sugerencia malformada para ${email.id}:`, s);
-              return null;
-            }
-          }
-
-          return {
-            action: s?.action || '',
-            category: s?.category || '',
-            confidence_score: s?.confidence_score || 0
-          };
-        }).filter(Boolean); // elimina nulls
-      } else {
-        suggestions = [];
+  return list.map((s) => {
+    if (typeof s === 'string') {
+      try {
+        const parsed = JSON.parse(s);
+        if (typeof parsed === 'object' && parsed !== null) {
+          return parsed;
+        }
+      } catch {
+        // ignoramos error y seguimos al fallback
       }
 
-      console.log(`🔍 Enriquecido: ${email.id} →`, suggestions);
+      return { action: s };
+    }
+
+    if (typeof s === 'object' && s !== null) {
+      return s;
+    }
+
+    return { action: String(s) };
+  });
+}
+
+/**
+ * Llama al microservicio Python para obtener sugerencias de acción
+ * sobre una lista de correos.
+ *
+ * @param {Array<Record<string, unknown>>} emails - Lista de correos con metadatos (id, subject, etc.).
+ * @returns {Promise<{ emails: Array<Record<string, unknown>> }>}
+ */
+export async function suggestActions(emails) {
+  if (!Array.isArray(emails)) {
+    throw new TypeError('suggestActions: "emails" must be an array');
+  }
+
+  const timeoutMs = Number(process.env.ML_TIMEOUT_MS || '5000');
+
+  try {
+    // Llamamos al cliente HTTP especializado.
+    const raw = await classifyEmails(emails, { timeoutMs });
+
+    const suggestionMap = normalizeSuggestionMap(raw);
+
+    const enriched = emails.map((email) => {
+      const emailId = String(email.id ?? '');
+      const rawSuggestions = suggestionMap[emailId] ?? [];
+      const suggestions = normalizeSuggestionList(rawSuggestions);
+
       return {
         ...email,
         suggestions
@@ -66,15 +112,19 @@ export async function suggestActions(emails) {
     });
 
     return { emails: enriched };
-
   } catch (err) {
-    console.error('Error llamando al clasificador:', err);
+    // En caso de error, no rompemos el flujo del backend:
+    // devolvemos los correos originales con suggestions vacías.
+    // El error queda registrado en logs para diagnóstico.
+    // eslint-disable-next-line no-console
+    console.error('Error llamando al clasificador ML:', err);
 
     return {
-      emails: emails.map(email => ({
+      emails: emails.map((email) => ({
         ...email,
         suggestions: []
       }))
     };
   }
 }
+
