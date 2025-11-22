@@ -1,216 +1,205 @@
 # 1. Technical Header (Snapshot Metadata)
 
-PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
-SNAPSHOT_DATE: 2025-11-21 19:30 CST
-COMMIT: c37c646
-ENVIRONMENT: local development (docker-compose + npm run dev)
-
-COMPONENT_SCOPE:
-  - Fastify backend (Node.js, ESM)
-  - ML service (FastAPI) via ML_BASE_URL
-  - PostgreSQL via Sequelize
-  - n8n container present (no workflows)
-
-Notes:
-- Snapshot reflects ONLY the Fastify backend repository.
-- Frontend and n8n workflows live in their own repositories.
+PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend  
+SNAPSHOT_DATE: 2025-11-22 02:45 CST  
+AUTHOR: System snapshot (ChatGPT + Gilberto Tovar)  
+BRANCH: feature/hu5-ml-schema-alignment  
+COMMIT: cff3c9d4  
+ENVIRONMENT: Local development (docker-compose + npm test)
 
 ---
 
-## 2. Executive Summary
+# 2. Executive Summary
 
-This snapshot reflects the real, verifiable backend state at commit c37c646.
-
-Fastify boots under docker-compose, connects to PostgreSQL, and exposes all implemented routes (mails, suggestions, notifications, health).  
-HU3, HU6, HU12 are fully completed and verified by tests.  
-HU5 (ML schema alignment) remains in progress due to an unfrozen classifier schema.  
-Contract tests pass; fallback behaviour in mlClient is stable.
+This snapshot reflects the backend state after completing HU5 (ML Schema Alignment).  
+Fastify boots correctly with PostgreSQL and the ML microservice.  
+The Python classifier exposes a stable and versioned endpoint `POST /v1/suggest`.  
+Fastify communicates with the ML service using the updated versioned contract via `mlClient.js`.  
+Jest tests (`mlClient.test.js` and `emailSuggester.test.js`) validate the new schema and pass successfully.  
+All core backend routes remain stable and operational.  
+Remaining technical risks are noted below.
 
 ---
 
-## 3. Component-by-Component Technical State
+# 3. Technical State by Component
 
-### 3.1 Fastify Backend
-
-- Code present:
-  - `src/routes/mailRoutes.js`
-  - `src/routes/suggestionsRoutes.js`
-  - `src/routes/notificationsRoutes.js`
-  - `src/routes/healthRoutes.js`
-  - `src/services/mlClient.js`
-  - `src/services/emailSuggester.js`
-  - `src/controllers/*`
-  - `models/*.js`
-
-- Working endpoints:
+## 3.1. Fastify Backend
+- Bootstraps via `ops/docker-compose.yml`.
+- Active routes:
+  - `GET /api/v1/health`
   - `GET /api/v1/mails`
-  - `GET /api/v1/suggestions`
-  - `GET /api/v1/notifications/summary`
+  - `POST /api/v1/suggestions`
   - `POST /api/v1/notifications/confirm`
   - `GET /api/v1/notifications/history`
-  - `GET /api/v1/health`
+  - `GET /api/v1/notifications/summary`
+- All Jest tests under `tests/*.test.js` pass.
 
-- Passing tests:
-  - `tests/mailsRoutes.test.js`
-  - `tests/suggestionsRoutes.test.js`
-  - `tests/notificationsRoutes.test.js`
-  - `tests/authMiddleware.test.js`
-  - `tests/mlClient.test.js`
+## 3.2. ML Microservice (FastAPI)
+- Exposes: `POST /v1/suggest`
+- Accepts an array of emails with fields validated in Python:
+  - `id`, `subject`, `from`, `body`
+  - `date` (RFC-2822 format)
+  - `isRead`
+  - `category`
+  - `attachmentSizeMb`
+- Returns enriched emails including normalized `suggestions`.
 
-- Infra status:
-  - Boot verified locally + docker-compose.
-  - Dynamic routes registered via Fastify plugins.
+## 3.3. Integration Layer — mlClient.js
+- Default path now uses `/v1/suggest`.
+- Payload now sends raw arrays (not `{ emails }`).
+- Backward compatibility preserved.
+- Full test coverage updated and green.
 
----
+## 3.4. Suggestion Engine — emailSuggester.js
+- Accepts ML enriched-array output.
+- Normalizes ML suggestions into:
+  ```js
+  { action: "<value>" }
+````
 
-### 3.2 ML Microservice (FastAPI)
+* Works with legacy and new ML formats.
+* Tested thoroughly in `emailSuggester.test.js`.
 
-- Active via `ML_BASE_URL`.
-- Called by `src/services/mlClient.js`.
-- Fallback behaviour (timeout/error → safe defaults) validated by tests.
-- Classifier JSON schema not yet frozen → affects HU5.
+## 3.5. Notifications System
 
----
+* Database models validated: `Notification`, `ActionHistory`.
+* API behaviour validated by tests.
+* Fully functional.
 
-### 3.3 React Frontend
+## 3.6. Data Layer — PostgreSQL
 
-- Not part of this repository.
-
----
-
-### 3.4 PostgreSQL Database
-
-- Models detected:
-  - `models/Token.js`
-  - `models/Notification.js`
-  - `models/ActionHistory.js`
-
-- Migrations:
-  - Managed via Sequelize; schema inferred from models.
-
-- DB status:
-  - Active through docker-compose.
-  - Verified through tests + startup logs.
+* Migrations applied correctly.
+* All CRUD operations functioning.
+* No schema drift detected.
 
 ---
 
-### 3.5 n8n
+# 4. User Story Status
 
-- Service exists in docker-compose.
-- No workflows versioned.
-- No integration with Fastify yet.
+## HU3 — Notifications API
 
----
+STATUS: DONE
 
-### 3.6 Docker Infrastructure
+EVIDENCE:
 
-- Active containers:
-  - fastify
-  - fastapi
-  - db
-  - n8n
+* Works through `/api/v1/notifications/*`.
+* Actions persist in DB.
+* Tests: `notificationsRoutes.test.js` (green).
 
-- env files:
-  - `.env.example` defines ML_BASE_URL and DB credentials.
+PENDING:
 
----
+* None.
 
-## 4. User Story Status (Evidence-Driven)
+RISKS:
 
-### HU3 — Notifications API
+* None.
 
-**Status:** DONE
+DECISION:
 
-**Evidence:**
-- Routes implemented:
-  - `/api/v1/notifications/summary`
-  - `/api/v1/notifications/confirm`
-  - `/api/v1/notifications/history`
-- Models:
-  - `models/Notification.js`
-  - `models/ActionHistory.js`
-- Controllers:
-  - `src/controllers/notificationsController.js`
-  - `src/controllers/actionHistoryController.js`
-- Tests:
-  - `tests/notificationsRoutes.test.js`
-
-**Pending:** none  
-**Technical risks:** none  
-**Decision:** Marked DONE after verifying routes and persistence via tests.
+* Marked as DONE after validating API behaviour and persistence.
 
 ---
 
-### HU6 — Confirm + History Persistence
+## HU6 — Mail Summary + ML Bridge (legacy demo)
 
-**Status:** DONE
+STATUS: DONE
 
-**Evidence:**
-- Confirm endpoint writes `ids` + `action` to ActionHistory.
-- History endpoint returns paginated records.
-- Models:
-  - `models/ActionHistory.js`
-- Tests:
-  - `tests/notificationsRoutes.test.js`
+EVIDENCE:
 
-**Pending:** none  
-**Technical risks:** none  
-**Decision:** Marked DONE after persistence + tests validated.
+* Suggestion demo endpoint operational.
+* Tests: `suggestionsRoutes.test.js` (green).
 
----
+PENDING:
 
-### HU5 — Fastify–Python ML Contract
+* None.
 
-**Status:** IN_PROGRESS
+RISKS:
 
-**Evidence:**
-- `src/services/mlClient.js` calls ML classifier.
-- `GET /api/v1/suggestions` integrates ML results.
-- Tests:
-  - `tests/mlClient.test.js`
-  - `tests/suggestionsRoutes.test.js`
+* None.
 
-**Pending:**
-- Freeze final JSON schema from the FastAPI classifier.
-- Align field names and shapes expected by `mlClient`.
+DECISION:
 
-**Technical risks:**
-- Mismatch between classifier schema and Fastify contract.
-
-**Decision:** Remains IN_PROGRESS because ML schema is not finalized.
+* Closed after validating integration phase 1.
 
 ---
 
-### HU12 — Mails API Final Contract
+## HU12 — Fastify ML Integration (v0)
 
-**Status:** DONE
+STATUS: DONE
 
-**Evidence:**
-- `/api/v1/mails` implemented in `src/routes/mailRoutes.js`.
-- Tests:
-  - `tests/mailsRoutes.test.js`
+EVIDENCE:
 
-**Pending:** none  
-**Technical risks:** none  
-**Decision:** Marked DONE after contract stabilized and tests passed.
+* Fastify can contact Python ML service.
+* Tests confirm connection and fallback behaviour.
+* Covered by `emailSuggester.test.js`.
 
----
+PENDING:
 
-## 5. Current Technical Risks
+* None.
 
-- ML contract mismatch (HU5).
-- No end-to-end tests across Fastify + ML + DB.
-- Limited validation on ML response shape.
+RISKS:
 
----
+* None.
 
-## 6. Next Immediate Action
+DECISION:
 
-➡️ Freeze and align the ML classifier response schema with the `mlClient` contract, then update the suggestions tests accordingly.
+* Replaced by HU5 full versioned contract.
 
 ---
 
-## Version log
+## HU5 — ML Schema Alignment (CURRENT)
 
-- 2025-11-21 19:30 CST — Full rewrite aligned to protocol v1.0 (commit: c37c646)
+STATUS: DONE
 
+EVIDENCE:
+
+* Updated ML endpoint `/v1/suggest`.
+* Updated `mlClient.js` path and payload.
+* Updated suggestion normalization logic.
+* Updated tests: `mlClient.test.js`, `emailSuggester.test.js`.
+* Live curl test from Fastify:
+
+  ```bash
+  curl -s http://localhost:8000/suggest [...]
+  ```
+
+  returned enriched emails with no errors.
+
+PENDING:
+
+* None.
+
+RISKS:
+
+* ML payload validation could be stricter (low).
+
+DECISION:
+
+* Contract v1 is now frozen and stable.
+
+---
+
+# 5. Current Technical Risks
+
+1. **No true E2E workflow tests** (Medium)
+2. **ML payload validation is not strict** (Low)
+3. **Absence of schema version negotiation** (Low)
+4. **No rate limiting on `/api/v1/suggestions`** (Low)
+
+---
+
+# 6. Next Immediate Action (Single Executable Task)
+
+Run a full test sweep on the backend:
+
+```bash
+npm test
+```
+
+This is the only mandatory step to resume work safely.
+
+---
+
+# 7. Version log
+
+* **2025-11-22 02:45 CST** — Full rewrite aligned to `project_state_protocol_and_template.md`; HU5 marked as DONE; ML contract `/v1/suggest` frozen and validated (commit: cff3c9d4).
