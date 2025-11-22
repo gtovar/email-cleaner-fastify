@@ -13,9 +13,9 @@ import { classifyEmails } from './mlClient.js';
  * Normaliza la estructura global devuelta por el microservicio de ML.
  *
  * Acepta:
+ * - Un arreglo de objetos devueltos por ML: [{ id, suggestions }, ...]
  * - Un objeto directamente de la forma { [emailId]: suggestions[] }
- * - Un objeto con la forma { suggestionsById: { [emailId]: suggestions[] } }
- * - Cualquier otra cosa se normaliza a {}.
+ * - Un objeto con la forma { suggestionsById: { ... } }
  *
  * @param {any} raw
  * @returns {Record<string, unknown[]>}
@@ -23,6 +23,27 @@ import { classifyEmails } from './mlClient.js';
 function normalizeSuggestionMap(raw) {
   if (!raw) {
     return {};
+  }
+
+  // Caso 1: el microservicio devuelve directamente una lista de correos enriquecidos
+  // [{ id, ..., suggestions: [...] }, ...]
+  if (Array.isArray(raw)) {
+    const map = {};
+
+    for (const item of raw) {
+      if (!item || typeof item !== 'object') continue;
+
+      const emailId = String(item.id ?? '');
+      if (!emailId) continue;
+
+      const suggestions = Array.isArray(item.suggestions)
+        ? item.suggestions
+        : [];
+
+      map[emailId] = suggestions;
+    }
+
+    return map;
   }
 
   if (

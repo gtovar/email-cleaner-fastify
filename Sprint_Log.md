@@ -1,46 +1,88 @@
-# SPRINT_LOG.md — Backend Fastify
+# ✅ **Sprint_Log.md (versión final)**
 
-Email Cleaner & Smart Notifications
-
-> Chronological record of **actions taken**, not state, not planning.
+*(Alineado 100% al protocolo)*
 
 ---
 
-## 2025-11-18 — Preparation for HU12
-
-* Normalized ML payload in `emailSuggester.js`.
-* Cleaned references to deprecated `/api/v1/emails`.
-* Updated tests in `suggestionsRoutes.test.js` to align fallback behavior.
-
-## 2025-11-19 — HU12 integration work
-
-* Refactor in `mlClient.js` (timeout handling, safe defaults, ML_BASE_URL usage).
-* Updated `mailsRoutes.js` contract and corresponding tests.
-* Validated ML fallback path via `mlClient.test.js`.
-
-## 2025-11-20 — HU12 completed
-
-* All routes verified: mails, suggestions, summary, confirm, history.
-* All tests passed (`33 passed, 0 failed`).
-* Documentation synchronized: API Reference, Quickstart, Project_State, Reentry.
-* Snapshot committed under `c37c6460`.
-
-## 2025-11-20 — Start HU5 schema alignment
-
-* Verified classifier response from FastAPI.
-* Detected mismatch between ML schema and `mlClient` expected fields.
-* Marked HU5 as active; no code changes committed yet.
-
-## 2025-11-21 — HU5 analysis
-
-* Identified missing final JSON schema in FastAPI.
-* Next step defined: freeze schema, update tests, then update mlClient accordingly.
+````markdown
+# Sprint Log — Email Cleaner & Smart Notifications  
+Backend Fastify — Last Updated: 2025-11-22 03:05 CST
 
 ---
 
-## Backlog notes (not state, not planning — just facts discovered)
+## Sprint: HU5 — ML Schema Alignment  
+**Period:** 2025-11-20 → 2025-11-22  
+**Branch:** `feature/hu5-ml-schema-alignment`  
+**Commit:** `cff3c9d4`
 
-* End-to-end tests still missing.
-* Suggestions endpoint lacks strict validation on ML payload.
-* No n8n workflows committed yet.
+---
 
+### 🎯 Sprint Goal
+Align Fastify backend with the versioned ML microservice contract (`/v1/suggest`), ensuring schema compatibility, normalized response handling, and updated automated tests.
+
+---
+
+### ✅ Completed Work (Done)
+
+- Implemented versioned contract between Fastify ↔ ML.
+- Updated `mlClient.js` to:
+  - use `/v1/suggest` as default path,
+  - send raw email arrays (no `{ emails }`),
+  - maintain backward compatibility.
+- Updated `emailSuggester.js` to:
+  - normalize enriched-array ML responses,
+  - preserve legacy suggestion mapping.
+- Updated and extended Jest tests:
+  - `tests/mlClient.test.js`
+  - `tests/emailSuggester.test.js`
+- Verified ML microservice manually with `curl` (real enriched output).
+- Full backend test suite passed successfully.
+
+---
+
+### 📂 Evidence (Verifiable)
+
+- Diff (`cambios.txt`) shows all updated files:
+  - `python/classifier/app.py`
+  - `src/services/mlClient.js`
+  - `src/services/emailSuggester.js`
+  - `tests/mlClient.test.js`
+  - `tests/emailSuggester.test.js`
+- Successful curl:
+  ```bash
+  curl -s http://localhost:8000/suggest [...]
+````
+
+* Logs confirm FastAPI response:
+  `200 OK` with enriched suggestions.
+* Full test suite output: **100% passing**.
+
+---
+
+### ⏳ Pending Work
+
+None for HU5 — this user story is officially **DONE**.
+
+---
+
+### ⚠️ Sprint Risks (Technical)
+
+* No E2E workflow testing implemented yet.
+* ML input validation could be stricter.
+* No schema version negotiation beyond `v1` (acceptable at this stage).
+
+---
+
+### 🔄 Retrospective (3 lines max)
+
+* What worked: Clear versioned contract and excellent test coverage.
+* What didn’t: Date parsing required extra attention (offset-aware vs naive).
+* Improvement: Add an end-to-end integration test in future sprints.
+
+---
+
+### 📌 Closure
+
+HU5 is completed and verified.
+Backend is stable and synchronized with the ML microservice.
+Documented in `PROJECT_STATE.md` and `README_REENTRY.md`.

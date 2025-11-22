@@ -112,7 +112,7 @@ async function postJson(path, body, options = {}) {
  *
  * @param {Array<object>} emails - Lista de correos a clasificar.
  * @param {object} [options]
- * @param {string} [options.path] - Endpoint relativo del ML. Por defecto "/v1/emails/classify".
+ * @param {string} [options.path] - Endpoint relativo del ML. Por defecto "/v1/suggest".
  * @param {number} [options.timeoutMs] - Timeout en milisegundos.
  *
  * @returns {Promise<any>} - Respuesta JSON del servicio ML (formato definido por el ML).
@@ -122,8 +122,8 @@ async function classifyEmails(emails, options = {}) {
     throw new TypeError('classifyEmails: "emails" must be an array');
   }
 
-  const path = options.path || '/v1/emails/classify'; // endpoint por defecto
-  const payload = { emails };
+  const path = options.path || '/v1/suggest'; // endpoint por defecto
+  const payload = emails;
 
   return postJson(path, payload, options);
 }

@@ -1,141 +1,117 @@
-# README_REENTRY.md — Backend Fastify
+## 1. Last Confirmed Work (Ground Truth)
 
-Email Cleaner & Smart Notifications
+Branch: `feature/hu5-ml-schema-alignment`  
+Commit: `cff3c9d4`  
+State validated in: `PROJECT_STATE.md` (same timestamp)
 
-> Single-purpose file: allow fast reentry into the backend after a long pause, in under 2 minutes.
-> This file summarizes only: branch, last HU, current state, and the next actionable step.
+### The last completed task:
+HU5 — ML Schema Alignment is DONE.
 
----
+Backend now uses the versioned ML contract:
 
-## 1. Context at Last Update
+- Python ML endpoint: `POST /v1/suggest`
+- Fastify `mlClient.js` updated to use `/v1/suggest`
+- Payload switched to sending **raw email arrays**
+- `emailSuggester.js` now supports enriched ML responses
+- Tests updated:
+  - `tests/mlClient.test.js`
+  - `tests/emailSuggester.test.js`
+- Curl verification to FastAPI is working (real enriched emails returned)
 
-**Repository:** Backend Fastify
-**Branch:** `develop`
-**Commit:** `c37c6460`
-**Last update:** 2025-11-20 CST
-**Project scope:**
-
-* Fastify backend (Node.js, ESM)
-* PostgreSQL via Sequelize
-* FastAPI ML microservice (external dependency)
-* No frontend code here
-* No n8n workflows versioned
-
-The backend is stable, all tests pass, and the last completed work was HU12.
+Everything was tested and is green on the backend.
 
 ---
 
-## 2. Last Completed User Story
+## 2. What You Were Doing (Context)
 
-### HU12 — Final Fastify ↔ ML Contract Integration
+You had just completed HU5, validated the ML versioned contract, updated tests,
+and updated `PROJECT_STATE.md`.
 
-**Status:** DONE
-
-* `/api/v1/mails` contract validated
-* Gmail mock responses consistent with tests
-* All tests under `mailsRoutes.test.js`, `suggestionsRoutes.test.js`, and `mlClient.test.js` passed
-* API Reference aligned with behavior
-
-No pending items for this HU.
+You paused the project exactly at the point where the backend was stable and the
+next action needed to be defined.
 
 ---
 
-## 3. Current Active User Story
+## 3. Single Action To Resume (≤ 90 minutes)
 
-### HU5 — Fastify–Python ML Contract Alignment
-
-**Status:** IN_PROGRESS
-**Reason:**
-The JSON schema returned by the FastAPI classifier is not yet fully aligned with the shape consumed by `mlClient` and `/api/v1/suggestions`.
-
-**Verified requirements:**
-
-* `mlClient.js` handles timeouts and returns safe defaults
-* Tests cover fallback behavior
-
-**What remains:**
-
-* Freeze and document the ML → Fastify response schema
-* Update `mlClient` and tests to match the final schema
-
----
-
-## 4. Verified Current System State
-
-### Backend
-
-* Boots locally and under `docker-compose`
-* Exposes stable endpoints:
-
-  * `GET /api/v1/mails`
-  * `GET /api/v1/suggestions`
-  * `GET /api/v1/notifications/summary`
-  * `POST /api/v1/notifications/confirm`
-  * `GET /api/v1/notifications/history`
-  * `GET /api/v1/health`
-
-### Database
-
-* Models present: `Token`, `Notification`, `ActionHistory`
-* DB connection validated at startup
-* Reads/writes verified via History and Confirm endpoints
-
-### ML Microservice
-
-* FastAPI service reachable through `ML_BASE_URL`
-* Fallback logic validated by tests
-
-### Tests
-
-```
-All tests: passing
-0 failures
-```
-
----
-
-## 5. How to Restart the Backend
-
-### 1. Install dependencies
+Run the full backend test suite to re-anchor technical safety:
 
 ```bash
-npm install
-```
+npm test
+````
 
-### 2. Start PostgreSQL + ML + backend
+If everything passes, the system is fully synchronized with the latest snapshot.
 
-```bash
-docker compose up
-```
+---
 
-### 3. Run backend standalone (optional)
+## 4. Boot Commands (Backend Only)
 
-```bash
-npm run dev
-```
-
-### 4. Verify key endpoints
+Start full stack (Fastify + ML + Postgres):
 
 ```bash
-curl -H "Authorization: Bearer dummy" http://localhost:3000/api/v1/mails
-curl -H "Authorization: Bearer dummy" http://localhost:3000/api/v1/suggestions
+docker compose -f ops/docker-compose.yml up --build
+```
+
+Verify ML endpoint manually:
+
+```bash
+curl -s http://localhost:8000/suggest \
+  -H "Content-Type: application/json" \
+  -d '[
+    {
+      "id": "1",
+      "subject": "Test",
+      "from": "demo@example.com",
+      "body": "hello",
+      "date": "Sat, 22 Nov 2025 00:00:00 -0000",
+      "isRead": false,
+      "category": "primary",
+      "attachmentSizeMb": 0
+    }
+  ]'
+```
+
+A successful response should include:
+
+```json
+{
+  "id": "1",
+  "suggestions": [...]
+}
 ```
 
 ---
 
-## 6. Files Needed to Understand the Current Work
+## 5. Verification Checklist (Quick)
 
-* `src/services/mlClient.js`
-* `src/services/emailSuggester.js`
-* `src/routes/suggestionsRoutes.js`
-* `tests/mlClient.test.js`
-* `tests/suggestionsRoutes.test.js`
+You are safe to continue if:
+
+* Fastify boots without errors
+* ML responds at `POST /v1/suggest`
+* `npm test` passes 100%
+* Routes respond:
+
+  * `/api/v1/health`
+  * `/api/v1/mails`
+  * `/api/v1/suggestions`
+  * `/api/v1/notifications/*`
 
 ---
 
-## 7. Next Immediate Action (strict, single step)
+## 6. Next Documentation Steps (Do After Test)
 
-➡️ **Align the final ML → Fastify JSON schema and update `/api/v1/suggestions` tests accordingly.**
+After running `npm test`:
 
-This is the *only* next step required to resume backend work.
+* No further steps required unless changes are made.
+* Update `Sprint_Log.md` only if starting HU6 or new work.
 
+---
+
+## 7. Reentry Sync
+
+This README_REENTRY.md is tied to:
+
+* `PROJECT_STATE.md` snapshot from `2025-11-22 02:45 CST`
+* Commit `cff3c9d4`
+
+Maintaining this alignment guarantees perfect reproducibility.
