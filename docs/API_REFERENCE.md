@@ -1,59 +1,54 @@
+# API Reference — Email Cleaner & Smart Notifications
+
+Official public reference for the HTTP API exposed by the Email Cleaner backend.
+
+This document is intended for:
+- Frontend developers integrating the UI
+- External services consuming the API
+- Test and tooling integrations
+
+All routes below are **stable v1** endpoints.
 
 ---
 
-# ✅ **API_REFERENCE.md (formato TXT)**
+## 1. Authentication
 
-````txt
-# Emails API Reference (v1)
-> Documentación oficial de la API — Email Cleaner & Smart Notifications  
-> Actualizado tras la corrección de HU12 (Fastify ↔ ML)
+All protected endpoints require a valid **Google OAuth2 Bearer token**.
 
----
-
-# 📚 Índice
-
-1. Autenticación  
-2. GET /api/v1/mails  
-3. GET /api/v1/suggestions  
-4. Errores comunes  
-5. Notas de desarrollo  
-6. Última actualización  
-
----
-
-# 🔐 1. Autenticación
-
-Todos los endpoints requieren un **Bearer token** de OAuth Google válido.
-
-Ejemplo:
+Include it in the `Authorization` header:
 
 ```bash
 -H "Authorization: Bearer <ACCESS_TOKEN>"
-````
+```
 
-Si el token expira, Gmail y Fastify devolverán errores de autorización.
+If the token is missing or invalid, the API will return **401 Unauthorized**.
 
 ---
 
-# ✉️ 2. GET /api/v1/mails
+## 2. Emails API
 
-> Devuelve la lista de correos base SIN procesar por IA.
+### 2.1 GET /api/v1/mails
 
-### Descripción
+Returns the list of base Gmail emails **without any AI processing**.
 
-Endpoint para obtener correos crudos desde Gmail.
-Este endpoint NO llama a ML, NO genera sugerencias y NO aplica clasificación automática.
+#### Description
 
-Este es el equivalente a “inbox real”.
+- Fetches raw emails from Gmail.
+- No machine learning, no automatic classification.
+- This endpoint represents the “raw inbox” view.
 
-### Request
+#### Request
 
+```http
+GET /api/v1/mails HTTP/1.1
+Authorization: Bearer <ACCESS_TOKEN>
 ```
-GET /api/v1/mails
-Authorization: Bearer <token>
-```
 
-### Response 200
+#### Query Parameters
+
+- `pageToken` *(optional, string)* — Gmail pagination token (if supported by the current implementation).
+
+#### Response 200 (example)
 
 ```json
 {
@@ -61,8 +56,8 @@ Authorization: Bearer <token>
     {
       "id": "18c8f6e...",
       "from": "facturas@cfe.mx",
-      "subject": "Tu recibo de luz",
-      "snippet": "Vence el 15 de noviembre...",
+      "subject": "Your power bill",
+      "snippet": "Due on November 15...",
       "date": "2025-11-18T02:32:11.000Z"
     }
   ],
@@ -71,33 +66,33 @@ Authorization: Bearer <token>
 }
 ```
 
-### Notas
+#### Possible Status Codes
 
-* Paginación depende de `nextPageToken`.
-* Se usa Gmail API internamente.
-* No hay sugerencias ni IA en este endpoint.
+- **200 OK** – Mails returned successfully.
+- **401 Unauthorized** – Missing or invalid token.
 
 ---
 
-# 🤖 3. GET /api/v1/suggestions
+## 3. Suggestions API
 
-> Devuelve correos enriquecidos CON IA (clasificación y sugerencias).
+### 3.1 GET /api/v1/suggestions
 
-### Descripción
+Returns Gmail emails **enriched with AI-generated suggestions**.
 
-Este endpoint aplica inteligencia artificial sobre los correos.
-Fastify obtiene los correos base → llama a `emailSuggester` → que delega en `mlClient` → que llama al microservicio ML en Python.
+#### Description
 
-Resultado: correos con sugerencias automáticas.
+- Backend fetches base emails (similar to `/api/v1/mails`).
+- Emails are sent to the ML service.
+- The response includes a `suggestions` array per email.
 
-### Request
+#### Request
 
+```http
+GET /api/v1/suggestions HTTP/1.1
+Authorization: Bearer <ACCESS_TOKEN>
 ```
-GET /api/v1/suggestions
-Authorization: Bearer <token>
-```
 
-### Respuesta 200 (ejemplo)
+#### Response 200 (example)
 
 ```json
 {
@@ -105,8 +100,8 @@ Authorization: Bearer <token>
     {
       "id": "18c8f6e...",
       "from": "facturas@cfe.mx",
-      "subject": "Tu recibo de luz",
-      "snippet": "Vence el 15 de noviembre...",
+      "subject": "Your power bill",
+      "snippet": "Due on November 15...",
       "date": "2025-11-18T02:32:11.000Z",
       "suggestions": [
         {
@@ -119,10 +114,14 @@ Authorization: Bearer <token>
 }
 ```
 
-### Caso ML caído o con error (timeout, 5xx, fallas de red)
+#### ML Failure Behavior
 
-La API NO truena.
-Devuelve:
+If the ML service is unavailable (timeout, network error, 5xx):
+
+- The endpoint **still returns 200 OK**.
+- Each email will include an **empty `suggestions` array**.
+
+Example:
 
 ```json
 {
@@ -130,8 +129,8 @@ Devuelve:
     {
       "id": "18c8f6e...",
       "from": "facturas@cfe.mx",
-      "subject": "Tu recibo de luz",
-      "snippet": "Vence el 15 de noviembre...",
+      "subject": "Your power bill",
+      "snippet": "Due on November 15...",
       "date": "2025-11-18T02:32:11.000Z",
       "suggestions": []
     }
@@ -139,85 +138,234 @@ Devuelve:
 }
 ```
 
-### Notas técnicas
+#### Possible Status Codes
 
-* `suggestions` siempre es un arreglo.
-* Fastify NO detiene la respuesta si ML falla.
-* `emailSuggester` normaliza strings, números y objetos en formato uniforme.
-* La lógica robusta está en:
-
-  * `src/services/mlClient.js`
-  * `src/services/emailSuggester.js`
+- **200 OK** – Emails returned successfully (with or without suggestions).
+- **401 Unauthorized** – Missing or invalid token.
 
 ---
 
-# ⚠️ 4. Errores comunes
+## 4. Notifications API
 
-### 401 — Unauthorized
+The Notifications API exposes endpoints to:
 
-Token inválido o expirado.
+- Get a **summary of suggested actions**
+- **Confirm** actions taken on emails
+- Retrieve the **history** of actions per user
 
-### 503 — ML unavailable (solo interno, no al cliente)
+All routes share:
 
-Fastify captura este error y NO devuelve 503 al cliente.
-En su lugar devuelve suggestions vacías.
-
-### 422 — Validation error
-
-Fastify devolverá error si payloads esperados no cumplen formato.
+- `Authorization: Bearer <ACCESS_TOKEN>`
+- Prefix: `/api/v1/notifications/...`
 
 ---
 
-# 🧪 5. Pruebas asociadas
+### 4.1 GET /api/v1/notifications/summary
 
-Rutas:
+Returns a summary list of emails with suggested actions to review.
 
-* `tests/mailsRoutes.test.js`
-* `tests/suggestionsRoutes.test.js`
+#### Description
 
-Servicios:
+- Intended for “overview” dashboards.
+- Each item represents an email plus a list of suggested actions (e.g., archive, delete, move).
 
-* `tests/mlClient.test.js`
-* `tests/emailSuggester.test.js`
+#### Request
 
-Todos los tests pasan en verde:
-
-```
-33 passed — 0 failed
+```http
+GET /api/v1/notifications/summary HTTP/1.1
+Authorization: Bearer <ACCESS_TOKEN>
 ```
 
+#### Query Parameters
+
+- `period` *(optional, string)* — `daily` or `weekly`.  
+  Used to filter the summary window.
+
+#### Response 200 (example)
+
+```json
+[
+  {
+    "id": "test1",
+    "from": "noti@demo.com",
+    "subject": "Notification demo",
+    "date": "2025-11-18T02:32:11.000Z",
+    "isRead": false,
+    "category": "demo",
+    "attachmentSizeMb": 0.1,
+    "suggestions": ["archive"]
+  }
+]
+```
+
+#### Possible Status Codes
+
+- **200 OK** – Summary returned successfully.
+- **401 Unauthorized** – Missing or invalid token.
+
 ---
 
-# 🛠 6. Notas de desarrollo
+### 4.2 POST /api/v1/notifications/confirm
 
-* El backend usa ESM (import/export).
-* Gmail API se accede mediante servicios internos.
-* ML está desacoplado vía mlClient.
-* No se exponen tokens en logs (seguridad obligatoria).
-* Timeout configurable:
+Confirms actions for one or more emails (e.g., accept or reject suggested actions).
 
-  ```
-  ML_TIMEOUT_MS=5000
-  ```
-* URL configurable:
+#### Description
 
-  ```
-  ML_BASE_URL=http://localhost:8000
-  ```
+- Used by the UI when the user confirms or rejects suggested actions.
+- Internally, the backend may:
+  - Execute Gmail actions.
+  - Record entries in the action history.
+
+#### Request
+
+```http
+POST /api/v1/notifications/confirm HTTP/1.1
+Authorization: Bearer <ACCESS_TOKEN>
+Content-Type: application/json
+```
+
+#### Request Body
+
+```json
+{
+  "ids": ["18c8f6e...", "18c8f7a..."],
+  "action": "accept"
+}
+```
+
+- `ids` *(array of strings, required)* — Email IDs to process.
+- `action` *(string, required)* — One of: `accept`, `reject`.
+
+#### Response 200 (example)
+
+The schema guarantees:
+
+```json
+{
+  "success": true,
+  "processed": 2,
+  "action": "accept"
+}
+```
+
+> Note: The internal implementation may include additional fields,  
+> but `success`, `processed` and `action` are guaranteed by contract.
+
+#### Possible Status Codes
+
+- **200 OK** – Actions processed successfully.
+- **400 Bad Request** – Invalid payload (e.g., missing `ids` or `action`).
+- **401 Unauthorized** – Missing or invalid token.
 
 ---
 
-# 📅 Última actualización
+### 4.3 GET /api/v1/notifications/history
 
-Julio 2025
-Equipo de Arquitectura (actualizado automáticamente por ChatGPT)
+Returns the history of actions taken on emails for the authenticated user.
+
+#### Description
+
+- Used to display “what has been done” over time.
+- Returns a paginated list of action records.
+
+#### Request
+
+```http
+GET /api/v1/notifications/history HTTP/1.1
+Authorization: Bearer <ACCESS_TOKEN>
+```
+
+#### Query Parameters
+
+- `page` *(optional, integer, default: 1)* — Page number.
+- `perPage` *(optional, integer, default: 20)* — Items per page.
+
+#### Response 200 (example)
+
+```json
+{
+  "total": 3,
+  "page": 1,
+  "perPage": 20,
+  "data": [
+    {
+      "userId": "user-123",
+      "emailId": "18c8f6e...",
+      "action": "accept",
+      "timestamp": "2025-11-18T02:32:11.000Z",
+      "details": {
+        "gmailResponse": { "status": "OK" },
+        "note": "Executed"
+      }
+    }
+  ]
+}
+```
+
+#### Possible Status Codes
+
+- **200 OK** – History returned successfully.
+- **401 Unauthorized** – Missing or invalid token.
 
 ---
 
-# FIN DEL ARCHIVO
+## 5. Health Check
 
+### 5.1 GET /api/v1/health
+
+Simple health-check endpoint for monitoring and local diagnostics.
+
+#### Request
+
+```http
+GET /api/v1/health HTTP/1.1
+```
+
+#### Response 200 (example)
+
+```json
+{
+  "status": "ok"
+}
 ```
 
 ---
 
+## 6. Error Summary
+
+| Status Code | Meaning                         | Typical Cause                          |
+|------------|---------------------------------|----------------------------------------|
+| 200        | OK                              | Successful request                     |
+| 400        | Bad Request                     | Invalid body or query parameters       |
+| 401        | Unauthorized                    | Missing or invalid `Authorization`     |
+| 422        | Validation Error (if configured)| Payload does not match expected shape  |
+| 503        | ML Service Unavailable (internal)| ML failure; suggestions fall back to []|
+
+> Note: When the ML service fails, the API **does not** return 5xx to the client.  
+> It returns a valid 200 response with empty `suggestions` arrays.
+
+---
+
+## 7. Developer Notes
+
+- Backend uses **ECMAScript Modules (ESM)**.
+- Gmail is accessed via internal services, not directly from the client.
+- ML integration is abstracted through `mlClient`.
+- Key configuration:
+
+```env
+ML_TIMEOUT_MS=5000
+ML_BASE_URL=http://localhost:8000
 ```
+
+---
+
+## 8. Versioning & Updates
+
+- API version: **v1** (`/api/v1/...`).
+- Last update: 2025 — Email Cleaner Engineering Team.
+
+---
+
+# END OF FILE
+

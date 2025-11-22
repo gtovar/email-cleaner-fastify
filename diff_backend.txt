@@ -1,0 +1,1487 @@
+diff --git a/PROJECT_STATE.md b/PROJECT_STATE.md
+index 0bcff57..4fd3969 100644
+--- a/PROJECT_STATE.md
++++ b/PROJECT_STATE.md
+@@ -1,74 +1,216 @@
+-# PROJECT_STATE – Email Cleaner & Smart Notifications  
+-> Última actualización automática por ChatGPT (HU12 corregida)
++# 1. Technical Header (Snapshot Metadata)
+ 
+-## 📌 Estado general del proyecto
++PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
++SNAPSHOT_DATE: 2025-11-21 19:30 CST
++COMMIT: c37c646
++ENVIRONMENT: local development (docker-compose + npm run dev)
+ 
+-El proyecto está alineado en tres capas principales:
++COMPONENT_SCOPE:
++  - Fastify backend (Node.js, ESM)
++  - ML service (FastAPI) via ML_BASE_URL
++  - PostgreSQL via Sequelize
++  - n8n container present (no workflows)
+ 
+-1. **Fastify Backend (Node.js)**
+-2. **Microservicio de ML (FastAPI / Python)**
+-3. **Frontend React**
++Notes:
++- Snapshot reflects ONLY the Fastify backend repository.
++- Frontend and n8n workflows live in their own repositories.
+ 
+-La integración entre Fastify ↔ ML ya está establecida y probada.
++---
++
++## 2. Executive Summary
++
++This snapshot reflects the real, verifiable backend state at commit c37c646.
++
++Fastify boots under docker-compose, connects to PostgreSQL, and exposes all implemented routes (mails, suggestions, notifications, health).  
++HU3, HU6, HU12 are fully completed and verified by tests.  
++HU5 (ML schema alignment) remains in progress due to an unfrozen classifier schema.  
++Contract tests pass; fallback behaviour in mlClient is stable.
++
++---
++
++## 3. Component-by-Component Technical State
++
++### 3.1 Fastify Backend
++
++- Code present:
++  - `src/routes/mailRoutes.js`
++  - `src/routes/suggestionsRoutes.js`
++  - `src/routes/notificationsRoutes.js`
++  - `src/routes/healthRoutes.js`
++  - `src/services/mlClient.js`
++  - `src/services/emailSuggester.js`
++  - `src/controllers/*`
++  - `models/*.js`
++
++- Working endpoints:
++  - `GET /api/v1/mails`
++  - `GET /api/v1/suggestions`
++  - `GET /api/v1/notifications/summary`
++  - `POST /api/v1/notifications/confirm`
++  - `GET /api/v1/notifications/history`
++  - `GET /api/v1/health`
++
++- Passing tests:
++  - `tests/mailsRoutes.test.js`
++  - `tests/suggestionsRoutes.test.js`
++  - `tests/notificationsRoutes.test.js`
++  - `tests/authMiddleware.test.js`
++  - `tests/mlClient.test.js`
++
++- Infra status:
++  - Boot verified locally + docker-compose.
++  - Dynamic routes registered via Fastify plugins.
++
++---
++
++### 3.2 ML Microservice (FastAPI)
++
++- Active via `ML_BASE_URL`.
++- Called by `src/services/mlClient.js`.
++- Fallback behaviour (timeout/error → safe defaults) validated by tests.
++- Classifier JSON schema not yet frozen → affects HU5.
++
++---
++
++### 3.3 React Frontend
++
++- Not part of this repository.
++
++---
++
++### 3.4 PostgreSQL Database
++
++- Models detected:
++  - `models/Token.js`
++  - `models/Notification.js`
++  - `models/ActionHistory.js`
++
++- Migrations:
++  - Managed via Sequelize; schema inferred from models.
++
++- DB status:
++  - Active through docker-compose.
++  - Verified through tests + startup logs.
++
++---
++
++### 3.5 n8n
+ 
+-El frontend ya puede consumir `/api/v1/suggestions`, pero HU6 (UI real de Sugerencias) sigue pendiente.
++- Service exists in docker-compose.
++- No workflows versioned.
++- No integration with Fastify yet.
+ 
+ ---
+ 
+-## 🧠 Estado de Historias de Usuario (Scrum / Roadmap)
++### 3.6 Docker Infrastructure
+ 
+-### ✔ HU12 — Integración ML (Fastify ↔ Python) — **DONE**
++- Active containers:
++  - fastify
++  - fastapi
++  - db
++  - n8n
+ 
+-Esta HU fue corregida y reescrita para alinear el diseño con rutas reales del sistema:
++- env files:
++  - `.env.example` defines ML_BASE_URL and DB credentials.
++
++---
++
++## 4. User Story Status (Evidence-Driven)
++
++### HU3 — Notifications API
++
++**Status:** DONE
++
++**Evidence:**
++- Routes implemented:
++  - `/api/v1/notifications/summary`
++  - `/api/v1/notifications/confirm`
++  - `/api/v1/notifications/history`
++- Models:
++  - `models/Notification.js`
++  - `models/ActionHistory.js`
++- Controllers:
++  - `src/controllers/notificationsController.js`
++  - `src/controllers/actionHistoryController.js`
++- Tests:
++  - `tests/notificationsRoutes.test.js`
++
++**Pending:** none  
++**Technical risks:** none  
++**Decision:** Marked DONE after verifying routes and persistence via tests.
++
++---
++
++### HU6 — Confirm + History Persistence
++
++**Status:** DONE
++
++**Evidence:**
++- Confirm endpoint writes `ids` + `action` to ActionHistory.
++- History endpoint returns paginated records.
++- Models:
++  - `models/ActionHistory.js`
++- Tests:
++  - `tests/notificationsRoutes.test.js`
++
++**Pending:** none  
++**Technical risks:** none  
++**Decision:** Marked DONE after persistence + tests validated.
++
++---
++
++### HU5 — Fastify–Python ML Contract
++
++**Status:** IN_PROGRESS
++
++**Evidence:**
++- `src/services/mlClient.js` calls ML classifier.
++- `GET /api/v1/suggestions` integrates ML results.
++- Tests:
++  - `tests/mlClient.test.js`
++  - `tests/suggestionsRoutes.test.js`
++
++**Pending:**
++- Freeze final JSON schema from the FastAPI classifier.
++- Align field names and shapes expected by `mlClient`.
++
++**Technical risks:**
++- Mismatch between classifier schema and Fastify contract.
++
++**Decision:** Remains IN_PROGRESS because ML schema is not finalized.
++
++---
+ 
+-- `/api/v1/mails` → listado base SIN IA  
+-- `/api/v1/suggestions` → listado enriquecido CON IA  
++### HU12 — Mails API Final Contract
+ 
+-**Cumple:**
++**Status:** DONE
+ 
+-- Integración `Fastify → emailSuggester → mlClient → FastAPI`.
+-- Timeout configurable `ML_TIMEOUT_MS`.
+-- URL configurable `ML_BASE_URL`.
+-- Normalización robusta de sugerencias (JSON, strings, números, objetos).
+-- Fallback seguro cuando el ML falla.
+-- Logs con contexto sin exponer tokens.
+-- Tests en verde:
+-  - `mlClient.test.js`
+-  - `emailSuggester.test.js`
+-  - `suggestionsRoutes.test.js`
+-  - `mailsRoutes.test.js` (antes `emailsRoutes.test.js`)
+-- Documentación corregida:
+-  - API_REFERENCE.md
+-  - QUICKSTART.md
+-  - README_REENTRY.md  
+-  - Sprint_Log.md  
++**Evidence:**
++- `/api/v1/mails` implemented in `src/routes/mailRoutes.js`.
++- Tests:
++  - `tests/mailsRoutes.test.js`
+ 
+-**Nota:**  
+-Se eliminó `/api/v1/emails` de la documentación porque nunca existió en el backend real.
++**Pending:** none  
++**Technical risks:** none  
++**Decision:** Marked DONE after contract stabilized and tests passed.
+ 
+ ---
+ 
+-### 🔧 HU6 — UI React: Sugerencias Inteligentes — **En progreso**
++## 5. Current Technical Risks
+ 
+-- React ya consume backend base.
+-- No existe aún una vista formal para suggestions.
+-- Pendiente: HU específica para UI + interacción con acciones (“marcar como leído”, “archivar”, etc.)
++- ML contract mismatch (HU5).
++- No end-to-end tests across Fastify + ML + DB.
++- Limited validation on ML response shape.
+ 
+ ---
+ 
+-## 🚦 Infraestructura Local (Docker / Dev Envs)
++## 6. Next Immediate Action
+ 
+-- Fastify corre localmente en puerto `3000`
+-- ML corre en `8000`
+-- Docker-compose funcional, pero no integrado al 100% con Gmail OAuth (pending)
+-- Variables reproducibles vía `.env.example`
++➡️ Freeze and align the ML classifier response schema with the `mlClient` contract, then update the suggestions tests accordingly.
+ 
+ ---
+ 
+-## 🔑 Variables importantes del sistema (resumen)
++## Version log
+ 
+-```env
+-ML_BASE_URL=http://localhost:8000
+-ML_TIMEOUT_MS=5000
+-FASTAPI_URL=http://fastapi:8000
++- 2025-11-21 19:30 CST — Full rewrite aligned to protocol v1.0 (commit: c37c646)
+ 
+diff --git a/README_REENTRY.md b/README_REENTRY.md
+index aa08125..ec7c3cd 100644
+--- a/README_REENTRY.md
++++ b/README_REENTRY.md
+@@ -1,195 +1,141 @@
++# README_REENTRY.md — Backend Fastify
+ 
+----
++Email Cleaner & Smart Notifications
+ 
+-```txt
+-# Reentrada Rápida – Email Cleaner & Smart Notifications
+-> Guía para retomar el proyecto después de una pausa  
+-> Actualizado tras la corrección de HU12 (Fastify ↔ ML)
++> Single-purpose file: allow fast reentry into the backend after a long pause, in under 2 minutes.
++> This file summarizes only: branch, last HU, current state, and the next actionable step.
+ 
+ ---
+ 
+-## 🎯 Propósito de este documento
+-Este archivo existe para que puedas regresar al proyecto incluso después de semanas/meses sin tocar código y **volver a estar operativo en minutos**, sin releer todo.
++## 1. Context at Last Update
++
++**Repository:** Backend Fastify
++**Branch:** `develop`
++**Commit:** `c37c6460`
++**Last update:** 2025-11-20 CST
++**Project scope:**
+ 
+-Aquí se explica:
++* Fastify backend (Node.js, ESM)
++* PostgreSQL via Sequelize
++* FastAPI ML microservice (external dependency)
++* No frontend code here
++* No n8n workflows versioned
+ 
+-- Qué se estaba haciendo
+-- En qué rama
+-- Qué HU estaba activa
+-- Qué queda pendiente
+-- Qué endpoints existen realmente
+-- Cómo levantar el proyecto rápido
++The backend is stable, all tests pass, and the last completed work was HU12.
+ 
+ ---
+ 
+-## 🚦 Último trabajo activo
+-**Historia activa final:**  
+-✔ **HU12 — Integración Fastify ↔ ML para sugerencias inteligentes de correos**
++## 2. Last Completed User Story
++
++### HU12 — Final Fastify ↔ ML Contract Integration
+ 
+-Esta historia ya está **100% completada** y corregida.
++**Status:** DONE
+ 
+-### ¿Qué se logró?
++* `/api/v1/mails` contract validated
++* Gmail mock responses consistent with tests
++* All tests under `mailsRoutes.test.js`, `suggestionsRoutes.test.js`, and `mlClient.test.js` passed
++* API Reference aligned with behavior
+ 
+-- Integración Fastify ↔ Microservicio ML (FastAPI)
+-- Endpoint IA oficial: **`GET /api/v1/suggestions`**
+-- Endpoint base: **`GET /api/v1/mails`**
+-- Se eliminó `/api/v1/emails` porque nunca existió en el backend real
+-- Normalización completa de sugerencias ML
+-- Manejo de errores con fallback seguro (`suggestions: []`)
+-- Nuevas pruebas unitarias y de rutas — todo en **verde**
+-- Documentación alineada (API_REFERENCE, Quickstart, Sprint_Log, Project_State)
++No pending items for this HU.
+ 
+ ---
+ 
+-## 🔥 Estado del backend Fastify
+-Totalmente estable:
++## 3. Current Active User Story
+ 
+-- Tests en verde:  
+-```
++### HU5 — Fastify–Python ML Contract Alignment
++
++**Status:** IN_PROGRESS
++**Reason:**
++The JSON schema returned by the FastAPI classifier is not yet fully aligned with the shape consumed by `mlClient` and `/api/v1/suggestions`.
++
++**Verified requirements:**
+ 
+-33 passed, 0 failed
++* `mlClient.js` handles timeouts and returns safe defaults
++* Tests cover fallback behavior
+ 
+-````
+-- Rutas reales y correctas:
+-- `/api/v1/mails` (datos base desde Gmail)
+-- `/api/v1/suggestions` (datos enriquecidos por IA)
+-- `emailSuggester` y `mlClient` funcionando con configuración clara:
+-```env
+-ML_BASE_URL=http://localhost:8000
+-ML_TIMEOUT_MS=5000
+-````
++**What remains:**
++
++* Freeze and document the ML → Fastify response schema
++* Update `mlClient` and tests to match the final schema
+ 
+ ---
+ 
+-## 🧠 Reglas clave que debes recordar
++## 4. Verified Current System State
++
++### Backend
++
++* Boots locally and under `docker-compose`
++* Exposes stable endpoints:
+ 
+-1. **Fastify nunca llama a ML en `/mails`**
+-   `/mails` = inbox crudo.
++  * `GET /api/v1/mails`
++  * `GET /api/v1/suggestions`
++  * `GET /api/v1/notifications/summary`
++  * `POST /api/v1/notifications/confirm`
++  * `GET /api/v1/notifications/history`
++  * `GET /api/v1/health`
+ 
+-2. **Toda la inteligencia ocurre en `/api/v1/suggestions`**
+-   `/suggestions` = inbox + IA.
++### Database
+ 
+-3. **Si ML falla, la API no truena**
++* Models present: `Token`, `Notification`, `ActionHistory`
++* DB connection validated at startup
++* Reads/writes verified via History and Confirm endpoints
+ 
+-   * Devuelve `suggestions: []`
+-   * Loguea error interno
++### ML Microservice
+ 
+-4. **El frontend sólo debe usar `/suggestions`**
+-   (para la HU6 próxima)
++* FastAPI service reachable through `ML_BASE_URL`
++* Fallback logic validated by tests
++
++### Tests
++
++```
++All tests: passing
++0 failures
++```
+ 
+ ---
+ 
+-## 🧪 Cómo levantar el sistema rápido
++## 5. How to Restart the Backend
+ 
+-### 1. Levantar Fastify
++### 1. Install dependencies
+ 
+ ```bash
+ npm install
+-npm run dev
+ ```
+ 
+-### 2. Levantar Microservicio ML (FastAPI)
++### 2. Start PostgreSQL + ML + backend
+ 
+ ```bash
+-cd python/classifier
+-uvicorn app:app --reload --host 0.0.0.0 --port 8000
++docker compose up
+ ```
+ 
+-### 3. Probar con Curl
++### 3. Run backend standalone (optional)
+ 
+ ```bash
+-curl -H "Authorization: Bearer <TOKEN>" \
+-     http://localhost:3000/api/v1/suggestions
++npm run dev
+ ```
+ 
+----
+-
+-## 🧩 Arquitectura mínima para recordar
+-
+-Fastify → GmailService → emailSuggester → mlClient → FastAPI
++### 4. Verify key endpoints
+ 
+-```
+-[mails] ------------------> Gmail API
+-   |
+-   | (solo datos base)
+-   v
+-[emailSuggester] -----> mlClient -----> FastAPI ML
+-   |
+-   | (datos enriquecidos)
+-   v
+-[suggestions]
++```bash
++curl -H "Authorization: Bearer dummy" http://localhost:3000/api/v1/mails
++curl -H "Authorization: Bearer dummy" http://localhost:3000/api/v1/suggestions
+ ```
+ 
+ ---
+ 
+-## 🗂 Archivos clave relacionados con HU12
++## 6. Files Needed to Understand the Current Work
+ 
+ * `src/services/mlClient.js`
+ * `src/services/emailSuggester.js`
+ * `src/routes/suggestionsRoutes.js`
+ * `tests/mlClient.test.js`
+-* `tests/emailSuggester.test.js`
+ * `tests/suggestionsRoutes.test.js`
+-* `tests/mailsRoutes.test.js` (renombrado)
+-
+----
+-
+-## 🛠 Próximo trabajo recomendado (HU6)
+-
+-Siguiente etapa lógica del proyecto:
+-
+-* Crear UI de sugerencias en React
+-* Integrar `/suggestions` con la pantalla real
+-* Mostrar `suggestions[]` con acciones recomendadas
+-* Preparar interacción con el backend (futuras HU: acciones reales)
+-
+----
+-
+-## 📝 Estado de la rama activa
+-
+-Última rama utilizada:
+-
+-```
+-feature/hu12-fastify-ml-integration
+-```
+-
+-Esta rama ya está lista para hacer:
+-
+-```
+-git merge main
+-```
+-
+-o crear una nueva rama para HU6.
+-
+----
+-
+-## 🧹 Limpieza realizada
+-
+-* Eliminación de `/api/v1/emails` en toda la documentación
+-* Corrección de Quickstart
+-* Corrección de API Reference
+-* Corrección de Sprint_Log
+-* Corrección de Project_State
+-* Normalización de naming “mails” vs “suggestions”
+-
+----
+-
+-## ✔ Resumen final de reentrada
+-
+-1. Backend está estable
+-2. ML integrado correctamente
+-3. HU12 está terminada
+-4. Rutas oficiales:
+-
+-   * `/api/v1/mails`
+-   * `/api/v1/suggestions`
+-5. Siguiente paso: HU6 (UI de Sugerencias)
+ 
+ ---
+ 
+-# FIN DEL ARCHIVO
++## 7. Next Immediate Action (strict, single step)
+ 
+-```
++➡️ **Align the final ML → Fastify JSON schema and update `/api/v1/suggestions` tests accordingly.**
+ 
+----
++This is the *only* next step required to resume backend work.
+ 
+diff --git a/Sprint_Log.md b/Sprint_Log.md
+index 9aa902f..b59d745 100644
+--- a/Sprint_Log.md
++++ b/Sprint_Log.md
+@@ -1,103 +1,46 @@
+-# SPRINT LOG – Email Cleaner & Smart Notifications
+-> Registro cronológico de decisiones, avances y cambios del proyecto  
+-> Actualizado tras la corrección de HU12 (Fastify ↔ ML)
++# SPRINT_LOG.md — Backend Fastify
+ 
+----
++Email Cleaner & Smart Notifications
+ 
+-## 📅 Sprint Actual  
+-**Sprint #? – Integración ML + Limpieza de documentación**
++> Chronological record of **actions taken**, not state, not planning.
+ 
+ ---
+ 
+-## 🟢 HU12 — Integración Fastify ↔ ML (DONE)
+-
+-### Resumen
+-La HU12 se reescribió para reflejar correctamente el diseño final:
+-
+-- `/api/v1/mails` → listado base SIN IA  
+-- `/api/v1/suggestions` → listado enriquecido CON IA  
+-
+-Se eliminó `/api/v1/emails` porque nunca existió en el backend real.  
+-Se corrigieron referencias, tests y documentación.
+-
+-### Log de avances HU12 (cronológico)
+-
+-1. **Refactor mlClient.js**
+-   - Implementación de errores tipados  
+-   - Manejo de timeout  
+-   - Uso de `ML_BASE_URL` y `ML_TIMEOUT_MS`  
+-
+-2. **Refactor emailSuggester.js**
+-   - Normalización de payload del ML  
+-   - Manejo de errores con fallback  
+-   - Sin exponer tokens  
+-
+-3. **Creación y corrección de tests**
+-   - `mlClient.test.js`  
+-   - `emailSuggester.test.js`  
+-   - `suggestionsRoutes.test.js`  
+-   - `mailsRoutes.test.js` (antes emailsRoutes.test.js)
+-
+-4. **Actualización de documentación**
+-   - Corrección completa de:
+-     - API_REFERENCE.md  
+-     - QUICKSTART.md  
+-     - README_REENTRY.md  
+-     - PROJECT_STATE.md  
+-     - Sprint_Log.md  
++## 2025-11-18 — Preparation for HU12
+ 
+-5. **Limpieza de endpoints**
+-   - Eliminado `/api/v1/emails` (referencias y docs)
+-   - `/suggestions` declarado como endpoint IA oficial  
+-   - `/mails` declarado como endpoint base  
++* Normalized ML payload in `emailSuggester.js`.
++* Cleaned references to deprecated `/api/v1/emails`.
++* Updated tests in `suggestionsRoutes.test.js` to align fallback behavior.
+ 
+-### Estado final HU12  
+-✔ Implementación completa  
+-✔ Documentación corregida  
+-✔ Tests en verde  
+-✔ Branch listo para merge  
+-✔ No quedan dependencias abiertas  
++## 2025-11-19 — HU12 integration work
+ 
+----
++* Refactor in `mlClient.js` (timeout handling, safe defaults, ML_BASE_URL usage).
++* Updated `mailsRoutes.js` contract and corresponding tests.
++* Validated ML fallback path via `mlClient.test.js`.
+ 
+-## 🔧 HU6 (UI React → Suggestions)
++## 2025-11-20 — HU12 completed
+ 
+-### Avances
+-- Frontend en React ya consume backend básico  
+-- Falta vista real para suggestions  
+-- Pendiente integración de acciones reales  
++* All routes verified: mails, suggestions, summary, confirm, history.
++* All tests passed (`33 passed, 0 failed`).
++* Documentation synchronized: API Reference, Quickstart, Project_State, Reentry.
++* Snapshot committed under `c37c6460`.
+ 
+-### Riesgos
+-- Requiere sincronización con contrato `/suggestions`  
+-- Gmail OAuth real aún no integrado en ambiente Docker  
++## 2025-11-20 — Start HU5 schema alignment
+ 
+----
++* Verified classifier response from FastAPI.
++* Detected mismatch between ML schema and `mlClient` expected fields.
++* Marked HU5 as active; no code changes committed yet.
+ 
+-## 🧹 Limpiezas realizadas en este sprint
++## 2025-11-21 — HU5 analysis
+ 
+-- Depuración completa de referencias a `/api/v1/emails`  
+-- Renombrado del test `emailsRoutes.test.js → mailsRoutes.test.js`  
+-- Actualización cross-file de documentación  
++* Identified missing final JSON schema in FastAPI.
++* Next step defined: freeze schema, update tests, then update mlClient accordingly.
+ 
+ ---
+ 
+-## 📌 Entradas de backlog generadas durante este sprint
+-
+-- **HU-XX — UI de Sugerencias Inteligentes (continuación HU6)**
+-- **HU-XX — Acciones reales (archivar / eliminar / marcar leído)**
+-- **HU-XX — Paginación avanzada para /api/v1/mails**  
+-- **HU-XX — Limpieza final de endpoints legacy**  
+-- **HU-XX — Endpoint de reglas ML (futuro)**
+-
+----
+-
+-## 📝 Notas importantes
+-
+-- Todo el backend está estable: 33 tests en verde.  
+-- La arquitectura Fastify ↔ ML está completamente funcional.  
+-- El próximo sprint debería enfocarse en la UI o en acciones reales del backend.
+-
+----
++## Backlog notes (not state, not planning — just facts discovered)
+ 
+-# FIN DEL ARCHIVO
++* End-to-end tests still missing.
++* Suggestions endpoint lacks strict validation on ML payload.
++* No n8n workflows committed yet.
+ 
+diff --git a/docs/API_REFERENCE.md b/docs/API_REFERENCE.md
+index 72f8811..7cf02ad 100644
+--- a/docs/API_REFERENCE.md
++++ b/docs/API_REFERENCE.md
+@@ -1,59 +1,54 @@
++# API Reference — Email Cleaner & Smart Notifications
+ 
+----
+-
+-# ✅ **API_REFERENCE.md (formato TXT)**
+-
+-````txt
+-# Emails API Reference (v1)
+-> Documentación oficial de la API — Email Cleaner & Smart Notifications  
+-> Actualizado tras la corrección de HU12 (Fastify ↔ ML)
+-
+----
++Official public reference for the HTTP API exposed by the Email Cleaner backend.
+ 
+-# 📚 Índice
++This document is intended for:
++- Frontend developers integrating the UI
++- External services consuming the API
++- Test and tooling integrations
+ 
+-1. Autenticación  
+-2. GET /api/v1/mails  
+-3. GET /api/v1/suggestions  
+-4. Errores comunes  
+-5. Notas de desarrollo  
+-6. Última actualización  
++All routes below are **stable v1** endpoints.
+ 
+ ---
+ 
+-# 🔐 1. Autenticación
++## 1. Authentication
+ 
+-Todos los endpoints requieren un **Bearer token** de OAuth Google válido.
++All protected endpoints require a valid **Google OAuth2 Bearer token**.
+ 
+-Ejemplo:
++Include it in the `Authorization` header:
+ 
+ ```bash
+ -H "Authorization: Bearer <ACCESS_TOKEN>"
+-````
++```
+ 
+-Si el token expira, Gmail y Fastify devolverán errores de autorización.
++If the token is missing or invalid, the API will return **401 Unauthorized**.
+ 
+ ---
+ 
+-# ✉️ 2. GET /api/v1/mails
++## 2. Emails API
+ 
+-> Devuelve la lista de correos base SIN procesar por IA.
++### 2.1 GET /api/v1/mails
+ 
+-### Descripción
++Returns the list of base Gmail emails **without any AI processing**.
+ 
+-Endpoint para obtener correos crudos desde Gmail.
+-Este endpoint NO llama a ML, NO genera sugerencias y NO aplica clasificación automática.
++#### Description
+ 
+-Este es el equivalente a “inbox real”.
++- Fetches raw emails from Gmail.
++- No machine learning, no automatic classification.
++- This endpoint represents the “raw inbox” view.
+ 
+-### Request
++#### Request
+ 
++```http
++GET /api/v1/mails HTTP/1.1
++Authorization: Bearer <ACCESS_TOKEN>
+ ```
+-GET /api/v1/mails
+-Authorization: Bearer <token>
+-```
+ 
+-### Response 200
++#### Query Parameters
++
++- `pageToken` *(optional, string)* — Gmail pagination token (if supported by the current implementation).
++
++#### Response 200 (example)
+ 
+ ```json
+ {
+@@ -61,8 +56,8 @@ Authorization: Bearer <token>
+     {
+       "id": "18c8f6e...",
+       "from": "facturas@cfe.mx",
+-      "subject": "Tu recibo de luz",
+-      "snippet": "Vence el 15 de noviembre...",
++      "subject": "Your power bill",
++      "snippet": "Due on November 15...",
+       "date": "2025-11-18T02:32:11.000Z"
+     }
+   ],
+@@ -71,33 +66,33 @@ Authorization: Bearer <token>
+ }
+ ```
+ 
+-### Notas
++#### Possible Status Codes
+ 
+-* Paginación depende de `nextPageToken`.
+-* Se usa Gmail API internamente.
+-* No hay sugerencias ni IA en este endpoint.
++- **200 OK** – Mails returned successfully.
++- **401 Unauthorized** – Missing or invalid token.
+ 
+ ---
+ 
+-# 🤖 3. GET /api/v1/suggestions
++## 3. Suggestions API
+ 
+-> Devuelve correos enriquecidos CON IA (clasificación y sugerencias).
++### 3.1 GET /api/v1/suggestions
+ 
+-### Descripción
++Returns Gmail emails **enriched with AI-generated suggestions**.
+ 
+-Este endpoint aplica inteligencia artificial sobre los correos.
+-Fastify obtiene los correos base → llama a `emailSuggester` → que delega en `mlClient` → que llama al microservicio ML en Python.
++#### Description
+ 
+-Resultado: correos con sugerencias automáticas.
++- Backend fetches base emails (similar to `/api/v1/mails`).
++- Emails are sent to the ML service.
++- The response includes a `suggestions` array per email.
+ 
+-### Request
++#### Request
+ 
+-```
+-GET /api/v1/suggestions
+-Authorization: Bearer <token>
++```http
++GET /api/v1/suggestions HTTP/1.1
++Authorization: Bearer <ACCESS_TOKEN>
+ ```
+ 
+-### Respuesta 200 (ejemplo)
++#### Response 200 (example)
+ 
+ ```json
+ {
+@@ -105,8 +100,8 @@ Authorization: Bearer <token>
+     {
+       "id": "18c8f6e...",
+       "from": "facturas@cfe.mx",
+-      "subject": "Tu recibo de luz",
+-      "snippet": "Vence el 15 de noviembre...",
++      "subject": "Your power bill",
++      "snippet": "Due on November 15...",
+       "date": "2025-11-18T02:32:11.000Z",
+       "suggestions": [
+         {
+@@ -119,10 +114,14 @@ Authorization: Bearer <token>
+ }
+ ```
+ 
+-### Caso ML caído o con error (timeout, 5xx, fallas de red)
++#### ML Failure Behavior
+ 
+-La API NO truena.
+-Devuelve:
++If the ML service is unavailable (timeout, network error, 5xx):
++
++- The endpoint **still returns 200 OK**.
++- Each email will include an **empty `suggestions` array**.
++
++Example:
+ 
+ ```json
+ {
+@@ -130,8 +129,8 @@ Devuelve:
+     {
+       "id": "18c8f6e...",
+       "from": "facturas@cfe.mx",
+-      "subject": "Tu recibo de luz",
+-      "snippet": "Vence el 15 de noviembre...",
++      "subject": "Your power bill",
++      "snippet": "Due on November 15...",
+       "date": "2025-11-18T02:32:11.000Z",
+       "suggestions": []
+     }
+@@ -139,85 +138,234 @@ Devuelve:
+ }
+ ```
+ 
+-### Notas técnicas
++#### Possible Status Codes
++
++- **200 OK** – Emails returned successfully (with or without suggestions).
++- **401 Unauthorized** – Missing or invalid token.
++
++---
++
++## 4. Notifications API
++
++The Notifications API exposes endpoints to:
++
++- Get a **summary of suggested actions**
++- **Confirm** actions taken on emails
++- Retrieve the **history** of actions per user
+ 
+-* `suggestions` siempre es un arreglo.
+-* Fastify NO detiene la respuesta si ML falla.
+-* `emailSuggester` normaliza strings, números y objetos en formato uniforme.
+-* La lógica robusta está en:
++All routes share:
+ 
+-  * `src/services/mlClient.js`
+-  * `src/services/emailSuggester.js`
++- `Authorization: Bearer <ACCESS_TOKEN>`
++- Prefix: `/api/v1/notifications/...`
+ 
+ ---
+ 
+-# ⚠️ 4. Errores comunes
++### 4.1 GET /api/v1/notifications/summary
++
++Returns a summary list of emails with suggested actions to review.
++
++#### Description
+ 
+-### 401 — Unauthorized
++- Intended for “overview” dashboards.
++- Each item represents an email plus a list of suggested actions (e.g., archive, delete, move).
+ 
+-Token inválido o expirado.
++#### Request
+ 
+-### 503 — ML unavailable (solo interno, no al cliente)
++```http
++GET /api/v1/notifications/summary HTTP/1.1
++Authorization: Bearer <ACCESS_TOKEN>
++```
++
++#### Query Parameters
++
++- `period` *(optional, string)* — `daily` or `weekly`.  
++  Used to filter the summary window.
+ 
+-Fastify captura este error y NO devuelve 503 al cliente.
+-En su lugar devuelve suggestions vacías.
++#### Response 200 (example)
++
++```json
++[
++  {
++    "id": "test1",
++    "from": "noti@demo.com",
++    "subject": "Notification demo",
++    "date": "2025-11-18T02:32:11.000Z",
++    "isRead": false,
++    "category": "demo",
++    "attachmentSizeMb": 0.1,
++    "suggestions": ["archive"]
++  }
++]
++```
+ 
+-### 422 — Validation error
++#### Possible Status Codes
+ 
+-Fastify devolverá error si payloads esperados no cumplen formato.
++- **200 OK** – Summary returned successfully.
++- **401 Unauthorized** – Missing or invalid token.
+ 
+ ---
+ 
+-# 🧪 5. Pruebas asociadas
++### 4.2 POST /api/v1/notifications/confirm
++
++Confirms actions for one or more emails (e.g., accept or reject suggested actions).
+ 
+-Rutas:
++#### Description
+ 
+-* `tests/mailsRoutes.test.js`
+-* `tests/suggestionsRoutes.test.js`
++- Used by the UI when the user confirms or rejects suggested actions.
++- Internally, the backend may:
++  - Execute Gmail actions.
++  - Record entries in the action history.
+ 
+-Servicios:
++#### Request
+ 
+-* `tests/mlClient.test.js`
+-* `tests/emailSuggester.test.js`
++```http
++POST /api/v1/notifications/confirm HTTP/1.1
++Authorization: Bearer <ACCESS_TOKEN>
++Content-Type: application/json
++```
+ 
+-Todos los tests pasan en verde:
++#### Request Body
+ 
++```json
++{
++  "ids": ["18c8f6e...", "18c8f7a..."],
++  "action": "accept"
++}
+ ```
+-33 passed — 0 failed
++
++- `ids` *(array of strings, required)* — Email IDs to process.
++- `action` *(string, required)* — One of: `accept`, `reject`.
++
++#### Response 200 (example)
++
++The schema guarantees:
++
++```json
++{
++  "success": true,
++  "processed": 2,
++  "action": "accept"
++}
+ ```
+ 
++> Note: The internal implementation may include additional fields,  
++> but `success`, `processed` and `action` are guaranteed by contract.
++
++#### Possible Status Codes
++
++- **200 OK** – Actions processed successfully.
++- **400 Bad Request** – Invalid payload (e.g., missing `ids` or `action`).
++- **401 Unauthorized** – Missing or invalid token.
++
+ ---
+ 
+-# 🛠 6. Notas de desarrollo
++### 4.3 GET /api/v1/notifications/history
+ 
+-* El backend usa ESM (import/export).
+-* Gmail API se accede mediante servicios internos.
+-* ML está desacoplado vía mlClient.
+-* No se exponen tokens en logs (seguridad obligatoria).
+-* Timeout configurable:
++Returns the history of actions taken on emails for the authenticated user.
+ 
+-  ```
+-  ML_TIMEOUT_MS=5000
+-  ```
+-* URL configurable:
++#### Description
+ 
+-  ```
+-  ML_BASE_URL=http://localhost:8000
+-  ```
++- Used to display “what has been done” over time.
++- Returns a paginated list of action records.
+ 
+----
++#### Request
++
++```http
++GET /api/v1/notifications/history HTTP/1.1
++Authorization: Bearer <ACCESS_TOKEN>
++```
++
++#### Query Parameters
++
++- `page` *(optional, integer, default: 1)* — Page number.
++- `perPage` *(optional, integer, default: 20)* — Items per page.
++
++#### Response 200 (example)
++
++```json
++{
++  "total": 3,
++  "page": 1,
++  "perPage": 20,
++  "data": [
++    {
++      "userId": "user-123",
++      "emailId": "18c8f6e...",
++      "action": "accept",
++      "timestamp": "2025-11-18T02:32:11.000Z",
++      "details": {
++        "gmailResponse": { "status": "OK" },
++        "note": "Executed"
++      }
++    }
++  ]
++}
++```
+ 
+-# 📅 Última actualización
++#### Possible Status Codes
+ 
+-Julio 2025
+-Equipo de Arquitectura (actualizado automáticamente por ChatGPT)
++- **200 OK** – History returned successfully.
++- **401 Unauthorized** – Missing or invalid token.
+ 
+ ---
+ 
+-# FIN DEL ARCHIVO
++## 5. Health Check
+ 
++### 5.1 GET /api/v1/health
++
++Simple health-check endpoint for monitoring and local diagnostics.
++
++#### Request
++
++```http
++GET /api/v1/health HTTP/1.1
+ ```
+ 
++#### Response 200 (example)
++
++```json
++{
++  "status": "ok"
++}
++```
++
++---
++
++## 6. Error Summary
++
++| Status Code | Meaning                         | Typical Cause                          |
++|------------|---------------------------------|----------------------------------------|
++| 200        | OK                              | Successful request                     |
++| 400        | Bad Request                     | Invalid body or query parameters       |
++| 401        | Unauthorized                    | Missing or invalid `Authorization`     |
++| 422        | Validation Error (if configured)| Payload does not match expected shape  |
++| 503        | ML Service Unavailable (internal)| ML failure; suggestions fall back to []|
++
++> Note: When the ML service fails, the API **does not** return 5xx to the client.  
++> It returns a valid 200 response with empty `suggestions` arrays.
++
+ ---
+ 
++## 7. Developer Notes
++
++- Backend uses **ECMAScript Modules (ESM)**.
++- Gmail is accessed via internal services, not directly from the client.
++- ML integration is abstracted through `mlClient`.
++- Key configuration:
++
++```env
++ML_TIMEOUT_MS=5000
++ML_BASE_URL=http://localhost:8000
+ ```
++
++---
++
++## 8. Versioning & Updates
++
++- API version: **v1** (`/api/v1/...`).
++- Last update: 2025 — Email Cleaner Engineering Team.
++
++---
++
++# END OF FILE
++
+diff --git a/docs/TUTORIALS/QUICKSTART.md b/docs/TUTORIALS/QUICKSTART.md
+index 7304fff..7b30351 100644
+--- a/docs/TUTORIALS/QUICKSTART.md
++++ b/docs/TUTORIALS/QUICKSTART.md
+@@ -1,232 +1,191 @@
+-````txt
+-# ⚡ Quickstart — Email Cleaner & Smart Notifications
+-> Guía rápida para levantar y probar el proyecto  
+-> Actualizado tras la corrección de HU12 (Fastify ↔ ML)
++# Quickstart — Email Cleaner & Smart Notifications
++Fast and simple guide to run the entire system locally.
+ 
+ ---
+ 
+-# 🚀 Objetivo del Quickstart
+-Levantar el backend Fastify y el microservicio ML (FastAPI), obtener un token de Gmail, probar los endpoints reales y validar que la integración funciona.
++## 1. Requirements
+ 
+-Este documento te permite levantar todo el sistema en minutos.
++- Node.js 18+
++- Python 3.10+
++- pip + venv
++- Uvicorn
++- Docker (optional, recommended)
++- Google OAuth2 credentials (Client ID, Secret, Redirect URI)
+ 
+ ---
+ 
+-# 🧩 Requisitos previos
++## 2. Install Dependencies
+ 
+-- Node.js 18+  
+-- Python 3.10+  
+-- Gmail OAuth configurado  
+-- Uvicorn instalado (para FastAPI)
+-- npm o yarn
+-- Postman / Curl opcional
+-
+----
+-
+-# 📦 1. Instalar dependencias
+-
+-## Fastify backend
++### Backend (Fastify)
+ ```bash
++cd email-cleaner-fastify
+ npm install
+-````
+-
+-## Microservicio ML (Python)
++```
+ 
++### ML Service (FastAPI)
+ ```bash
+-cd python/classifier
++cd email-cleaner-ml-python
+ pip install -r requirements.txt
+ ```
+ 
++### Frontend (React)
++```bash
++cd email-cleaner-frontend-react
++npm install
++```
++
+ ---
+ 
+-# ⚙️ 2. Variables de entorno
++## 3. Environment Variables
++
++Each module includes a `.env.example`. Copy it to `.env`:
++
++```bash
++cp .env.example .env
++```
+ 
+-Crea un archivo `.env` en el raíz del proyecto:
++Important variables for the backend:
+ 
+ ```env
+-# Config ML
+ ML_BASE_URL=http://localhost:8000
+ ML_TIMEOUT_MS=5000
+ 
+-# (Opcional) URL para Docker
+-FASTAPI_URL=http://fastapi:8000
++GOOGLE_CLIENT_ID=...
++GOOGLE_CLIENT_SECRET=...
++GOOGLE_REDIRECT_URI=...
+ ```
+ 
+-> Nota: FASTAPI_URL es usada en escenarios Docker;
+-> ML_BASE_URL es usada localmente por mlClient.
+-
+ ---
+ 
+-# 🟢 3. Levantar Fastify
++## 4. Run in Development Mode
+ 
++### A) Fastify Backend
+ ```bash
++cd email-cleaner-fastify
+ npm run dev
+ ```
+ 
+-Escuchando en:
+-
++Available at:
+ ```
+ http://localhost:3000
+ ```
+ 
+----
+-
+-# 🔵 4. Levantar el microservicio ML (FastAPI)
+-
++### B) FastAPI ML Service
+ ```bash
+-cd python/classifier
++cd email-cleaner-ml-python
+ uvicorn app:app --reload --host 0.0.0.0 --port 8000
+ ```
+ 
+-Escuchando en:
+-
++Available at:
+ ```
+ http://localhost:8000
+ ```
+ 
+----
+-
+-# 🔐 5. Obtener token de Gmail
++### C) React Frontend
++```bash
++cd email-cleaner-frontend-react
++npm run dev
++```
+ 
+-Este proyecto usa OAuth2 de Google.
++Available at:
++```
++http://localhost:5173
++```
+ 
+-Pasos:
++---
+ 
+-1. En navegador, autentícate con Gmail.
+-2. Copia el access_token.
+-3. Úsalo en headers como:
++## 5. Run with Docker (Recommended)
+ 
+ ```bash
+--H "Authorization: Bearer <ACCESS_TOKEN>"
++cd ops
++docker compose -f docker-compose.yml up --build
+ ```
+ 
++This starts:
++- Postgres
++- Fastify Backend
++- FastAPI ML
++- React Frontend
++
+ ---
+ 
+-# 📬 6. Probar endpoints reales
++## 6. Authentication (Google OAuth)
+ 
+-## 🔸 Prueba: obtener correos base (sin IA)
++Use your Gmail OAuth `access_token` in the headers:
+ 
+ ```bash
+-curl -X GET "http://localhost:3000/api/v1/mails" \
+-  -H "Authorization: Bearer <ACCESS_TOKEN>"
+-```
+-
+-Respuesta esperada:
+-
+-```json
+-{
+-  "mails": [
+-    {
+-      "id": "18c8f6e...",
+-      "from": "facturas@cfe.mx",
+-      "subject": "Tu recibo de luz",
+-      "snippet": "Vence el 15 de noviembre...",
+-      "date": "2025-11-18T02:32:11Z"
+-    }
+-  ],
+-  "nextPageToken": null,
+-  "total": 1
+-}
++-H "Authorization: Bearer <ACCESS_TOKEN>"
+ ```
+ 
+ ---
+ 
+-## 🔸 Prueba: obtener correos con IA (sugerencias)
++## 7. Test the API
+ 
++### Base Email List (no AI)
+ ```bash
+-curl -X GET "http://localhost:3000/api/v1/suggestions" \
+-  -H "Authorization: Bearer <ACCESS_TOKEN>"
++curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/mails
+ ```
+ 
+-Respuesta esperada:
+-
+-```json
+-{
+-  "emails": [
+-    {
+-      "id": "18c8f6e...",
+-      "from": "facturas@cfe.mx",
+-      "subject": "Tu recibo de luz",
+-      "snippet": "Vence el 15 de noviembre...",
+-      "date": "2025-11-18T02:32:11Z",
+-      "suggestions": [
+-        {
+-          "action": "archive",
+-          "reason": "low_priority"
+-        }
+-      ]
+-    }
+-  ]
+-}
+-```
+-
+-### Caso ML caído
++### Email List with AI Suggestions
++```bash
++curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/suggestions
++```
+ 
++If ML is offline, backend returns suggestions as empty:
+ ```json
+-{
+-  "emails": [
+-    {
+-      "id": "...",
+-      "suggestions": []
+-    }
+-  ]
+-}
++{ "emails": [ { "id": "...", "suggestions": [] } ] }
+ ```
+ 
+-> El backend nunca truena si el ML falla.
+-> Simplemente devuelve `suggestions: []`.
+-
+ ---
+ 
+-# 🧪 7. Probar todo el pipeline
+-
+-### Pipeline completo:
++## 8. Run Tests
+ 
++### Backend (Jest)
+ ```bash
++cd email-cleaner-fastify
+ npm test
+ ```
+ 
+-Resultados esperados:
+-
++Expected:
+ ```
+ 33 passed, 0 failed
+ ```
+ 
+-Esto asegura:
+-
+-* mlClient funciona (errores, timeout, URL)
+-* emailSuggester funciona (normalización + fallback)
+-* suggestionsRoutes funciona
+-* mailsRoutes funciona
++### ML (pytest)
++```bash
++cd email-cleaner-ml-python
++pytest
++```
+ 
+ ---
+ 
+-# 🛠 8. Notas importantes para desarrollo
+-
+-* `/api/v1/mails` → Gmail base
+-* `/api/v1/suggestions` → Gmail base + IA
+-* No usar `/api/v1/emails` (endpoint eliminado)
+-* Fastify usa ESM
+-* ML usa FastAPI con JSON puro
+-* Las sugerencias siempre se normalizan a objetos `{ action, reason? }`
++## 9. Smoke Test
+ 
+----
++### Backend health:
++```bash
++curl http://localhost:3000/api/v1/health
++```
+ 
+-# 🧭 9. Siguiente paso recomendado (HU6)
++### ML docs:
++```bash
++curl http://localhost:8000/docs
++```
+ 
+-* Implementar UI real de sugerencias en React
+-* Consumir `/suggestions` desde frontend
+-* Mostrar acciones sugeridas
+-* Preparar endpoints futuros para accionamientos reales
+-  (archivar, eliminar, marcar leído)
++### Suggestions:
++```bash
++curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/suggestions
++```
+ 
+ ---
+ 
+-# FIN DEL ARCHIVO
++## 10. Main Endpoints
+ 
+-```
++- `/api/v1/mails`
++- `/api/v1/suggestions`
++- `/health`
++- `http://localhost:8000/docs` (ML OpenAPI)
+ 
+ ---
+ 
+-```
++# END OF FILE
+ 

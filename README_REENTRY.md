@@ -1,195 +1,141 @@
+# README_REENTRY.md — Backend Fastify
+
+Email Cleaner & Smart Notifications
+
+> Single-purpose file: allow fast reentry into the backend after a long pause, in under 2 minutes.
+> This file summarizes only: branch, last HU, current state, and the next actionable step.
 
 ---
 
-```txt
-# Reentrada Rápida – Email Cleaner & Smart Notifications
-> Guía para retomar el proyecto después de una pausa  
-> Actualizado tras la corrección de HU12 (Fastify ↔ ML)
+## 1. Context at Last Update
+
+**Repository:** Backend Fastify
+**Branch:** `develop`
+**Commit:** `c37c6460`
+**Last update:** 2025-11-20 CST
+**Project scope:**
+
+* Fastify backend (Node.js, ESM)
+* PostgreSQL via Sequelize
+* FastAPI ML microservice (external dependency)
+* No frontend code here
+* No n8n workflows versioned
+
+The backend is stable, all tests pass, and the last completed work was HU12.
 
 ---
 
-## 🎯 Propósito de este documento
-Este archivo existe para que puedas regresar al proyecto incluso después de semanas/meses sin tocar código y **volver a estar operativo en minutos**, sin releer todo.
+## 2. Last Completed User Story
 
-Aquí se explica:
+### HU12 — Final Fastify ↔ ML Contract Integration
 
-- Qué se estaba haciendo
-- En qué rama
-- Qué HU estaba activa
-- Qué queda pendiente
-- Qué endpoints existen realmente
-- Cómo levantar el proyecto rápido
+**Status:** DONE
 
----
+* `/api/v1/mails` contract validated
+* Gmail mock responses consistent with tests
+* All tests under `mailsRoutes.test.js`, `suggestionsRoutes.test.js`, and `mlClient.test.js` passed
+* API Reference aligned with behavior
 
-## 🚦 Último trabajo activo
-**Historia activa final:**  
-✔ **HU12 — Integración Fastify ↔ ML para sugerencias inteligentes de correos**
-
-Esta historia ya está **100% completada** y corregida.
-
-### ¿Qué se logró?
-
-- Integración Fastify ↔ Microservicio ML (FastAPI)
-- Endpoint IA oficial: **`GET /api/v1/suggestions`**
-- Endpoint base: **`GET /api/v1/mails`**
-- Se eliminó `/api/v1/emails` porque nunca existió en el backend real
-- Normalización completa de sugerencias ML
-- Manejo de errores con fallback seguro (`suggestions: []`)
-- Nuevas pruebas unitarias y de rutas — todo en **verde**
-- Documentación alineada (API_REFERENCE, Quickstart, Sprint_Log, Project_State)
+No pending items for this HU.
 
 ---
 
-## 🔥 Estado del backend Fastify
-Totalmente estable:
+## 3. Current Active User Story
 
-- Tests en verde:  
+### HU5 — Fastify–Python ML Contract Alignment
+
+**Status:** IN_PROGRESS
+**Reason:**
+The JSON schema returned by the FastAPI classifier is not yet fully aligned with the shape consumed by `mlClient` and `/api/v1/suggestions`.
+
+**Verified requirements:**
+
+* `mlClient.js` handles timeouts and returns safe defaults
+* Tests cover fallback behavior
+
+**What remains:**
+
+* Freeze and document the ML → Fastify response schema
+* Update `mlClient` and tests to match the final schema
+
+---
+
+## 4. Verified Current System State
+
+### Backend
+
+* Boots locally and under `docker-compose`
+* Exposes stable endpoints:
+
+  * `GET /api/v1/mails`
+  * `GET /api/v1/suggestions`
+  * `GET /api/v1/notifications/summary`
+  * `POST /api/v1/notifications/confirm`
+  * `GET /api/v1/notifications/history`
+  * `GET /api/v1/health`
+
+### Database
+
+* Models present: `Token`, `Notification`, `ActionHistory`
+* DB connection validated at startup
+* Reads/writes verified via History and Confirm endpoints
+
+### ML Microservice
+
+* FastAPI service reachable through `ML_BASE_URL`
+* Fallback logic validated by tests
+
+### Tests
+
+```
+All tests: passing
+0 failures
 ```
 
-33 passed, 0 failed
-
-````
-- Rutas reales y correctas:
-- `/api/v1/mails` (datos base desde Gmail)
-- `/api/v1/suggestions` (datos enriquecidos por IA)
-- `emailSuggester` y `mlClient` funcionando con configuración clara:
-```env
-ML_BASE_URL=http://localhost:8000
-ML_TIMEOUT_MS=5000
-````
-
 ---
 
-## 🧠 Reglas clave que debes recordar
+## 5. How to Restart the Backend
 
-1. **Fastify nunca llama a ML en `/mails`**
-   `/mails` = inbox crudo.
-
-2. **Toda la inteligencia ocurre en `/api/v1/suggestions`**
-   `/suggestions` = inbox + IA.
-
-3. **Si ML falla, la API no truena**
-
-   * Devuelve `suggestions: []`
-   * Loguea error interno
-
-4. **El frontend sólo debe usar `/suggestions`**
-   (para la HU6 próxima)
-
----
-
-## 🧪 Cómo levantar el sistema rápido
-
-### 1. Levantar Fastify
+### 1. Install dependencies
 
 ```bash
 npm install
+```
+
+### 2. Start PostgreSQL + ML + backend
+
+```bash
+docker compose up
+```
+
+### 3. Run backend standalone (optional)
+
+```bash
 npm run dev
 ```
 
-### 2. Levantar Microservicio ML (FastAPI)
+### 4. Verify key endpoints
 
 ```bash
-cd python/classifier
-uvicorn app:app --reload --host 0.0.0.0 --port 8000
-```
-
-### 3. Probar con Curl
-
-```bash
-curl -H "Authorization: Bearer <TOKEN>" \
-     http://localhost:3000/api/v1/suggestions
+curl -H "Authorization: Bearer dummy" http://localhost:3000/api/v1/mails
+curl -H "Authorization: Bearer dummy" http://localhost:3000/api/v1/suggestions
 ```
 
 ---
 
-## 🧩 Arquitectura mínima para recordar
-
-Fastify → GmailService → emailSuggester → mlClient → FastAPI
-
-```
-[mails] ------------------> Gmail API
-   |
-   | (solo datos base)
-   v
-[emailSuggester] -----> mlClient -----> FastAPI ML
-   |
-   | (datos enriquecidos)
-   v
-[suggestions]
-```
-
----
-
-## 🗂 Archivos clave relacionados con HU12
+## 6. Files Needed to Understand the Current Work
 
 * `src/services/mlClient.js`
 * `src/services/emailSuggester.js`
 * `src/routes/suggestionsRoutes.js`
 * `tests/mlClient.test.js`
-* `tests/emailSuggester.test.js`
 * `tests/suggestionsRoutes.test.js`
-* `tests/mailsRoutes.test.js` (renombrado)
 
 ---
 
-## 🛠 Próximo trabajo recomendado (HU6)
+## 7. Next Immediate Action (strict, single step)
 
-Siguiente etapa lógica del proyecto:
+➡️ **Align the final ML → Fastify JSON schema and update `/api/v1/suggestions` tests accordingly.**
 
-* Crear UI de sugerencias en React
-* Integrar `/suggestions` con la pantalla real
-* Mostrar `suggestions[]` con acciones recomendadas
-* Preparar interacción con el backend (futuras HU: acciones reales)
-
----
-
-## 📝 Estado de la rama activa
-
-Última rama utilizada:
-
-```
-feature/hu12-fastify-ml-integration
-```
-
-Esta rama ya está lista para hacer:
-
-```
-git merge main
-```
-
-o crear una nueva rama para HU6.
-
----
-
-## 🧹 Limpieza realizada
-
-* Eliminación de `/api/v1/emails` en toda la documentación
-* Corrección de Quickstart
-* Corrección de API Reference
-* Corrección de Sprint_Log
-* Corrección de Project_State
-* Normalización de naming “mails” vs “suggestions”
-
----
-
-## ✔ Resumen final de reentrada
-
-1. Backend está estable
-2. ML integrado correctamente
-3. HU12 está terminada
-4. Rutas oficiales:
-
-   * `/api/v1/mails`
-   * `/api/v1/suggestions`
-5. Siguiente paso: HU6 (UI de Sugerencias)
-
----
-
-# FIN DEL ARCHIVO
-
-```
-
----
+This is the *only* next step required to resume backend work.
 

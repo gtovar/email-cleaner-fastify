@@ -1,103 +1,46 @@
-# SPRINT LOG – Email Cleaner & Smart Notifications
-> Registro cronológico de decisiones, avances y cambios del proyecto  
-> Actualizado tras la corrección de HU12 (Fastify ↔ ML)
+# SPRINT_LOG.md — Backend Fastify
+
+Email Cleaner & Smart Notifications
+
+> Chronological record of **actions taken**, not state, not planning.
 
 ---
 
-## 📅 Sprint Actual  
-**Sprint #? – Integración ML + Limpieza de documentación**
+## 2025-11-18 — Preparation for HU12
+
+* Normalized ML payload in `emailSuggester.js`.
+* Cleaned references to deprecated `/api/v1/emails`.
+* Updated tests in `suggestionsRoutes.test.js` to align fallback behavior.
+
+## 2025-11-19 — HU12 integration work
+
+* Refactor in `mlClient.js` (timeout handling, safe defaults, ML_BASE_URL usage).
+* Updated `mailsRoutes.js` contract and corresponding tests.
+* Validated ML fallback path via `mlClient.test.js`.
+
+## 2025-11-20 — HU12 completed
+
+* All routes verified: mails, suggestions, summary, confirm, history.
+* All tests passed (`33 passed, 0 failed`).
+* Documentation synchronized: API Reference, Quickstart, Project_State, Reentry.
+* Snapshot committed under `c37c6460`.
+
+## 2025-11-20 — Start HU5 schema alignment
+
+* Verified classifier response from FastAPI.
+* Detected mismatch between ML schema and `mlClient` expected fields.
+* Marked HU5 as active; no code changes committed yet.
+
+## 2025-11-21 — HU5 analysis
+
+* Identified missing final JSON schema in FastAPI.
+* Next step defined: freeze schema, update tests, then update mlClient accordingly.
 
 ---
 
-## 🟢 HU12 — Integración Fastify ↔ ML (DONE)
+## Backlog notes (not state, not planning — just facts discovered)
 
-### Resumen
-La HU12 se reescribió para reflejar correctamente el diseño final:
-
-- `/api/v1/mails` → listado base SIN IA  
-- `/api/v1/suggestions` → listado enriquecido CON IA  
-
-Se eliminó `/api/v1/emails` porque nunca existió en el backend real.  
-Se corrigieron referencias, tests y documentación.
-
-### Log de avances HU12 (cronológico)
-
-1. **Refactor mlClient.js**
-   - Implementación de errores tipados  
-   - Manejo de timeout  
-   - Uso de `ML_BASE_URL` y `ML_TIMEOUT_MS`  
-
-2. **Refactor emailSuggester.js**
-   - Normalización de payload del ML  
-   - Manejo de errores con fallback  
-   - Sin exponer tokens  
-
-3. **Creación y corrección de tests**
-   - `mlClient.test.js`  
-   - `emailSuggester.test.js`  
-   - `suggestionsRoutes.test.js`  
-   - `mailsRoutes.test.js` (antes emailsRoutes.test.js)
-
-4. **Actualización de documentación**
-   - Corrección completa de:
-     - API_REFERENCE.md  
-     - QUICKSTART.md  
-     - README_REENTRY.md  
-     - PROJECT_STATE.md  
-     - Sprint_Log.md  
-
-5. **Limpieza de endpoints**
-   - Eliminado `/api/v1/emails` (referencias y docs)
-   - `/suggestions` declarado como endpoint IA oficial  
-   - `/mails` declarado como endpoint base  
-
-### Estado final HU12  
-✔ Implementación completa  
-✔ Documentación corregida  
-✔ Tests en verde  
-✔ Branch listo para merge  
-✔ No quedan dependencias abiertas  
-
----
-
-## 🔧 HU6 (UI React → Suggestions)
-
-### Avances
-- Frontend en React ya consume backend básico  
-- Falta vista real para suggestions  
-- Pendiente integración de acciones reales  
-
-### Riesgos
-- Requiere sincronización con contrato `/suggestions`  
-- Gmail OAuth real aún no integrado en ambiente Docker  
-
----
-
-## 🧹 Limpiezas realizadas en este sprint
-
-- Depuración completa de referencias a `/api/v1/emails`  
-- Renombrado del test `emailsRoutes.test.js → mailsRoutes.test.js`  
-- Actualización cross-file de documentación  
-
----
-
-## 📌 Entradas de backlog generadas durante este sprint
-
-- **HU-XX — UI de Sugerencias Inteligentes (continuación HU6)**
-- **HU-XX — Acciones reales (archivar / eliminar / marcar leído)**
-- **HU-XX — Paginación avanzada para /api/v1/mails**  
-- **HU-XX — Limpieza final de endpoints legacy**  
-- **HU-XX — Endpoint de reglas ML (futuro)**
-
----
-
-## 📝 Notas importantes
-
-- Todo el backend está estable: 33 tests en verde.  
-- La arquitectura Fastify ↔ ML está completamente funcional.  
-- El próximo sprint debería enfocarse en la UI o en acciones reales del backend.
-
----
-
-# FIN DEL ARCHIVO
+* End-to-end tests still missing.
+* Suggestions endpoint lacks strict validation on ML payload.
+* No n8n workflows committed yet.
 
