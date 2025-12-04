@@ -178,7 +178,7 @@ describe('mlClient service', () => {
           ).rejects.toThrow('classifyEmails: "emails" must be an array');
       });
 
-    test('sends emails to default endpoint /v1/emails/classify', async () => {
+    test('sends emails to default endpoint /v1/suggest', async () => {
       const fakeResponse = { result: 'ok' };
 
       // eslint-disable-next-line no-undef
@@ -200,11 +200,11 @@ describe('mlClient service', () => {
 
       // eslint-disable-next-line no-undef
       const [url, options] = global.fetch.mock.calls[0];
-      expect(url).toBe('http://ml:8000/v1/emails/classify');
+      expect(url).toBe('http://ml:8000/v1/suggest');
 
       const parsedBody = JSON.parse(options.body);
-      expect(parsedBody).toHaveProperty('emails');
-      expect(parsedBody.emails).toEqual(emails);
+      // Ahora enviamos el arreglo directamente
+      expect(parsedBody).toEqual(emails);
 
       expect(result).toEqual(fakeResponse);
     });

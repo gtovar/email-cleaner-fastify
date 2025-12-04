@@ -1,100 +1,117 @@
-````txt
-# ⚡ Quickstart — Email Cleaner & Smart Notifications
-> Guía rápida para levantar y probar el proyecto  
-> Actualizado tras la corrección de HU12 (Fastify ↔ ML)
+# Quickstart — Email Cleaner & Smart Notifications
+Fast and simple guide to run the entire system locally.
 
 ---
 
-# 🚀 Objetivo del Quickstart
-Levantar el backend Fastify y el microservicio ML (FastAPI), obtener un token de Gmail, probar los endpoints reales y validar que la integración funciona.
+## 1. Requirements
 
-Este documento te permite levantar todo el sistema en minutos.
-
----
-
-# 🧩 Requisitos previos
-
-- Node.js 18+  
-- Python 3.10+  
-- Gmail OAuth configurado  
-- Uvicorn instalado (para FastAPI)
-- npm o yarn
-- Postman / Curl opcional
+- Node.js 18+
+- Python 3.10+
+- pip + venv
+- Uvicorn
+- Docker (optional, recommended)
+- Google OAuth2 credentials (Client ID, Secret, Redirect URI)
 
 ---
 
-# 📦 1. Instalar dependencias
+## 2. Install Dependencies
 
-## Fastify backend
+### Backend (Fastify)
 ```bash
+cd email-cleaner-fastify
 npm install
-````
+```
 
-## Microservicio ML (Python)
-
+### ML Service (FastAPI)
 ```bash
-cd python/classifier
+cd email-cleaner-ml-python
 pip install -r requirements.txt
 ```
 
+### Frontend (React)
+```bash
+cd email-cleaner-frontend-react
+npm install
+```
+
 ---
 
-# ⚙️ 2. Variables de entorno
+## 3. Environment Variables
 
-Crea un archivo `.env` en el raíz del proyecto:
+Each module includes a `.env.example`. Copy it to `.env`:
+
+```bash
+cp .env.example .env
+```
+
+Important variables for the backend:
 
 ```env
-# Config ML
 ML_BASE_URL=http://localhost:8000
 ML_TIMEOUT_MS=5000
 
-# (Opcional) URL para Docker
-FASTAPI_URL=http://fastapi:8000
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_REDIRECT_URI=...
 ```
-
-> Nota: FASTAPI_URL es usada en escenarios Docker;
-> ML_BASE_URL es usada localmente por mlClient.
 
 ---
 
-# 🟢 3. Levantar Fastify
+## 4. Run in Development Mode
 
+### A) Fastify Backend
 ```bash
+cd email-cleaner-fastify
 npm run dev
 ```
 
-Escuchando en:
-
+Available at:
 ```
 http://localhost:3000
 ```
 
----
-
-# 🔵 4. Levantar el microservicio ML (FastAPI)
-
+### B) FastAPI ML Service
 ```bash
-cd python/classifier
+cd email-cleaner-ml-python
 uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Escuchando en:
-
+Available at:
 ```
 http://localhost:8000
 ```
 
+### C) React Frontend
+```bash
+cd email-cleaner-frontend-react
+npm run dev
+```
+
+Available at:
+```
+http://localhost:5173
+```
+
 ---
 
-# 🔐 5. Obtener token de Gmail
+## 5. Run with Docker (Recommended)
 
-Este proyecto usa OAuth2 de Google.
+```bash
+cd ops
+docker compose -f docker-compose.yml up --build
+```
 
-Pasos:
+This starts:
+- Postgres
+- Fastify Backend
+- FastAPI ML
+- React Frontend
 
-1. En navegador, autentícate con Gmail.
-2. Copia el access_token.
-3. Úsalo en headers como:
+---
+
+## 6. Authentication (Google OAuth)
+
+Use your Gmail OAuth `access_token` in the headers:
 
 ```bash
 -H "Authorization: Bearer <ACCESS_TOKEN>"
@@ -102,131 +119,73 @@ Pasos:
 
 ---
 
-# 📬 6. Probar endpoints reales
+## 7. Test the API
 
-## 🔸 Prueba: obtener correos base (sin IA)
-
+### Base Email List (no AI)
 ```bash
-curl -X GET "http://localhost:3000/api/v1/mails" \
-  -H "Authorization: Bearer <ACCESS_TOKEN>"
+curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/mails
 ```
 
-Respuesta esperada:
+### Email List with AI Suggestions
+```bash
+curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/suggestions
+```
 
+If ML is offline, backend returns suggestions as empty:
 ```json
-{
-  "mails": [
-    {
-      "id": "18c8f6e...",
-      "from": "facturas@cfe.mx",
-      "subject": "Tu recibo de luz",
-      "snippet": "Vence el 15 de noviembre...",
-      "date": "2025-11-18T02:32:11Z"
-    }
-  ],
-  "nextPageToken": null,
-  "total": 1
-}
+{ "emails": [ { "id": "...", "suggestions": [] } ] }
 ```
 
 ---
 
-## 🔸 Prueba: obtener correos con IA (sugerencias)
+## 8. Run Tests
 
+### Backend (Jest)
 ```bash
-curl -X GET "http://localhost:3000/api/v1/suggestions" \
-  -H "Authorization: Bearer <ACCESS_TOKEN>"
-```
-
-Respuesta esperada:
-
-```json
-{
-  "emails": [
-    {
-      "id": "18c8f6e...",
-      "from": "facturas@cfe.mx",
-      "subject": "Tu recibo de luz",
-      "snippet": "Vence el 15 de noviembre...",
-      "date": "2025-11-18T02:32:11Z",
-      "suggestions": [
-        {
-          "action": "archive",
-          "reason": "low_priority"
-        }
-      ]
-    }
-  ]
-}
-```
-
-### Caso ML caído
-
-```json
-{
-  "emails": [
-    {
-      "id": "...",
-      "suggestions": []
-    }
-  ]
-}
-```
-
-> El backend nunca truena si el ML falla.
-> Simplemente devuelve `suggestions: []`.
-
----
-
-# 🧪 7. Probar todo el pipeline
-
-### Pipeline completo:
-
-```bash
+cd email-cleaner-fastify
 npm test
 ```
 
-Resultados esperados:
-
+Expected:
 ```
 33 passed, 0 failed
 ```
 
-Esto asegura:
-
-* mlClient funciona (errores, timeout, URL)
-* emailSuggester funciona (normalización + fallback)
-* suggestionsRoutes funciona
-* mailsRoutes funciona
-
----
-
-# 🛠 8. Notas importantes para desarrollo
-
-* `/api/v1/mails` → Gmail base
-* `/api/v1/suggestions` → Gmail base + IA
-* No usar `/api/v1/emails` (endpoint eliminado)
-* Fastify usa ESM
-* ML usa FastAPI con JSON puro
-* Las sugerencias siempre se normalizan a objetos `{ action, reason? }`
-
----
-
-# 🧭 9. Siguiente paso recomendado (HU6)
-
-* Implementar UI real de sugerencias en React
-* Consumir `/suggestions` desde frontend
-* Mostrar acciones sugeridas
-* Preparar endpoints futuros para accionamientos reales
-  (archivar, eliminar, marcar leído)
-
----
-
-# FIN DEL ARCHIVO
-
+### ML (pytest)
+```bash
+cd email-cleaner-ml-python
+pytest
 ```
 
 ---
 
+## 9. Smoke Test
+
+### Backend health:
+```bash
+curl http://localhost:3000/api/v1/health
 ```
+
+### ML docs:
+```bash
+curl http://localhost:8000/docs
+```
+
+### Suggestions:
+```bash
+curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/suggestions
+```
+
+---
+
+## 10. Main Endpoints
+
+- `/api/v1/mails`
+- `/api/v1/suggestions`
+- `/health`
+- `http://localhost:8000/docs` (ML OpenAPI)
+
+---
+
+# END OF FILE
 

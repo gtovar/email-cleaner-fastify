@@ -3,14 +3,22 @@ import { notificationsService } from '../src/services/notificationsService.js';
 
 describe('notificationsService', () => {
     let recorded;
+    let eventsRecorded;
     let service;
 
     beforeEach(() => {
         recorded = [];
+        eventsRecorded = [];
         const fakeModels = {
             ActionHistory: {
                 create: jest.fn(async (row) => {
                     recorded.push(row);
+                    return row;
+                })
+            },
+            NotificationEvent: {
+                create: jest.fn(async (row) => {
+                    eventsRecorded.push(row);
                     return row;
                 })
             }
@@ -29,6 +37,12 @@ describe('notificationsService', () => {
         expect(summary[0]).toMatchObject({
             id: 'test1',
             suggestions: ['archive']
+        });
+
+        expect(eventsRecorded).toHaveLength(1);
+        expect(eventsRecorded[0]).toMatchObject({
+            type: 'NEW_SUGGESTIONS_AVAILABLE',
+            userId: 'demo-user'
         });
     });
 

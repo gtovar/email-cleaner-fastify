@@ -81,6 +81,35 @@ describe('suggestActions', () => {
       ]
     });
   });
+    
+   it('enriches emails when ML returns an array of enriched emails', async () => {
+    const emails = [
+      { id: '1', subject: 'Hello' },
+      { id: '2', subject: 'Promo' }
+    ];
+
+    // Simulamos el formato real del microservicio Python:
+    classifyEmailsMock.mockResolvedValue([
+      { id: '1', suggestions: ['archive'] },
+      { id: '2', suggestions: ['delete'] }
+    ]);
+
+    const result = await suggestActions(emails);
+
+    expect(result.emails).toEqual([
+      {
+        id: '1',
+        subject: 'Hello',
+        // 'archive' se normaliza a { action: 'archive' }
+        suggestions: [{ action: 'archive' }]
+      },
+      {
+        id: '2',
+        subject: 'Promo',
+        suggestions: [{ action: 'delete' }]
+      }
+    ]);
+  });
 
   it('falls back to empty suggestions when ML fails', async () => {
     const emails = [{ id: '1', subject: 'Hello' }];

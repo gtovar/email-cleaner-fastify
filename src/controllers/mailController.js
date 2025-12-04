@@ -45,7 +45,7 @@ export async function listEmails(req, reply) {
       })
     );
 
-    const mailsWithSuggestions = await suggestActions(mails);
+    const { emails: mailsWithSuggestions } = await suggestActions(mails);
 
     reply.send({
       mails: mailsWithSuggestions,
