@@ -1,88 +1,57 @@
-# ✅ **Sprint_Log.md (versión final)**
+## 📌 Sprint_Log.md — Backend Fastify
 
-*(Alineado 100% al protocolo)*
-
----
-
-````markdown
-# Sprint Log — Email Cleaner & Smart Notifications  
-Backend Fastify — Last Updated: 2025-11-22 03:05 CST
+*(Email Cleaner & Smart Notifications — Backend)*
+*Last updated: 2025-11-30 23:58 CST*
 
 ---
 
-## Sprint: HU5 — ML Schema Alignment  
-**Period:** 2025-11-20 → 2025-11-22  
-**Branch:** `feature/hu5-ml-schema-alignment`  
-**Commit:** `cff3c9d4`
+### 2025-11-20 — HU5 started
+
+* ML contract v1 defined (`/v1/suggest`).
+* Branch created: `feature/hu5-ml-schema-alignment`.
+
+### 2025-11-21 — mlClient updated
+
+* Default path switched to `/v1/suggest`.
+* Payload changed to raw email arrays.
+
+### 2025-11-21 — emailSuggester updated
+
+* Normalized ML enriched-array output.
+* Legacy mapping preserved.
+
+### 2025-11-21 — Tests updated
+
+* `mlClient.test.js` and `emailSuggester.test.js` adjusted for v1 contract.
+
+### 2025-11-22 — HU5 completed
+
+* Full backend test suite green.
+* Contract v1 validated with curl.
 
 ---
 
-### 🎯 Sprint Goal
-Align Fastify backend with the versioned ML microservice contract (`/v1/suggest`), ensuring schema compatibility, normalized response handling, and updated automated tests.
+### 2025-11-28 — HU12 validated
+
+* Fastify ↔ ML integration fallback behaviour tested.
+* emailSuggester fallback confirmed.
+
+### 2025-11-28 — Merge HU5 + HU12 into `develop`
+
+* Backend stabilized under ML v1 contract.
+* All tests passing.
 
 ---
 
-### ✅ Completed Work (Done)
+### 2025-11-30 — Documentation synchronized
 
-- Implemented versioned contract between Fastify ↔ ML.
-- Updated `mlClient.js` to:
-  - use `/v1/suggest` as default path,
-  - send raw email arrays (no `{ emails }`),
-  - maintain backward compatibility.
-- Updated `emailSuggester.js` to:
-  - normalize enriched-array ML responses,
-  - preserve legacy suggestion mapping.
-- Updated and extended Jest tests:
-  - `tests/mlClient.test.js`
-  - `tests/emailSuggester.test.js`
-- Verified ML microservice manually with `curl` (real enriched output).
-- Full backend test suite passed successfully.
+* PROJECT_STATE.md backend rewritten using template.
+* README_REENTRY.md backend updated.
+* Sprint_Log backend updated to this point.
 
----
+### 2025-12-03 — HU16 Notification Event Pipeline completed
+- Added NotificationEvent model and migration.  
+- getSummary() now emits and persists NEW_SUGGESTIONS_AVAILABLE events.  
+- Added GET /api/v1/notifications/events feed with pagination and filters.  
+- Updated tests and API documentation accordingly.
 
-### 📂 Evidence (Verifiable)
-
-- Diff (`cambios.txt`) shows all updated files:
-  - `python/classifier/app.py`
-  - `src/services/mlClient.js`
-  - `src/services/emailSuggester.js`
-  - `tests/mlClient.test.js`
-  - `tests/emailSuggester.test.js`
-- Successful curl:
-  ```bash
-  curl -s http://localhost:8000/suggest [...]
-````
-
-* Logs confirm FastAPI response:
-  `200 OK` with enriched suggestions.
-* Full test suite output: **100% passing**.
-
----
-
-### ⏳ Pending Work
-
-None for HU5 — this user story is officially **DONE**.
-
----
-
-### ⚠️ Sprint Risks (Technical)
-
-* No E2E workflow testing implemented yet.
-* ML input validation could be stricter.
-* No schema version negotiation beyond `v1` (acceptable at this stage).
-
----
-
-### 🔄 Retrospective (3 lines max)
-
-* What worked: Clear versioned contract and excellent test coverage.
-* What didn’t: Date parsing required extra attention (offset-aware vs naive).
-* Improvement: Add an end-to-end integration test in future sprints.
-
----
-
-### 📌 Closure
-
-HU5 is completed and verified.
-Backend is stable and synchronized with the ML microservice.
-Documented in `PROJECT_STATE.md` and `README_REENTRY.md`.

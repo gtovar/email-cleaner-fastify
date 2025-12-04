@@ -7,7 +7,7 @@ export async function getSummary(request, reply) {
     // TODO: Lógica para obtener sugerencias no confirmadas agrupadas por fecha
     const service = notificationsService(request.server.models);
     const userId = request.user?.id || 'demo-user';
-    const summary = await service.getSummary(userId);
+    const summary = await service.getSummary({ userId });
     return reply.send(summary);
 }
 
@@ -48,4 +48,3 @@ export async function confirmSuggestion(req, reply) {
     return reply.code(500).send({ ok: false, error: 'No se pudo guardar la confirmación.' });
   }
 }
-

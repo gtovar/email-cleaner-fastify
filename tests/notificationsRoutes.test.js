@@ -61,6 +61,28 @@ jest.unstable_mockModule('../src/controllers/actionHistoryController.js', () => 
   getHistory: mockGetHistory
 }));
 
+const mockListEvents = jest.fn(async (req, reply) => {
+  expect(req.query).toMatchObject({ page: 2, perPage: 5, type: 'NEW_SUGGESTIONS_AVAILABLE', userId: 'demo-user' });
+  return reply.send({
+    total: 1,
+    page: 2,
+    perPage: 5,
+    data: [
+      {
+        type: 'NEW_SUGGESTIONS_AVAILABLE',
+        userId: 'demo-user',
+        summary: { totalSuggestions: 3, sampledEmails: [] },
+        createdAt: '2025-11-14T07:15:00.000Z',
+        updatedAt: '2025-11-14T07:15:00.000Z'
+      }
+    ]
+  });
+});
+
+jest.unstable_mockModule('../src/controllers/notificationEventsController.js', () => ({
+  listEvents: mockListEvents
+}));
+
 // 3) Importamos las rutas ya con los controladores mockeados
 const notificationsRoutesModule = await import('../src/routes/notificationsRoutes.js');
 const notificationsRoutes = notificationsRoutesModule.default;
@@ -187,5 +209,42 @@ describe('Notifications Routes (contrato Fastify)', () => {
 
     expect(mockGetHistory).toHaveBeenCalledTimes(1);
   });
-});
 
+  it('GET /api/v1/notifications/events → 401 sin token', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/notifications/events'
+    });
+
+    expect(res.statusCode).toBe(401);
+    const body = JSON.parse(res.body);
+    expect(body).toEqual({ error: 'Falta token o formato inválido' });
+  });
+
+  it('GET /api/v1/notifications/events → 200 con token y filtro userId', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/notifications/events?page=2&perPage=5&type=NEW_SUGGESTIONS_AVAILABLE&userId=demo-user',
+      headers: {
+        Authorization: 'Bearer dummy-token'
+      }
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = JSON.parse(res.body);
+
+    expect(body).toMatchObject({
+      total: 1,
+      page: 2,
+      perPage: 5
+    });
+
+    expect(Array.isArray(body.data)).toBe(true);
+    expect(body.data[0]).toMatchObject({
+      type: 'NEW_SUGGESTIONS_AVAILABLE',
+      userId: 'demo-user'
+    });
+
+    expect(mockListEvents).toHaveBeenCalledTimes(1);
+  });
+});

@@ -24,7 +24,7 @@ const DEFAULT_TIMEOUT_MS = Number(process.env.ML_TIMEOUT_MS || '5000');
  * Construye de forma segura una URL a partir de la base ML y un path relativo.
  * Evita problemas de dobles slashes.
  *
- * @param {string} path - Ruta relativa del endpoint ML (ej: "/v1/emails/classify").
+ * @param {string} path - Ruta relativa del endpoint ML (ej: "/v1/suggest").
  * @returns {string} URL absoluta lista para usar con fetch.
  */
 function buildMlUrl(path) {

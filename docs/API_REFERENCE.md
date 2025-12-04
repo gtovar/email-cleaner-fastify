@@ -309,6 +309,58 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 ---
 
+### 4.4 GET /api/v1/notifications/events
+
+Lists notification events with pagination. Useful to consume a timeline of system/user events related to notifications.
+
+#### Description
+
+- Supports filtering by `type` and by `userId` (as required by the functional spec).
+- Records are stored with `timestamps: true`, so `createdAt`/`updatedAt` are always present and map to Sequelize defaults.
+
+#### Request
+
+```http
+GET /api/v1/notifications/events HTTP/1.1
+Authorization: Bearer <ACCESS_TOKEN>
+```
+
+#### Query Parameters
+
+- `page` *(optional, integer, default: 1)* — Page number.
+- `perPage` *(optional, integer, default: 20)* — Items per page.
+- `type` *(optional, string)* — Filter by event type (e.g., `NEW_SUGGESTIONS_AVAILABLE`).
+- `userId` *(optional, string)* — Filter by user identifier.
+
+#### Response 200 (example)
+
+```json
+{
+  "total": 1,
+  "page": 1,
+  "perPage": 20,
+  "data": [
+    {
+      "type": "NEW_SUGGESTIONS_AVAILABLE",
+      "userId": "demo-user",
+      "summary": {
+        "totalSuggestions": 3,
+        "sampledEmails": []
+      },
+      "createdAt": "2025-11-18T02:32:11.000Z",
+      "updatedAt": "2025-11-18T02:32:11.000Z"
+    }
+  ]
+}
+```
+
+#### Possible Status Codes
+
+- **200 OK** – Events returned successfully.
+- **401 Unauthorized** – Missing or invalid token.
+
+---
+
 ## 5. Health Check
 
 ### 5.1 GET /api/v1/health
@@ -368,4 +420,3 @@ ML_BASE_URL=http://localhost:8000
 ---
 
 # END OF FILE
-

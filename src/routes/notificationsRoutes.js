@@ -1,6 +1,7 @@
 // src/routes/notificationsRoutes.js
 import { getSummary, confirmActions } from '../controllers/notificationsController.js';
 import { getHistory } from '../controllers/actionHistoryController.js';
+import { listEvents } from '../controllers/notificationEventsController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
 
 export default async function (fastify, opts) {
@@ -65,6 +66,30 @@ export default async function (fastify, opts) {
     }
   });
 
+  // Notification event item (timestamps enabled)
+  fastify.addSchema({
+    $id: 'NotificationEvent',
+    type: 'object',
+    properties: {
+      type: { type: 'string' },
+      userId: { type: 'string' },
+      summary: { type: 'object' },
+      createdAt: { type: 'string', format: 'date-time', description: 'timestamps: true ensures createdAt exists' },
+      updatedAt: { type: 'string', format: 'date-time' }
+    }
+  });
+
+  fastify.addSchema({
+    $id: 'NotificationEventList',
+    type: 'object',
+    properties: {
+      total: { type: 'integer' },
+      page: { type: 'integer' },
+      perPage: { type: 'integer' },
+      data: { type: 'array', items: { $ref: 'NotificationEvent#' } }
+    }
+  });
+
   // GET /notifications/summary
   fastify.get('/api/v1/notifications/summary', {
     preHandler: [authMiddleware],
@@ -124,4 +149,27 @@ export default async function (fastify, opts) {
       }
     }
   }, getHistory);
+
+  // GET /notifications/events
+  fastify.get('/api/v1/notifications/events', {
+    preHandler: [authMiddleware],
+    schema: {
+      tags: ['official-v1','Notificaciones'],
+      summary: 'Listar eventos de notificaciones (paginado)',
+      security: [{ bearerAuth: [] }],
+      querystring: {
+        type: 'object',
+        properties: {
+          page: { type: 'integer', default: 1 },
+          perPage: { type: 'integer', default: 20 },
+          type: { type: 'string', description: 'Filtra por tipo de evento' },
+          userId: { type: 'string', description: 'Filtra por usuario (especificación funcional)' }
+        }
+      },
+      response: {
+        200: { $ref: 'NotificationEventList#' },
+        401: { description: 'No autorizado' }
+      }
+    }
+  }, listEvents);
 }
