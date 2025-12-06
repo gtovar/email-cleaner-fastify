@@ -1,5 +1,7 @@
-import { describe, expect, test, jest, beforeEach } from '@jest/globals';
+import { describe, expect, test, jest, beforeEach, afterEach } from '@jest/globals';
 import { notificationsService } from '../src/services/notificationsService.js';
+import { registerNotificationEventListeners, __resetNotificationEventListeners } from '../src/services/notificationEventListeners.js';
+import { clearEventListeners, DOMAIN_EVENTS } from '../src/services/eventBus.js';
 
 describe('notificationsService', () => {
     let recorded;
@@ -9,6 +11,9 @@ describe('notificationsService', () => {
     beforeEach(() => {
         recorded = [];
         eventsRecorded = [];
+        clearEventListeners(DOMAIN_EVENTS.NEW_SUGGESTIONS);
+        __resetNotificationEventListeners();
+
         const fakeModels = {
             ActionHistory: {
                 create: jest.fn(async (row) => {
@@ -23,7 +28,14 @@ describe('notificationsService', () => {
                 })
             }
         };
+
+        registerNotificationEventListeners({ eventBus: null, models: fakeModels });
         service = notificationsService(fakeModels);
+    });
+
+    afterEach(() => {
+        clearEventListeners(DOMAIN_EVENTS.NEW_SUGGESTIONS);
+        __resetNotificationEventListeners();
     });
 
     test('getSummary devuelve al menos una sugerencia demo', async () => {

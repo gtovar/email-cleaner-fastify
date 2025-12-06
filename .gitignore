@@ -17,3 +17,5 @@ src/swagger.yaml
 proyecto_completo.txt
 proyecto_completo_*.txt
 proyecto_completo_email-cleaner-fastify.txt
+__pycache__/
+*.pyc

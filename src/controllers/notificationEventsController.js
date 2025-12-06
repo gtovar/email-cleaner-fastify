@@ -9,3 +9,13 @@ export async function listEvents(request, reply) {
 
   return reply.send(result);
 }
+
+export async function confirmActionHandler(req, reply) {
+  await confirmSuggestionCommand(...);
+  return reply.code(204).send();
+}
+
+export async function getSummaryHandler(req, reply) {
+  const summary = await getSummaryQuery(...);
+  return reply.send(summary);
+}

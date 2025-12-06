@@ -7,7 +7,7 @@ import mailRoutes from './routes/mailRoutes.js';
 import suggestionRoutes from './routes/suggestionRoutes.js';
 import notificationsRoutes from './routes/notificationsRoutes.js';
 import cors from '@fastify/cors';
-
+import eventBusPlugin from './plugins/eventBus.js';
 
 // Carga dotenv antes que nada
 import 'dotenv/config';
@@ -48,10 +48,11 @@ await fastify.register(swaggerUI, {
 
 // Registro de plugins y rutas (nota los imports dinámicos)
 await fastify.register(dbPlugin);
+await fastify.register(eventBusPlugin);
 await fastify.register(authRoutes);
 await fastify.register(mailRoutes);
 await fastify.register(suggestionRoutes);
-await fastify.register(notificationsRoutes);
+await fastify.register(notificationsRoutes, { prefix: "/api/v1/notifications" });
 
 
 // Healthcheck
@@ -89,4 +90,3 @@ const start = async () => {
 
 
 start();
-

@@ -1,50 +1,74 @@
-// notificationsController.js
 import { notificationsService } from '../services/notificationsService.js';
+import { confirmSuggestionCommand } from "../commands/notifications/confirmSuggestionCommand.js";
+import { confirmActionCommand } from "../commands/notifications/confirmActionCommand.js";
+import { getHistoryQuery } from "../queries/notifications/getHistoryQuery.js";
+import { getEventQuery } from "../queries/notifications/getEventQuery.js";
 
-// GET /notifications/summary
+// GET /api/v1/notifications/summary
 export async function getSummary(request, reply) {
-    // TODO: Extraer usuario autenticado (request.user o token)
-    // TODO: Lógica para obtener sugerencias no confirmadas agrupadas por fecha
-    const service = notificationsService(request.server.models);
-    const userId = request.user?.id || 'demo-user';
-    const summary = await service.getSummary({ userId });
-    return reply.send(summary);
+  const { models, eventBus } = request.server;
+  const userId = request.user?.id ?? "demo-user";
+
+  const service = notificationsService({ models, eventBus });
+
+  const summary = await service.getSummaryForUser({ userId });
+
+  return reply.send(summary);
 }
 
-// POST /notifications/confirm
-export async function confirmActions(request, reply) {
-    // TODO: Validar payload (ids, acción)
-    // TODO: Ejecutar acción (aceptar/rechazar), actualizar Gmail y registrar historial
-    // Ejemplo de payload: { ids: [string], action: 'accept' | 'reject' }
-    const { ids, action } = request.body;
-    const userId = request.user?.id || 'demo-user';
+// GET /api/v1/notifications/history  Queries
+export async function getHistory(request, reply) {
+  const userId = request.user?.id ?? "demo-user";
+  const history = await getHistoryQuery({
+    models: request.server.models,
+    userId,
+  });
 
-    const service = notificationsService(request.server.models); // ✅ esto es clave
+  return reply.send(history);
+}
 
-    const result = await service.confirmActions({ ids, action, userId });
-    return reply.send(result);
+// GET /api/v1/notifications/events   Queries
+export async function getEvents(request, reply) {
+  const { page = 1, perPage = 20, type, userId } = request.query;
+  const effectiveUserId = userId || request.user?.id || 'demo-user';
+
+  const events = await getEventsQuery({
+    models: request.server.models,
+    userId,
+    pag:
+  });
+
+  return reply.send(events);
 }
 
 
-export async function confirmSuggestion(req, reply) {
+// POST /api/v1/notifications/confirm
+export async function confirmAction(request, reply) {
+  await confirmActionCommand({  ids, action, userId })
+});
+
+return reply.code(204).send();
+}
+
+//POST /api/v1/notifications/confirm
+export async function confirmSuggestion(request, reply) {
   try {
-    const {Notification} = req.server.models;
-    const {emailId, subject, from, action, category, confidenceScore, confirmed } = req.body;
+    await confirmSuggestionCommand({ models, eventBus, logger, userId, emailIds, action }) {
+      const { ids, action } = request.body;
+      const userId = request.user?.id || 'demo-user';
+      await confirmSuggestionCommand({
+        models: request.server.models,
+        eventBus: request.server.eventBus,
+        logger: request.server.logger,
+        userId: userId,
+        emailIds: ids,
+        action: action,
+      });
 
-    const saved = await Notification.create({
-      emailId,
-      subject,
-      from,
-      action,
-      category,
-      confidenceScore,
-      confirmed,
-      confirmedAt: new Date()
-    });
-
-    return reply.code(201).send({ ok: true, id: saved.id });
-  } catch (err) {
-    console.error("❌ Error al guardar confirmación:", err);
-    return reply.code(500).send({ ok: false, error: 'No se pudo guardar la confirmación.' });
+      return reply.code(201).send({ ok: true, id: saved.id });
+    } catch (err) {
+      console.error("❌ Error al guardar confirmación:", err);
+      return reply.code(500).send({ ok: false, error: 'No se pudo guardar la confirmación.' });
+    }
   }
 }

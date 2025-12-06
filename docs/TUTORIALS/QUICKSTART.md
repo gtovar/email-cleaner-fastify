@@ -24,13 +24,13 @@ npm install
 
 ### ML Service (FastAPI)
 ```bash
-cd email-cleaner-ml-python
+cd email-cleaner-fastify/python/classifier
 pip install -r requirements.txt
 ```
 
 ### Frontend (React)
 ```bash
-cd email-cleaner-frontend-react
+cd email-cleaner-react
 npm install
 ```
 
@@ -72,7 +72,7 @@ http://localhost:3000
 
 ### B) FastAPI ML Service
 ```bash
-cd email-cleaner-ml-python
+cd email-cleaner-fasitfy/python
 uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -83,7 +83,7 @@ http://localhost:8000
 
 ### C) React Frontend
 ```bash
-cd email-cleaner-frontend-react
+cd email-cleaner-react
 npm run dev
 ```
 
@@ -153,7 +153,7 @@ Expected:
 
 ### ML (pytest)
 ```bash
-cd email-cleaner-ml-python
+cd email-cleaner-fastify/python/classifier
 pytest
 ```
 

@@ -9,3 +9,24 @@ export async function getHistory(request, reply) {
 
   return reply.send(history);
 };
+
+export async function confirmActionHandler(req, reply) {
+  await confirmSuggestionCommand({
+      models: req.server.models,
+      userId: req.user.id,
+      emailIds: req.body.ids,
+      action: req.body.action,
+    });
+
+  return reply.code(204).send();
+}
+
+export async function getSummaryHandler(req, reply) {
+  const result = await getSummaryQuery({
+      models: req.server.models,
+      userId: req.user.id,
+    });
+
+  return reply.send(result);
+}
+
