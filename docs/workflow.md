@@ -22,5 +22,17 @@ Este proyecto utiliza un flujo de trabajo basado en:
 Este workflow permite incorporar más desarrolladores sin cambios estructurales:
 issues, PRs, ADRs y documentación ya están preparados para colaboración incremental.
 
-```
+## Audit Policy (Canonical)
+
+- Default mode: NORMAL (warnings do not block work).
+- Strict mode: run only before
+  - merging into canonical branches (e.g., develop/main), or
+  - starting a large feature (contract/db/cross-cutting changes).
+
+Definition of “large feature”:
+- modifies API/event contracts
+- touches DB/models/migrations
+- includes mass renames/deletes (R/D)
+- cross-layer refactors (routes/controllers/services/events/tests)
+- introduces new external integration
 

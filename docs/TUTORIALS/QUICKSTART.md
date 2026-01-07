@@ -123,7 +123,7 @@ Use your Gmail OAuth `access_token` in the headers:
 
 ### Base Email List (no AI)
 ```bash
-curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/mails
+curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/emails
 ```
 
 ### Email List with AI Suggestions
@@ -180,7 +180,7 @@ curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/sugges
 
 ## 10. Main Endpoints
 
-- `/api/v1/mails`
+- `/api/v1/emails`
 - `/api/v1/suggestions`
 - `/health`
 - `http://localhost:8000/docs` (ML OpenAPI)

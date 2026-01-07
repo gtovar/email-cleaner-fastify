@@ -73,6 +73,9 @@ n8n simplifies integration pipelines and event‑based notifications with no add
 
 ```
 src/
+├── commands/         
+├── queries/         
+├── events/         
 ├── plugins/          # Dependency registration (DB, Gmail, etc.)
 ├── services/         # Business logic and rules
 ├── routes/           # REST endpoints
@@ -81,7 +84,7 @@ src/
 └── app.js            # Main entry point
 ```
 
-Pattern: **Service + Plugin Architecture**  
+Pattern: **“Controller → Service → Command → EventBus → Listener → Command → DB”.**
 Benefit: scalable, testable, and easily extendable structure.
 
 ---

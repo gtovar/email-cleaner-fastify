@@ -6,7 +6,7 @@
 - Fecha: `2025-11-14`.  
 - Describe claramente contexto, decisión (scripts, migración de node:test a Jest), pros y contras.   
 
-✅ **Conclusión**:  
+ **Conclusión**:  
 - Este criterio está **cumplidísimo** y además muy vendible en entrevista.
 
 ## Contexto

@@ -1,245 +1,216 @@
-# 1. Technical Header (Snapshot Metadata)
+# PROJECT_STATE.md
+
+## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
-SNAPSHOT_DATE: 2025-12-04 02:36 CST
-BRANCH: feature/hu16-notification-event-pipeline
-COMMIT: 288b96497b6f6eaa0f2a0c3998be0fe3d33f7c5d
-ENVIRONMENT: Local development (docker-compose + npm test)
+REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
+BRANCH: eat-experimental-CQRS
+HEAD_COMMIT: fbb11b8 (Experimental apply CQRS)
+BASELINE_REFERENCE: develop @ 097398a (feat(events): implement notification event pipeline (HU16))
 
-Notes:
+SNAPSHOT_DATE: 2025-12-31 01:37 CST (America/Monterrey)  (from prior checkpoint; NOT VERIFIED in this message)
+AUTHOR: Gilberto / ChatGPT
 
-* This snapshot reflects ONLY the Fastify backend repository.
-* Python ML microservice, React frontend, and n8n automations are external components.
+WORKING_TREE_STATUS: Uncommitted changes present (from prior checkpoint; NOT VERIFIED in this message)
 
----
+LAST_VERIFIED_TESTS_DATE: 2026-01-XX (America/Monterrey) (timestamp NOT captured in this file; evidence pasted in chat)
+LAST_VERIFIED_DOCS_ENDPOINTS_DATE: 2026-01-XX (America/Monterrey) (timestamp NOT captured in this file; evidence pasted in chat)
 
-# 2. Executive Summary
+SNAPSHOT_METHOD (Evidence Sources):
+- proyecto_completo_email-cleaner-fastify_january_03_of_2026.txt (repository export; previously provided)
+- cambios-enero-03.txt (git diff output; previously provided)
+- rg outputs (pasted in chat; PRIMARY for Docs Alignment gate)
+- npm test output (pasted in chat; PRIMARY for test status in this checkpoint)
 
-This snapshot reflects the real backend state after merging HU5 and HU12 into `develop`.
-Fastify boots correctly with PostgreSQL and the ML microservice.
-The ML contract `/v1/suggest` is active and validated via `mlClient.js`.
-All backend routes are stable and tested using Jest.
-Email suggestion flow, notification history, and action confirmation are fully operational.
-No failing tests or broken contracts were detected for this snapshot.
-
----
-
-# 3. Component-by-Component Technical State
-
-## 3.1 Fastify Backend
-
-* Code structure under: `src/`
-* Active endpoints:
-
-  * `GET /api/v1/health`
-  * `GET /api/v1/mails`
-  * `POST /api/v1/suggestions`
-  * `POST /api/v1/notifications/confirm`
-  * `GET /api/v1/notifications/history`
-  * `GET /api/v1/notifications/summary`
-* Passing Jest tests:
-
-  * `tests/suggestionsRoutes.test.js`
-  * `tests/notificationsRoutes.test.js`
-  * `tests/authMiddleware.test.js`
-  * `tests/googleAuthService.test.js`
-  * `tests/emailSuggester.test.js`
-  * `tests/mlClient.test.js`
-* Infra status:
-
-  * Dockerized Postgres and ML service working under `ops/docker-compose.yml`.
+SCOPE:
+- This checkpoint covers the Fastify backend only.
+- React frontend and Python ML service are referenced only when the backend contract likely impacts them.
 
 ---
 
-## 3.2 ML Microservice (FastAPI)
+## 2. Executive Summary
 
-* Code present in `python/classifier/`
-* Active route:
-
-  * `POST /v1/suggest`
-* Behaviour:
-
-  * Accepts enriched email objects with validated fields.
-  * Returns normalized `suggestions` list.
-* Fallback:
-
-  * If ML is unreachable, Fastify returns suggestions: `[]` (mlClient fallback behaviour).
-* Tests:
-
-  * Python service validated manually and through backend contract tests.
+- The backend is in an active transition to CQRS-lite + internal EventBus with a centralized DOMAIN_EVENTS catalog.
+- Docs Alignment for canonical event naming is PASS (see Section 8: Docs Alignment: PASS — 2026-01-03).
+- npm test overall status is VERIFIED PASS in this checkpoint:
+  - Test Suites: 12 passed, 12 total
+  - Tests: 40 passed, 40 total
+  - Evidence: terminal output pasted in chat; exact timestamp NOT captured in this file.
+- Docs endpoint legacy check is VERIFIED PASS in this checkpoint:
+  - rg -n "/api/v1/mails" docs -> 0 matches
+  - Evidence: rg output pasted in chat; exact timestamp NOT captured in this file.
 
 ---
 
-## 3.3 React Frontend (External Component)
+## 3. Component-by-Component Technical State
 
-* Not part of this repo, but validated through integration:
+### 3.1 Fastify Backend — HTTP Surface (Observed)
 
-  * Uses `/api/v1/suggestions`
-  * Uses `/api/v1/notifications/history`
-  * Uses `/api/v1/notifications/confirm`
-* No inconsistencies detected between frontend expectations and backend responses.
+Known notifications routes impacted by the refactor (exact prefix depends on route registration in src/index.js):
 
----
+- POST /api/v1/notifications/confirm
+  Request body:
+    {
+      "emailIds": ["<string>", "..."],
+      "action": "accept" | "reject"
+    }
 
-## 3.4 PostgreSQL Database
+- GET /api/v1/notifications/history
+  Purpose: query action history (auditing).
 
-* Models detected:
+- GET /api/v1/notifications/events
+  Purpose: query stored NotificationEvents (EventStore-like feed).
 
-  * `Notification`
-  * `ActionHistory`
-  * `Token` (used for Gmail OAuth)
-* Migrations applied and consistent.
-* Relations validated in runtime.
-* Active through Docker.
+IMPORTANT:
+- Do NOT assume the public path without checking Fastify route registration (prefixing).
+- docs/API_REFERENCE.md is the canonical place to document the final contract.
 
----
-
-## 3.5 n8n (optional)
-
-* Not active for this snapshot.
-* No workflows present in backend repo.
+### Working Rule (temporary)
+When HU docs, API_REFERENCE, and code disagree, STOP and verify against code paths that persist data (commands/listeners).
+This project is in active refactor; HU documents may contain outdated examples.
 
 ---
 
-## 3.6 Docker Infrastructure
+### 3.2 Fastify Backend — CQRS-lite Shape (Observed)
 
-* docker-compose services active:
+Current architectural direction (evidence: file moves/deletions + new commands/builders observed in prior snapshots/diffs; NOT VERIFIED in this message):
 
-  * fastify
-  * postgres
-  * python-ml-service
-* Makefile:
-
-  * present for automation tasks.
-* Required env files:
-
-  * `.env`
-  * `.env.example`
+- Controllers focus on HTTP concerns and delegate to:
+  - Commands (write side)
+  - Queries (read side)
+- Event creation/persistence is routed through commands (e.g., recordNotificationEventCommand).
+- EventBus is treated as an internal integration seam:
+  - DOMAIN_EVENTS catalog is used to normalize event names/payloads.
 
 ---
 
-# 4. User Story Status (Evidence-Driven)
+### 3.3 Fastify Backend — Event Pipeline / NotificationEvents (Observed)
 
-### HU3 — Notifications API
-
-**Estado:** DONE
-
-**Evidencia comprobable:**
-
-* Endpoints:
-
-  * `/api/v1/notifications/summary`
-  * `/api/v1/notifications/confirm`
-  * `/api/v1/notifications/history`
-* Models: `Notification.js`, `ActionHistory.js`
-* Tests: `notificationsRoutes.test.js` (green)
-* Actions persist to DB confirmed by tests.
-
-**Pendientes:** none
-**Riesgos técnicos:** none
-**Decisión o cambio reciente:** Marked DONE after validating DB persistence and contract stability.
+Event pipeline exists and is being normalized around canonical event strings (see Section 8).
 
 ---
 
-### HU6 — Mail Summary + Legacy Suggestion Bridge
+### 3.4 PostgreSQL / Sequelize Models (Observed)
 
-**Estado:** DONE
-
-**Evidencia comprobable:**
-
-* Legacy suggestion endpoint operational.
-* Tests: `suggestionsRoutes.test.js` (green)
-* Demo summary data confirmed functional.
-
-**Pendientes:** none
-**Riesgos técnicos:** none
-**Decisión o cambio reciente:** Closed after validating legacy flow before ML adoption.
+IMPORTANT:
+- This checkpoint does not claim migrations are correct or runnable; verify by running tests and booting the app.
 
 ---
 
-### HU12 — Fastify ↔ ML Integration (v0)
+### 3.5 ML Microservice Integration (Observed Impact)
 
-**Estado:** DONE
-
-**Evidencia comprobable:**
-
-* Fastify communicates with Python ML service.
-* Tests validate fallback behaviour when ML is unreachable.
-* Evidence: `emailSuggester.test.js`.
-
-**Pendientes:** none
-**Riesgos técnicos:** none
-**Decisión o cambio reciente:** Replaced by HU5 full v1 contract.
+Status:
+- Integration contract is NOT verified in this checkpoint (needs runtime evidence).
 
 ---
 
-### HU5 — ML Schema Alignment (v1 Contract)
+### 3.6 React Frontend (Out of Scope, Risk Noted)
 
-**Estado:** DONE
-
-**Evidencia comprobable:**
-
-* Updated endpoint `/v1/suggest` consumed by mlClient.
-* Payload structure aligned with ML v1 contract.
-* Tests:
-
-  * `mlClient.test.js`
-  * `emailSuggester.test.js`
-* Live validation via curl.
-
-**Pendientes:** none
-**Riesgos técnicos:** low schema-validation strictness.
-**Decisión o cambio reciente:** Marked DONE after confirming stable v1 contract.
+- Not evaluated here.
+- High risk of breaking UI if it depended on old notification endpoints or request schema.
 
 ---
 
-### HU16 — Notification Event Pipeline (Phase 1)
+## 4. User Story Status (Evidence-Based, Minimal)
 
-STATUS: Done
+This checkpoint is branch-specific.
+It does NOT redefine DONE globally without runtime evidence.
 
-EVIDENCE:
-- Model `NotificationEvent` defined in `src/models/notificationEvent.js` and registered in `src/plugins/sequelize.js`.
-- Migration `migrations/20251118000000_create_notification_events.cjs` creates the `NotificationEvents` table with timestamps.
-- Service `notificationEventsService` in `src/services/notificationEventsService.js` providing a `record()` function to persist events.
-- `notificationsService.getSummary()` in `src/services/notificationsService.js` builds `NEW_SUGGESTIONS_AVAILABLE` events via `buildNewSuggestionsEvent` / `createNewSuggestionsEvent` and persists them when suggestions exist.
-- HTTP endpoint `GET /api/v1/notifications/events` defined in `src/routes/notificationsRoutes.js`, with pagination (`page`, `perPage`) and filters (`type`, `userId`).
-- Controller `listEvents` in `src/controllers/notificationEventsController.js` used by the events endpoint.
-- Tests:
-  - `tests/notifications.test.js` validating automatic emission and persistence of `NEW_SUGGESTIONS_AVAILABLE` events from `getSummary()`.
-  - `tests/notificationsRoutes.test.js` validating the contract of `GET /api/v1/notifications/events` (auth, query parameters, response shape).
-- API contract documented in `docs/API_REFERENCE.md` under section `4.4 GET /api/v1/notifications/events`.
-
-PENDING:
-- None for Phase 1. Event deduplication, `processedAt` handling and n8n consumption will be covered by future HUs.
-
-RISKS:
-- Consumers like n8n may re-process the same events if they do not implement their own cursor or time-based filtering.
-- `userId` still relies on the `demo-user` fallback until a real identity is available via HU17 (OAuth2 / Gmail integration).
-
-DECISION:
-- Marked as Done after verifying that the model, migration, event builder, service, summary integration, events endpoint, tests and API documentation are all present and consistent in the current backend repository.
-
----
-# 5. Current Technical Risks
-
-* No end-to-end workflow tests covering Fastify → ML → DB (medium)
-* ML payload validation not fully strict (low)
-* No rate limiting on suggestion endpoints (low)
-* No schema version negotiation with ML service (low)
+- HU16 (Notification Event Pipeline) — Implemented in develop (commit 097398a), branch has experimental refactor on top.
+- HU5 (ML schema alignment) — Present in history (commit(s) referenced in prior notes; NOT VERIFIED here).
+- CQRS-lite experiment — Present in branch head (fbb11b8) and ongoing.
 
 ---
 
-# 6. Next Immediate Action
+## 5. Evidence (Primary)
 
-➡️ **Run full backend test suite to confirm all contracts are still stable:**
+### 5.1 Docs Alignment Evidence (PRIMARY — from pasted rg output)
+- Legacy checks:
+  - rg -n "NEW_SUGGESTIONS\b" src tests || echo "OK: 0 matches for NEW_SUGGESTIONS"
+    -> OK: 0 matches for NEW_SUGGESTIONS
+  - rg -n "DOMAIN_EVENTS\.SUGGESTION_GENERATED" src tests || echo "OK: 0 matches for DOMAIN_EVENTS.SUGGESTION_GENERATED"
+    -> OK: 0 matches for DOMAIN_EVENTS.SUGGESTION_GENERATED
 
-```
-npm test
+- Canon markers:
+  - docs/events_contract.md contains API Filtering Rule (Option A)
+  - docs/API_REFERENCE.md contains Canonical rule:
+
+- Canon propagation:
+  - domain.suggestions.generated present in docs/src/tests
+  - DOMAIN_EVENTS.SUGGESTIONS_GENERATED present in docs/src/tests
+
+### 5.2 Other Evidence (Secondary — referenced previously)
+- proyecto_completo_email-cleaner-fastify_january_03_of_2026.txt
+- cambios-enero-03.txt
+
+### 5.3 Runtime/Test Evidence (PRIMARY — from pasted terminal output)
+- npm test:
+  - Test Suites: 12 passed, 12 total
+  - Tests: 40 passed, 40 total
+
+### 5.4 Docs Endpoint Alignment Evidence (PRIMARY — from pasted rg output)
+- rg -n "/api/v1/mails" docs -> 0 matches
+- Decision: /api/v1/emails is the documented contract in docs/** (no legacy endpoint references remain).
+
+---
+
+## 6. Risks (Current, Not Future Plans)
+
+- API compatibility risk:
+  - Endpoint paths and/or schema changes can break consumers (React, scripts, n8n).
+- State drift risk:
+  - Because working tree may be uncommitted, snapshots can diverge quickly.
+- ML integration uncertainty:
+  - ML “orchestrator” layer stability must be validated by tests/runtime.
+
+---
+
+## 7. Next Immediate Action (Verification Only)
+
+1) DONE — Re-run npm test to refresh the true PASS/FAIL state after the Docs Alignment changes.
+   - Result: PASS (12/12 suites; 40/40 tests).
+
+2) Verify notification routes in the test fixture if 404s persist:
+   - Add temporary app.printRoutes() in the relevant test bootstrap (then remove).
+
+3) Freeze evidence:
+   - Create a commit (or snapshot) that includes the docs alignment changes so the checkpoint remains stable.
+   - NOTE: requires git status -sb evidence (NOT VERIFIED in this message).
+
+---
+
+## 8. Docs Alignment: PASS — Canon domain.suggestions.generated (2026-01-03)
+
+### HECHO (evidencia: rg)
+- Legacy eliminado de src/** y tests/**:
+  - rg -n "NEW_SUGGESTIONS\b" src tests || echo "OK: 0 matches for NEW_SUGGESTIONS"
+    - Resultado: OK: 0 matches for NEW_SUGGESTIONS
+  - rg -n "DOMAIN_EVENTS\.SUGGESTION_GENERATED" src tests || echo "OK: 0 matches for DOMAIN_EVENTS.SUGGESTION_GENERATED"
+    - Resultado: OK: 0 matches for DOMAIN_EVENTS.SUGGESTION_GENERATED
+
+- Marcadores documentales presentes:
+  - docs/events_contract.md incluye API Filtering Rule (Option A)
+  - docs/API_REFERENCE.md incluye Canonical rule:
+
+- Canon propagado en docs/src/tests:
+  - domain.suggestions.generated
+  - DOMAIN_EVENTS.SUGGESTIONS_GENERATED
+
+### DECISIÓN (Option A)
+El parámetro type en /api/v1/notifications/events filtra por canonical domain event type string (ej. domain.suggestions.generated). Legacy (NEW_SUGGESTIONS*) solo puede existir en docs bajo DEPRECATED.
+
+### CHECKLIST (reproducible)
+```bash
+rg -n "NEW_SUGGESTIONS\b" src tests || echo "OK: 0 matches for NEW_SUGGESTIONS"
+rg -n "DOMAIN_EVENTS\.SUGGESTION_GENERATED" src tests || echo "OK: 0 matches for DOMAIN_EVENTS.SUGGESTION_GENERATED"
+rg -n "Canonical rule:|API Filtering Rule \(Option A\)" docs/API_REFERENCE.md docs/events_contract.md
+rg -n "domain\.suggestions\.generated" docs src tests
+rg -n "DOMAIN_EVENTS\.SUGGESTIONS_GENERATED" docs src tests
 ```
 
----
+## 9. Version Log
 
-# 7. Version log
-
-* **2025-11-30 23:50 CST** — Full backend snapshot rewritten to match develop state; HU3, HU6, HU12, HU5 marked DONE with evidence; aligned with project_state_protocol_and_template.md. (commit: pending)
+* 2025-12-31 — Prior checkpoint built from snapshot/diff (historical; see Appendix if needed).
+* 2026-01-03 — Docs Alignment gate closed: PASS (Option A) based on rg evidence.
+* 2026-01-XX — Tests VERIFIED PASS: npm test -> 12/12 suites; 40/40 tests. Docs endpoints aligned: rg -n "/api/v1/mails" docs -> 0 matches. (Exact timestamp NOT captured in file; evidence pasted in chat.)
 

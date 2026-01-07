@@ -51,7 +51,9 @@
 
 ### 2025-12-03 — HU16 Notification Event Pipeline completed
 - Added NotificationEvent model and migration.  
-- getSummary() now emits and persists NEW_SUGGESTIONS_AVAILABLE events.  
+- getSummary() now emits and persists NEW_SUGGESTIONS events.  
 - Added GET /api/v1/notifications/events feed with pagination and filters.  
 - Updated tests and API documentation accordingly.
 
+- 2025-12-05: inicio `eat-experimental-CQRS` (fbb11b8)
+- 2025-12-30: `ids → emailIds`, normalización rutas internas, rename de domain events
