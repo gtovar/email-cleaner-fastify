@@ -3,7 +3,7 @@ import dbPlugin from './plugins/sequelize.js';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import authRoutes from './routes/authRoutes.js';
-import mailRoutes from './routes/mailRoutes.js';
+import emailRoutes from './routes/emailRoutes.js';
 import suggestionRoutes from './routes/suggestionRoutes.js';
 import notificationsRoutes from './routes/notificationsRoutes.js';
 import cors from '@fastify/cors';
@@ -50,7 +50,7 @@ await fastify.register(swaggerUI, {
 await fastify.register(dbPlugin);
 await fastify.register(eventBusPlugin);
 await fastify.register(authRoutes);
-await fastify.register(mailRoutes);
+await fastify.register(emailRoutes, { prefix: "/api/v1" });
 await fastify.register(suggestionRoutes);
 await fastify.register(notificationsRoutes, { prefix: "/api/v1/notifications" });
 

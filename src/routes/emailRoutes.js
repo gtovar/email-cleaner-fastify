@@ -1,5 +1,5 @@
-// src/routes/mailRoutes.js
-import { listEmails } from '../controllers/mailController.js';
+// src/routes/emailRoutes.js
+import { listEmails } from '../controllers/emailController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
 
 export default async function (fastify, opts) {
@@ -18,11 +18,11 @@ export default async function (fastify, opts) {
     }
   });
 
-  fastify.get('/api/v1/mails', {
+  fastify.get('/emails', {
     preHandler: [authMiddleware],
     schema: {
       description: 'Lista correos con filtros personalizados',
-      tags: ['official-v1','Mails'],
+      tags: ['official-v1','Emails'],
       summary: 'Listar correos de Gmail',
       security: [{ bearerAuth: [] }],
       querystring: {
@@ -44,7 +44,7 @@ export default async function (fastify, opts) {
           description: 'Lista de correos',
           type: 'object',
           properties: {
-            mails: { type: 'array', items: { $ref: 'Email#' } },
+            emails: { type: 'array', items: { $ref: 'Email#' } },
             nextPageToken: { type: 'string', nullable: true },
             total: { type: 'integer' }
           }

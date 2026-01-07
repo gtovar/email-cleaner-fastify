@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { suggestActions } from '../services/emailSuggester.js';
+import { suggestActions } from '../services/emailSuggesterService.js';
 
 
 /**
