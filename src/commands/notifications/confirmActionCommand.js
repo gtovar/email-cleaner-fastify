@@ -1,9 +1,8 @@
-import models from "../models"
-import eventBus from "../events/eventBus"
-import logger from "../logger"
+import { DOMAIN_EVENTS } from "../../events/eventBus.js";
+import { buildConfirmedSuggestionEvent } from '../../events/builders/confirmedSuggestionEvent.builder.js';
 
 export async function confirmActionCommand({ models, eventBus, logger, userId, emailIds, action }) {
-  const { ActionsHistory } = models;
+  const { ActionHistory } = models;
 
   // 1) Registrar acción
   await ActionHistory.bulkCreate(
@@ -17,11 +16,12 @@ export async function confirmActionCommand({ models, eventBus, logger, userId, e
 
   // 2) Emitir eventos (si usas EventBus / EventStore)
   if (emailIds.length > 0) {
-    eventBus.publish("suggestion.confirmed", { type, userId, summary, createdAt, updateAt });
+    const domainEvent = buildConfirmedSuggestionEvent({ userId, emailIds, action });
+    await eventBus.publish(DOMAIN_EVENTS.SUGGESTION_CONFIRMED, domainEvent);
   }
 
   // 3) Cualquier otra lógica de dominio
   logger.info({ userId, action, count: emailIds.length }, "Suggestion confirmed");
 
-  return { ok: true };
+  return { success: true, processed: emailIds.length };
 }

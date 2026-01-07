@@ -25,9 +25,10 @@ export default async function (fastify, opts) {
   fastify.addSchema({
     $id: 'ConfirmActionsRequest',
     type: 'object',
-    required: ['ids', 'action'],
+    required: ['emailIds', 'action'],
+    additionalProperties: false,
     properties: {
-      ids: { type: 'array', items: { type: 'string' } },
+      emailIds: { type: "array", minItems: 1, uniqueItems: true, items: { type: "string", minLength: 1 } },
       action: { type: 'string', enum: ['accept', 'reject'] }
     }
   });
@@ -36,10 +37,12 @@ export default async function (fastify, opts) {
   fastify.addSchema({
     $id: 'ConfirmActionsResponse',
     type: 'object',
+    required: ['success','processed','emailIds', 'action'],
     properties: {
       success: { type: 'boolean' },
-      processed: { type: 'integer' },
-      action: { type: 'string' }
+      processed: { type: "integer", minimum: 0 },
+      emailIds: { type: 'array', minItems: 1, items: { type: 'string', minLength: 1 } },
+      action: { type: 'string', enum: ["accept", "reject"] }
     }
   });
 
@@ -90,8 +93,8 @@ export default async function (fastify, opts) {
     }
   });
 
-  // GET /notifications/summary
-  fastify.get('/notifications/summary', {
+  // GET /summary
+  fastify.get('/summary', {
     preHandler: [authMiddleware],
     schema: {
       tags: ['official-v1','Notificaciones'],
@@ -113,8 +116,8 @@ export default async function (fastify, opts) {
     }
   }, getSummary);
 
-  // POST /notifications/confirm
-  fastify.post('/notifications/confirm', {
+  // POST /confirm
+  fastify.post('/confirm', {
     preHandler: [authMiddleware],
     schema: {
       tags: ['official-v1','Notificaciones'],
@@ -129,8 +132,8 @@ export default async function (fastify, opts) {
     }
   }, confirmActions);
 
-  // GET /notifications/history
-  fastify.get('/notifications/history', {
+  // GET /history
+  fastify.get('/history', {
     preHandler: [authMiddleware],
     schema: {
       tags: ['official-v1','Notificaciones'],
@@ -150,8 +153,8 @@ export default async function (fastify, opts) {
     }
   }, getHistory);
 
-  // GET /notifications/events
-  fastify.get('/notifications/events', {
+  // GET /events
+  fastify.get('/events', {
     preHandler: [authMiddleware],
     schema: {
       tags: ['official-v1','Notificaciones'],

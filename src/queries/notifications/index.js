@@ -1,6 +1,3 @@
-import { getNotificationSummaryForUser } from './getNotificationSummaryForUser.js';
+// src/queries/notifications/index.js
+export * as summaryQueries from './getNotificationSummaryForUser.js';
 
-export const summaryQueries = {
-  getNotificationSummaryForUser,
-  // otras queries...
-};

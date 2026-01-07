@@ -1,9 +1,8 @@
 import { describe, expect, test } from '@jest/globals';
-import {
-  buildNewSuggestionsEvent,
-  NEW_SUGGESTIONS_EVENT,
-  notificationsService
-} from '../src/services/notificationsService.js';
+import { buildNewSuggestionsEvent } from '../src/events/builders/newSuggestionsEvent.builder.js';
+import { notificationsService } from '../src/services/notificationsService.js';
+import { DOMAIN_EVENTS } from '../src/events/eventBus.js';
+
 
 describe('buildNewSuggestionsEvent', () => {
   const suggestions = [
@@ -15,8 +14,9 @@ describe('buildNewSuggestionsEvent', () => {
     const event = buildNewSuggestionsEvent({ userId: 'user-123', suggestions });
 
     expect(event).toMatchObject({
-      type: NEW_SUGGESTIONS_EVENT,
-      userId: 'user-123'
+      type: DOMAIN_EVENTS.SUGGESTIONS_GENERATED,
+      userId: 'user-123',
+      suggestions
     });
 
     expect(event.summary.totalSuggestions).toBe(3);
@@ -32,7 +32,7 @@ describe('buildNewSuggestionsEvent', () => {
     const service = notificationsService({});
     const event = service.createNewSuggestionsEvent({ userId: 'user-123', suggestions });
 
-    expect(event.type).toBe(NEW_SUGGESTIONS_EVENT);
+    expect(event.type).toBe(DOMAIN_EVENTS.SUGGESTIONS_GENERATED);
     expect(event.userId).toBe('user-123');
     expect(event.summary.totalSuggestions).toBe(3);
   });
