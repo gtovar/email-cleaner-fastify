@@ -1,17 +1,45 @@
-import { buildNewSuggestionsEvent } from "./notificationsEventsBuilder.js";
-import { DOMAIN_EVENTS } from "../events/eventBus.js";
+import { recordNotificationEventCommand } from "../commands/notification_events/recordNotificationEventCommand.js";
 
-export const notificationsService = ({ models, eventBus }) => ({
-  async getSummaryForUser({ userId }) {
-      const summary = await summaryQueries.getNotificationSummaryForUser({ models, userId });
+export const notificationEventsService = ({ models, eventBus, logger }) => ({
+  /**
+   * Write-path (CQRS-lite): persistir NotificationEvent
+   */
+  async record(dbEvent) {
+    const cmd = recordNotificationEventCommand({ models, logger });
+    return cmd.execute(dbEvent);
+  },
 
-      if (summary.length > 0) {
-            const domainEvent = buildNewSuggestionsEvent({ userId, suggestions: summary });
+  /**
+   * Read-path (CQRS-lite): listar/paginar/filtrar NotificationEvents
+   */
+  async list({ page = 1, perPage = 20, type, userId } = {}) {
+    const NotificationEvent = models?.NotificationEvent;
+    if (!NotificationEvent?.findAndCountAll) {
+      throw new Error("NotificationEvent model with findAndCountAll is required");
+    }
 
-            await eventBus.publish(DOMAIN_EVENTS.NEW_SUGGESTIONS, domainEvent);
-          }
+    const where = {};
+    if (type) where.type = type;
+    if (userId) where.userId = userId;
 
-      return summary;
-    },
+    const safePage = Number(page) || 1;
+    const safePerPage = Number(perPage) || 20;
+    const limit = safePerPage;
+    const offset = (safePage - 1) * safePerPage;
+
+    const result = await NotificationEvent.findAndCountAll({
+      where,
+      limit,
+      offset,
+      order: [["createdAt", "DESC"]],
+    });
+
+    return {
+      total: result.count,
+      page: safePage,
+      perPage: safePerPage,
+      data: result.rows.map((r) => (typeof r.toJSON === "function" ? r.toJSON() : r)),
+    };
+  }
 });
 
