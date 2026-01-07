@@ -17,7 +17,7 @@ jest.unstable_mockModule('../src/services/mlClient.js', () => ({
 }));
 
 // Import dinámico del módulo bajo prueba (para que el mock ya esté aplicado)
-const { suggestActions } = await import('../src/services/emailSuggester.js');
+const { suggestActions } = await import('../src/services/emailSuggesterService.js');
 
 describe('suggestActions', () => {
   const originalTimeout = process.env.ML_TIMEOUT_MS;
@@ -81,8 +81,8 @@ describe('suggestActions', () => {
       ]
     });
   });
-    
-   it('enriches emails when ML returns an array of enriched emails', async () => {
+
+  it('enriches emails when ML returns an array of enriched emails', async () => {
     const emails = [
       { id: '1', subject: 'Hello' },
       { id: '2', subject: 'Promo' }
@@ -116,12 +116,18 @@ describe('suggestActions', () => {
 
     classifyEmailsMock.mockRejectedValue(new Error('network down'));
 
+    // Silenciar el console.error esperado en este escenario
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
     const result = await suggestActions(emails);
 
+    // (Opcional) verificar que efectivamente loggea el error
+    expect(consoleErrorSpy).toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
+
     expect(result).toEqual({
-      emails: [
-        { id: '1', subject: 'Hello', suggestions: [] }
-      ]
+      emails: [{ id: '1', subject: 'Hello', suggestions: [] }]
     });
   });
 
