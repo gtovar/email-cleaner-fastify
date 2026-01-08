@@ -89,35 +89,22 @@ Objetivo: retomar el proyecto en 5–10 minutos con un estado verificable (sin d
 
 ## 1) Current Truth Snapshot (lo mínimo que importa)
 
-- Rama de trabajo: `eat-experimental-CQRS`
-- Arquitectura en transición: CQRS-lite + EventBus + catálogo `DOMAIN_EVENTS`.
-- Estado de tests (último conocido, 2025-12-31):
-  - FAIL — 6 suites failed / 6 suites passed (ver `PROJECT_STATE.md` para detalle).
+- Rama de trabajo: docs/sync-truth-2026-01-08
+- Commit verificado: b9fff3c
+- Estado de tests (verificado, 2026-01-08):
+  - PASS — 12 suites / 40 tests (`npm test`)
+- Puntos de verdad:
+  - Confirmación: `POST /api/v1/notifications/confirm`
+  - Historial: `GET /api/v1/notifications/history`
+  - Event store: `GET /api/v1/notifications/events`
 
 ---
 
-## 2) Known Contract Drift Hotspots (clasificación)
+## 2) Known Contract Drift Hotspots
 
-### Evidencia directa (no es teoría)
-1) **Tests esperan constante `DOMAIN_EVENTS.SUGGESTIONS_GENERATED`**
-   - Pero el catálogo usa `SUGGESTIONS_GENERATED` → expectativa queda `undefined` y rompe aserción.
+- Ninguno conocido (2026-01-08) con tests en PASS.
+- Si algo falla: correr `npm test` y revisar primero `PROJECT_STATE.md` (Test Status + Evidence).
 
-2) **Tests importan módulos ausentes**
-   - `tests/emailSuggester.test.js` intenta `src/services/emailSuggester.js`
-   - `tests/mailsRoutes.test.js` intenta `src/controllers/mailController.js`
-
-3) **Notifications routes en tests responden 404**
-   - Endpoints esperados: `/api/v1/notifications/*`
-   - En el fixture de tests, el server no los está exponiendo (registro/import/prefijo).
-
-### Hipótesis útiles (requieren verificación)
-A) **Estamos a mitad de una migración de naming de eventos**
-   - legacy: `NEW_SUGGESTIONS_EVENT` / `NEW_SUGGESTIONS`
-   - nuevo: `domain.suggestions.generated`
-   - Acción de verificación: definir “nombre canónico” único en `DOMAIN_EVENTS` y poner alias temporal si hace falta.
-
-B) **El fixture de tests registra un plugin distinto o con prefijo**
-   - Acción de verificación: `app.printRoutes()` en `beforeAll`.
 
 ---
 

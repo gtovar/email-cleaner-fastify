@@ -4,12 +4,11 @@
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
 REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
-BRANCH: eat-experimental-CQRS
-HEAD_COMMIT: fbb11b8 (Experimental apply CQRS)
-BASELINE_REFERENCE: develop @ 097398a (feat(events): implement notification event pipeline (HU16))
+BRANCH: docs/sync-truth-2026-01-08
+COMMIT: b9fff3c
 
-SNAPSHOT_DATE: 2025-12-31 01:37 CST (America/Monterrey)  (from prior checkpoint; NOT VERIFIED in this message)
-AUTHOR: Gilberto / ChatGPT
+SNAPSHOT_DATE: 2026-01-08 02:01 CST (America/Monterrey)
+AUTHOR: Gilberto
 
 WORKING_TREE_STATUS: Uncommitted changes present (from prior checkpoint; NOT VERIFIED in this message)
 
@@ -113,12 +112,26 @@ Status:
 
 ## 4. User Story Status (Evidence-Based, Minimal)
 
-This checkpoint is branch-specific.
-It does NOT redefine DONE globally without runtime evidence.
-
-- HU16 (Notification Event Pipeline) — Implemented in develop (commit 097398a), branch has experimental refactor on top.
-- HU5 (ML schema alignment) — Present in history (commit(s) referenced in prior notes; NOT VERIFIED here).
-- CQRS-lite experiment — Present in branch head (fbb11b8) and ongoing.
+- HU4: SUPERSEDIDA / absorbida
+  - Motivo: lo que HU4 pedía (confirmar acciones + no repetir sugerencias) hoy vive como:
+    - `POST /api/v1/notifications/confirm` (acción confirmada)
+    - `ActionHistory` (historial de acciones)
+    - `NotificationEvent` (event store + pipeline)
+- HU5: COMPLETADA (alineación contrato Fastify ↔ ML)
+  - Evidencia: `src/services/mlClient.js` usa `/v1/suggest`; tests `tests/mlClient.test.js`
+- HU6: COMPLETADA (Confirmar + Historial en backend)
+  - Evidencia:
+    - `src/routes/notificationsRoutes.js` incluye `/confirm` y `/history`
+    - `src/commands/notifications/confirmActionCommand.js` escribe `ActionHistory` y publica evento
+    - Tests `tests/notificationsRoutes.test.js`, `tests/notificationEventsService.test.js`
+- HU7: COMPLETADA (Frontend React)
+  - Evidencia en repo frontend (ver PROJECT_STATE frontend)
+- HU8: CERRADA POR ETAPAS (paginación/estabilidad UI + error handling)
+  - Evidencia: `GET /notifications/history?page=&perPage=` y UI con paginación
+- HU9: COMPLETADA (cliente HTTP robusto / retries)
+  - Evidencia: `src/services/api.js` implementa `httpRequest()` + tests en frontend
+- HU10: RENOMBRADA (se ejecutó como HU15 en frontend)
+  - Evidencia: README_REENTRY frontend menciona HU15 y el suite vitest ya existe
 
 ---
 
@@ -213,4 +226,11 @@ rg -n "DOMAIN_EVENTS\.SUGGESTIONS_GENERATED" docs src tests
 * 2025-12-31 — Prior checkpoint built from snapshot/diff (historical; see Appendix if needed).
 * 2026-01-03 — Docs Alignment gate closed: PASS (Option A) based on rg evidence.
 * 2026-01-XX — Tests VERIFIED PASS: npm test -> 12/12 suites; 40/40 tests. Docs endpoints aligned: rg -n "/api/v1/mails" docs -> 0 matches. (Exact timestamp NOT captured in file; evidence pasted in chat.)
+
+
+### Nota de arquitectura: ActionHistory vs NotificationEvent vs Notifications (legacy)
+
+- ActionHistory: log “humano/operativo” de acciones confirmadas (UI y trazabilidad).
+- NotificationEvent: event store/pipeline (event-driven, integraciones, auditoría técnica).
+- Notifications (tabla/modelo legacy): existe en migraciones antiguas pero NO es el modelo activo en runtime.
 

@@ -57,3 +57,12 @@
 
 - 2025-12-05: inicio `eat-experimental-CQRS` (fbb11b8)
 - 2025-12-30: `ids → emailIds`, normalización rutas internas, rename de domain events
+
+## 2026-01-08 — Doc Sync + Canon de HUs (truth alignment)
+
+- Backend tests: PASS (12 suites, 40 tests)
+- Frontend tests: PASS (vitest 6 files, 21 tests)
+- README_REENTRY: removida duplicidad y eliminado “rojo” obsoleto
+- PROJECT_STATE: metadata verificada (branch+commit) + HU4/HU5/HU6/HU10 clarificadas
+- Canon: “ActionHistory vs NotificationEvent” explícito para evitar drift mental
+

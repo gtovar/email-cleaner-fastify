@@ -82,6 +82,11 @@ sequenceDiagram
   S-->>R: { success, processed, emailIds, action, data }
   R-->>UI: 200 response
 ```
+#### Semántica (para evitar confusión futura)
+- `ActionHistory` responde: “¿Qué acción ejecutó/confirmó el usuario sobre qué email?”
+- `NotificationEvent` responde: “¿Qué eventos del dominio ocurrieron y cómo viajan por el pipeline?”
+- Ambos coexisten a propósito: UI necesita historial simple; el sistema necesita eventos auditables.
+
 
 ```mermaid
 flowchart LR
