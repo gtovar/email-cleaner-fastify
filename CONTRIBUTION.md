@@ -16,9 +16,10 @@ This guide ensures consistency, code quality, and efficient collaboration.
 
 ## 🧩 Workflow
 
-1. **Create a descriptive branch**
+1. **Create a descriptive branch from `develop`**
    ```bash
-   git checkout -b feat/new-feature
+   git checkout develop
+   git checkout -b feat/hu17-unify-suggestions-summary
    ```
 
 2. **Follow Conventional Commits**
@@ -70,11 +71,15 @@ Every PR must include at least one relevant unit or integration test.
 
 | Type          | Prefix      | Example                   |
 | ------------- | ----------- | ------------------------- |
-| New feature   | `feat/`     | feat/auto-rules           |
-| Bug fix       | `fix/`      | fix/token-expiration      |
-| Documentation | `docs/`     | docs/api-reference        |
-| Refactor      | `refactor/` | refactor/plugin-structure |
-| Maintenance   | `chore/`    | chore/update-dependencies |
+| New feature   | `feat/`     | feat/hu17-unify-suggestions-summary |
+| Bug fix       | `fix/`      | fix/huNN-short-desc |
+| Documentation | `docs/`     | docs/huNN-short-desc |
+| Refactor      | `refactor/` | refactor/huNN-short-desc |
+| Maintenance   | `chore/`    | chore/update-dependencies  |
+
+Working branch: `develop` (feature branches start and merge here).  
+Stable branch: `main` (updated from `develop` at releases/checkpoints).  
+Canonical HU naming: `type/huNN-short-desc` (lowercase `hu` id).
 
 **Versioning:** Semantic Versioning (SemVer)  
 Format: `MAJOR.MINOR.PATCH` → Example: `1.4.2`

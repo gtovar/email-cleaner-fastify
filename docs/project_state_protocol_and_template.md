@@ -1253,7 +1253,7 @@ Every reference must use its exact, complete identifier:
 - Files → `src/services/emailSuggester.js`  
 - Endpoints → `/api/v1/notifications/history`  
 - Environment variables → `ML_BASE_URL`  
-- Branches → `feature/hu12-fastify-ml-integration`  
+- Branches → `feat/hu12-fastify-ml-integration`  
 - Tests → `tests/suggestionsRoutes.test.js`  
 
 Never write:
@@ -1479,6 +1479,5 @@ Historical evolution lives in:
 * Git history
 * `Sprint_Log.md`
 * Version Log (at the bottom of PROJECT_STATE.md)
-
 
 

@@ -4,7 +4,7 @@
 
 ## 0) Checklist de re-entrada (orden estricto)
 
-1) Ver branch + estado:
+1) Ver branch + estado (patrón `type/huNN-short-desc`, rama base `develop`):
    - `git status -sb`
 2) Corre pruebas (verdad fuerte):
    - `npm test`

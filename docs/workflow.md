@@ -17,6 +17,10 @@ Este proyecto utiliza un flujo de trabajo basado en:
 7. CI: lint + test + build
 8. Merge → actualizar Sprint_Log.md y PROJECT_STATE.md
 
+- Working branch: `develop`
+- Branch naming: `type/huNN-short-desc` (ejemplo: `feat/hu17-unify-suggestions-summary`)
+- Flow: branch desde `develop` → PR/merge de regreso a `develop`; `main` se actualiza solo desde `develop` en releases/checkpoints
+
 ## Escalabilidad
 
 Este workflow permite incorporar más desarrolladores sin cambios estructurales:
@@ -35,4 +39,3 @@ Definition of “large feature”:
 - includes mass renames/deletes (R/D)
 - cross-layer refactors (routes/controllers/services/events/tests)
 - introduces new external integration
-
