@@ -99,7 +99,6 @@ curl -X POST http://localhost:3000/api/v1/emails/classify
 | [🗄️ Database Migrations](./migraciones.md) | Sequelize migration workflow |
 | [🌱 Seeders Guide](./seeders.guia.md) | Load initial or reference data |
 | [🚀 Deploy to Cloud Run](./despliegue-cloudrun.md) | Cloud Build + Cloud Run deployment steps |
-| [🧼 Git Hygiene](./git_hygiene.md) | Working tree / staging / HEAD protocol + artifact policy + ready-for-next-feature gate |
 | [🤝 Contribution Guide](https://github.com/gtovar/email-cleaner-fastify/blob/main/CONTRIBUTION.md) | Collaboration and commit standards |
 | [📦 Events Contract](./events_contract.md) | Event names, payloads, semantics y consumers |
 | [Documentation Rules](./documentation_rules.md) | Project-wide rules: canonical doc ownership, language/tone policy, and update protocols. |

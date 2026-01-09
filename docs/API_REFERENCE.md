@@ -52,7 +52,7 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 ```json
 {
-  "mails": [
+  "Emails": [
     {
       "id": "18c8f6e...",
       "from": "facturas@cfe.mx",
@@ -68,7 +68,7 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 #### Possible Status Codes
 
-* **200 OK** – Mails returned successfully.
+* **200 OK** – Emails returned successfully.
 * **401 Unauthorized** – Missing or invalid token.
 
 ---
