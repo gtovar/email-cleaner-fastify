@@ -51,7 +51,7 @@ await fastify.register(dbPlugin);
 await fastify.register(eventBusPlugin);
 await fastify.register(authRoutes);
 await fastify.register(emailRoutes, { prefix: "/api/v1" });
-await fastify.register(suggestionRoutes);
+await fastify.register(suggestionRoutes, { prefix: "/api/v1"});
 await fastify.register(notificationsRoutes, { prefix: "/api/v1/notifications" });
 
 

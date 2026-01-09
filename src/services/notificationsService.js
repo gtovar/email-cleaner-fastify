@@ -31,7 +31,7 @@ export const notificationsService = ({ models, eventBus, logger }) => ({
     return suggestions;
   },
 
-  // GET /api/v1/notifications/confirm
+  // POST /api/v1/notifications/confirm
   async confirmActions({ emailIds, action, userId }) {
     const results = [];
 
