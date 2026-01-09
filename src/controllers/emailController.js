@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { suggestActions } from '../services/emailSuggester.js';
+import { suggestActions } from '../services/emailSuggesterService.js';
 
 
 /**
@@ -28,7 +28,7 @@ export async function listEmails(req, reply) {
       maxResults: 20,
     });
 
-    const mails = await Promise.all(
+    const emails = await Promise.all(
       (res.data.messages || []).map(async (msg) => {
         const mail = await gmail.users.messages.get({ userId: 'me', id: msg.id });
         const headers = mail.data.payload.headers;
@@ -45,10 +45,10 @@ export async function listEmails(req, reply) {
       })
     );
 
-    const { emails: mailsWithSuggestions } = await suggestActions(mails);
+    const { emails: emailsWithSuggestions } = await suggestActions(emails);
 
     reply.send({
-      mails: mailsWithSuggestions,
+      emails: emailsWithSuggestions,
       nextPageToken: res.data.nextPageToken,
       total: res.data.resultSizeEstimate,
     });

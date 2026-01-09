@@ -1,44 +1,59 @@
-# Re-entry Guide — Backend Fastify
+# README_REENTRY.md — Email Cleaner & Smart Notifications (Fastify Backend)
 
-## 1. Current Context Snapshot
-HU16 (Notification Event Pipeline) is fully completed.  
-Backend is stable, tests are passing, and the event feed is available for external orchestrators.
+> Objetivo: volver al contexto en 1–2 minutos (sin leer docs largos).
 
-## 2. Active Branch
-feature/hu16-notification-event-pipeline  
-(Ready to merge or close depending on your workflow.)
+## 0) Checklist de re-entrada (orden estricto)
 
-## 3. Active User Story
-HU16 — Notification Event Pipeline (completed)
+1) Ver branch + estado:
+   - `git status -sb`
+2) Corre pruebas (verdad fuerte):
+   - `npm test`
+3) Abre el checkpoint:
+   - `PROJECT_STATE.md` (estado real, factual)
+4) Si algo no cuadra:
+   - Busca la verdad en `src/index.js`, `src/routes/*`, `src/services/*`, `src/events/*`, `tests/*`
 
-## 4. First Real Command to Execute
-Run the event-related tests to confirm the environment is consistent:
+---
 
-```
+## 1) Snapshot actual (lo mínimo que importa)
 
-npm test -- notifications.test.js
+- Branch: `docs/sync-truth-2026-01-08`
+- Último checkpoint: `PROJECT_STATE.md` (snapshot 2026-01-08)
+- Backend tests: PASS (Jest)
+- Endpoints principales:
+  - Gmail OAuth: `/auth/google`, `/auth/google/callback`
+  - v1: `/api/v1/emails`, `/api/v1/suggestions`
+  - Notificaciones: `/api/v1/notifications/summary|confirm|history|events`
+- Arquitectura (hoy): CQRS-lite + EventBus in-memory + persistencia de eventos en `NotificationEvent`
 
-```
+---
 
-## 5. Immediate Next Step
-Update and commit PROJECT_STATE.md, README_REENTRY.md, and Sprint_Log.md reflecting the completion of HU16.
+## 2) Dónde tocar según la intención
 
-## 6. Where the Workflow Stopped
-All implementation work for HU16 is done:
-- Event model and migration exist  
-- Summary emits events  
-- Events are persisted  
-- Feed endpoint is functional  
-- Tests are passing  
+- Agregar/ajustar endpoints: `src/routes/*` + `src/controllers/*`
+- Cambiar reglas de negocio: `src/services/*` + `src/commands/*`
+- Eventos / naming / listeners: `src/events/*` + `src/plugins/eventBus.js`
+- Persistencia: `src/models/*` + migraciones/seeders (si aplica)
+- Tests: `tests/*.test.js`
 
-The next workflow step is documentation finalization and closing the branch.
+---
 
-## 7. Technical Quick Reference
-Key files touched by HU16:
-- `src/models/notificationEvent.js`
-- `src/services/notificationsService.js`
-- `src/services/notificationEventsService.js`
-- `src/controllers/notificationEventsController.js`
-- `src/routes/notificationsRoutes.js`
-- `tests/notifications.test.js`
-```
+## 3) Comandos rápidos
+
+### Tests
+- `npm test`
+- `npm run test:watch`
+
+### Dev server
+- `npm run dev`
+- `npm run dev:pretty`
+
+### DB (Sequelize CLI)
+- `npm run db:migrate`
+
+---
+
+## 4) Reglas de documentación (para no olvidar)
+
+- PROJECT_STATE.md: solo hechos verificables (código/tests). Un “Next Immediate Action”. Sin logs pegados.
+- README_REENTRY.md: ultra corto, operativo, sin duplicados. Debe guiarte de regreso sin leer 20 archivos.

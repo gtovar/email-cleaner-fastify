@@ -24,13 +24,13 @@ npm install
 
 ### ML Service (FastAPI)
 ```bash
-cd email-cleaner-ml-python
+cd email-cleaner-fastify/python/classifier
 pip install -r requirements.txt
 ```
 
 ### Frontend (React)
 ```bash
-cd email-cleaner-frontend-react
+cd email-cleaner-react
 npm install
 ```
 
@@ -72,7 +72,7 @@ http://localhost:3000
 
 ### B) FastAPI ML Service
 ```bash
-cd email-cleaner-ml-python
+cd email-cleaner-fasitfy/python
 uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -83,7 +83,7 @@ http://localhost:8000
 
 ### C) React Frontend
 ```bash
-cd email-cleaner-frontend-react
+cd email-cleaner-react
 npm run dev
 ```
 
@@ -123,7 +123,7 @@ Use your Gmail OAuth `access_token` in the headers:
 
 ### Base Email List (no AI)
 ```bash
-curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/mails
+curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/emails
 ```
 
 ### Email List with AI Suggestions
@@ -153,7 +153,7 @@ Expected:
 
 ### ML (pytest)
 ```bash
-cd email-cleaner-ml-python
+cd email-cleaner-fastify/python/classifier
 pytest
 ```
 
@@ -180,7 +180,7 @@ curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/sugges
 
 ## 10. Main Endpoints
 
-- `/api/v1/mails`
+- `/api/v1/emails`
 - `/api/v1/suggestions`
 - `/health`
 - `http://localhost:8000/docs` (ML OpenAPI)

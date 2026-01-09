@@ -4,7 +4,7 @@ export async function listEvents(request, reply) {
   const { page = 1, perPage = 20, type, userId } = request.query;
   const effectiveUserId = userId || request.user?.id || 'demo-user';
 
-  const service = notificationEventsService(request.server.models);
+  const service = notificationEventsService({ models: request.server.models });
   const result = await service.list({ page, perPage, type, userId: effectiveUserId });
 
   return reply.send(result);

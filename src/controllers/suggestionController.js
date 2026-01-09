@@ -2,7 +2,7 @@
 
 import { GmailService } from '../services/gmailService.js';
 import { google } from 'googleapis';
-import { suggestActions } from '../services/emailSuggester.js';
+import { suggestActions } from '../services/emailSuggesterService.js';
 
 /**
  * Controlador para Fastify: sugiere acciones automáticas para correos (sin ejecutarlas).

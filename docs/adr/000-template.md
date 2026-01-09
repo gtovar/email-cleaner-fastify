@@ -15,4 +15,3 @@
 
 (Impactos positivos y negativos, riesgos, mitigaciones.)
 
-```

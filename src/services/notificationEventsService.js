@@ -1,39 +1,45 @@
-import { NEW_SUGGESTIONS_EVENT } from './notificationsService.js';
+import { recordNotificationEventCommand } from "../commands/notification_events/recordNotificationEventCommand.js";
 
-export function notificationEventsService(models) {
-  const model = models?.NotificationEvent;
-  if (!model) {
-    throw new Error('NotificationEvent model is required');
-  }
+export const notificationEventsService = ({ models, eventBus, logger }) => ({
+  /**
+   * Write-path (CQRS-lite): persistir NotificationEvent
+   */
+  async record(dbEvent) {
+    const cmd = recordNotificationEventCommand({ models, logger });
+    return cmd.execute(dbEvent);
+  },
 
-  return {
-    async record(event) {
-      return model.create(event);
-    },
-
-    async list({ page = 1, perPage = 20, type, userId } = {}) {
-      const safePage = Number(page) > 0 ? Number(page) : 1;
-      const safePerPage = Number(perPage) > 0 ? Number(perPage) : 20;
-
-      const where = {};
-      if (type) where.type = type;
-      if (userId) where.userId = userId;
-
-      const { count, rows } = await model.findAndCountAll({
-        where,
-        order: [['createdAt', 'DESC']],
-        offset: (safePage - 1) * safePerPage,
-        limit: safePerPage
-      });
-
-      return {
-        total: count,
-        page: safePage,
-        perPage: safePerPage,
-        data: rows.map((row) => row.toJSON())
-      };
+  /**
+   * Read-path (CQRS-lite): listar/paginar/filtrar NotificationEvents
+   */
+  async list({ page = 1, perPage = 20, type, userId } = {}) {
+    const NotificationEvent = models?.NotificationEvent;
+    if (!NotificationEvent?.findAndCountAll) {
+      throw new Error("NotificationEvent model with findAndCountAll is required");
     }
-  };
-}
 
-export { NEW_SUGGESTIONS_EVENT } from './notificationsService.js';
+    const where = {};
+    if (type) where.type = type;
+    if (userId) where.userId = userId;
+
+    const safePage = Number(page) || 1;
+    const safePerPage = Number(perPage) || 20;
+    const limit = safePerPage;
+    const offset = (safePage - 1) * safePerPage;
+
+    const result = await NotificationEvent.findAndCountAll({
+      where,
+      limit,
+      offset,
+      order: [["createdAt", "DESC"]],
+    });
+
+    return {
+      total: result.count,
+      page: safePage,
+      perPage: safePerPage,
+      data: result.rows.map((r) => (typeof r.toJSON === "function" ? r.toJSON() : r)),
+    };
+  }
+});
+

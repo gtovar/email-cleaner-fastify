@@ -1,4 +1,4 @@
-// src/services/emailSuggester.js
+// src/services/emailSuggesterService.js
 // Servicio de alto nivel para pedir sugerencias de acción al microservicio de ML.
 //
 // Responsabilidad:

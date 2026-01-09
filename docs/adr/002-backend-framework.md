@@ -18,6 +18,3 @@ Express queda archivado.
 * Plugins y hooks avanzados.
 
 - Requiere ajustar middlewares y estructura previa.
-
-```
-

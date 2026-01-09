@@ -19,5 +19,3 @@ Adoptar OAuth2 con scopes mínimos necesarios y tokens refrescables.
 
 - Configuración inicial más compleja.
 
-```
-

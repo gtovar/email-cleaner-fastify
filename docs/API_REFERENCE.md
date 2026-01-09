@@ -27,26 +27,26 @@ If the token is missing or invalid, the API will return **401 Unauthorized**.
 
 ## 2. Emails API
 
-### 2.1 GET /api/v1/mails
+### 2.1 GET /api/v1/emails
 
 Returns the list of base Gmail emails **without any AI processing**.
 
 #### Description
 
-- Fetches raw emails from Gmail.
-- No machine learning, no automatic classification.
-- This endpoint represents the “raw inbox” view.
+* Fetches raw emails from Gmail.
+* No machine learning, no automatic classification.
+* This endpoint represents the “raw inbox” view.
 
 #### Request
 
 ```http
-GET /api/v1/mails HTTP/1.1
+GET /api/v1/emails HTTP/1.1
 Authorization: Bearer <ACCESS_TOKEN>
 ```
 
 #### Query Parameters
 
-- `pageToken` *(optional, string)* — Gmail pagination token (if supported by the current implementation).
+* `pageToken` *(optional, string)* — Gmail pagination token (if supported by the current implementation).
 
 #### Response 200 (example)
 
@@ -68,8 +68,8 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 #### Possible Status Codes
 
-- **200 OK** – Mails returned successfully.
-- **401 Unauthorized** – Missing or invalid token.
+* **200 OK** – Mails returned successfully.
+* **401 Unauthorized** – Missing or invalid token.
 
 ---
 
@@ -81,9 +81,9 @@ Returns Gmail emails **enriched with AI-generated suggestions**.
 
 #### Description
 
-- Backend fetches base emails (similar to `/api/v1/mails`).
-- Emails are sent to the ML service.
-- The response includes a `suggestions` array per email.
+* Backend fetches base emails (similar to `/api/v1/emails`).
+* Emails are sent to the ML service.
+* The response includes a `suggestions` array per email.
 
 #### Request
 
@@ -118,8 +118,8 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 If the ML service is unavailable (timeout, network error, 5xx):
 
-- The endpoint **still returns 200 OK**.
-- Each email will include an **empty `suggestions` array**.
+* The endpoint **still returns 200 OK**.
+* Each email will include an **empty `suggestions` array**.
 
 Example:
 
@@ -140,8 +140,8 @@ Example:
 
 #### Possible Status Codes
 
-- **200 OK** – Emails returned successfully (with or without suggestions).
-- **401 Unauthorized** – Missing or invalid token.
+* **200 OK** – Emails returned successfully (with or without suggestions).
+* **401 Unauthorized** – Missing or invalid token.
 
 ---
 
@@ -149,14 +149,15 @@ Example:
 
 The Notifications API exposes endpoints to:
 
-- Get a **summary of suggested actions**
-- **Confirm** actions taken on emails
-- Retrieve the **history** of actions per user
+* Get a **summary of suggested actions**
+* **Confirm** actions taken on emails
+* Retrieve the **history** of actions per user
+* Consume a timeline of **notification events** (event store / audit log style)
 
 All routes share:
 
-- `Authorization: Bearer <ACCESS_TOKEN>`
-- Prefix: `/api/v1/notifications/...`
+* `Authorization: Bearer <ACCESS_TOKEN>`
+* Prefix: `/api/v1/notifications/...`
 
 ---
 
@@ -166,8 +167,8 @@ Returns a summary list of emails with suggested actions to review.
 
 #### Description
 
-- Intended for “overview” dashboards.
-- Each item represents an email plus a list of suggested actions (e.g., archive, delete, move).
+* Intended for “overview” dashboards.
+* Each item represents an email plus a list of suggested actions (e.g., archive, delete, move).
 
 #### Request
 
@@ -178,7 +179,7 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 #### Query Parameters
 
-- `period` *(optional, string)* — `daily` or `weekly`.  
+* `period` *(optional, string)* — `daily` or `weekly`.
   Used to filter the summary window.
 
 #### Response 200 (example)
@@ -200,8 +201,8 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 #### Possible Status Codes
 
-- **200 OK** – Summary returned successfully.
-- **401 Unauthorized** – Missing or invalid token.
+* **200 OK** – Summary returned successfully.
+* **401 Unauthorized** – Missing or invalid token.
 
 ---
 
@@ -211,10 +212,11 @@ Confirms actions for one or more emails (e.g., accept or reject suggested action
 
 #### Description
 
-- Used by the UI when the user confirms or rejects suggested actions.
-- Internally, the backend may:
-  - Execute Gmail actions.
-  - Record entries in the action history.
+* Used by the UI when the user confirms or rejects suggested actions.
+* Internally, the backend may:
+
+  * Execute Gmail actions.
+  * Record entries in the action history.
 
 #### Request
 
@@ -228,13 +230,13 @@ Content-Type: application/json
 
 ```json
 {
-  "ids": ["18c8f6e...", "18c8f7a..."],
+  "emailIds": ["18c8f6e...", "18c8f7a..."],
   "action": "accept"
 }
 ```
 
-- `ids` *(array of strings, required)* — Email IDs to process.
-- `action` *(string, required)* — One of: `accept`, `reject`.
+* `emailIds` *(array of strings, required)* — Email IDs to process.
+* `action` *(string, required)* — One of: `accept`, `reject`.
 
 #### Response 200 (example)
 
@@ -244,18 +246,31 @@ The schema guarantees:
 {
   "success": true,
   "processed": 2,
-  "action": "accept"
+  "emailIds": ["18c8f6e...", "18c8f7a..."],
+  "action": "accept",
+  "data": [
+    {
+      "userId": "user-123",
+      "emailId": "18c8f6e...",
+      "action": "accept",
+      "timestamp": "2025-11-18T02:32:11.000Z",
+      "details": {
+        "gmailResponse": { "status": "OK" },
+        "note": "Executed"
+      }
+    }
+  ]
 }
 ```
 
-> Note: The internal implementation may include additional fields,  
-> but `success`, `processed` and `action` are guaranteed by contract.
+> Note: The internal implementation may include additional fields,
+> but `success`, `processed`, `emailIds` and `action` are guaranteed by contract.
 
 #### Possible Status Codes
 
-- **200 OK** – Actions processed successfully.
-- **400 Bad Request** – Invalid payload (e.g., missing `ids` or `action`).
-- **401 Unauthorized** – Missing or invalid token.
+* **200 OK** – Actions processed successfully.
+* **400 Bad Request** – Invalid payload (e.g., missing `emailIds` or `action`).
+* **401 Unauthorized** – Missing or invalid token.
 
 ---
 
@@ -265,8 +280,8 @@ Returns the history of actions taken on emails for the authenticated user.
 
 #### Description
 
-- Used to display “what has been done” over time.
-- Returns a paginated list of action records.
+* Used to display “what has been done” over time.
+* Returns a paginated list of action records.
 
 #### Request
 
@@ -277,8 +292,8 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 #### Query Parameters
 
-- `page` *(optional, integer, default: 1)* — Page number.
-- `perPage` *(optional, integer, default: 20)* — Items per page.
+* `page` *(optional, integer, default: 1)* — Page number.
+* `perPage` *(optional, integer, default: 20)* — Items per page.
 
 #### Response 200 (example)
 
@@ -304,8 +319,8 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 #### Possible Status Codes
 
-- **200 OK** – History returned successfully.
-- **401 Unauthorized** – Missing or invalid token.
+* **200 OK** – History returned successfully.
+* **401 Unauthorized** – Missing or invalid token.
 
 ---
 
@@ -315,8 +330,8 @@ Lists notification events with pagination. Useful to consume a timeline of syste
 
 #### Description
 
-- Supports filtering by `type` and by `userId` (as required by the functional spec).
-- Records are stored with `timestamps: true`, so `createdAt`/`updatedAt` are always present and map to Sequelize defaults.
+* Supports filtering by `type` and by `userId`.
+* Records are stored with `timestamps: true`, so `createdAt`/`updatedAt` are always present and map to Sequelize defaults.
 
 #### Request
 
@@ -327,10 +342,12 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 #### Query Parameters
 
-- `page` *(optional, integer, default: 1)* — Page number.
-- `perPage` *(optional, integer, default: 20)* — Items per page.
-- `type` *(optional, string)* — Filter by event type (e.g., `NEW_SUGGESTIONS_AVAILABLE`).
-- `userId` *(optional, string)* — Filter by user identifier.
+* `page` *(optional, integer, default: 1)* — Page number.
+* `perPage` *(optional, integer, default: 20)* — Items per page.
+* `type` *(optional, string)* — Filter by canonical domain event type string.
+* `userId` *(optional, string)* — Filter by user identifier.
+
+**Canonical rule:** The `type` query parameter filters by the **canonical domain event type string** (e.g., `domain.suggestions.generated`, `domain.suggestions.confirmed`). Legacy labels such as `NEW_SUGGESTIONS` / `NEW_SUGGESTIONS_EVENT` are **not supported** in `src/**` or `tests/**` and may appear only in documentation under a **DEPRECATED** section for historical traceability.
 
 #### Response 200 (example)
 
@@ -341,7 +358,7 @@ Authorization: Bearer <ACCESS_TOKEN>
   "perPage": 20,
   "data": [
     {
-      "type": "NEW_SUGGESTIONS_AVAILABLE",
+      "type": "domain.suggestions.generated",
       "userId": "demo-user",
       "summary": {
         "totalSuggestions": 3,
@@ -356,8 +373,8 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 #### Possible Status Codes
 
-- **200 OK** – Events returned successfully.
-- **401 Unauthorized** – Missing or invalid token.
+* **200 OK** – Events returned successfully.
+* **401 Unauthorized** – Missing or invalid token.
 
 ---
 
@@ -385,25 +402,27 @@ GET /api/v1/health HTTP/1.1
 
 ## 6. Error Summary
 
-| Status Code | Meaning                         | Typical Cause                          |
-|------------|---------------------------------|----------------------------------------|
-| 200        | OK                              | Successful request                     |
-| 400        | Bad Request                     | Invalid body or query parameters       |
-| 401        | Unauthorized                    | Missing or invalid `Authorization`     |
-| 422        | Validation Error (if configured)| Payload does not match expected shape  |
-| 503        | ML Service Unavailable (internal)| ML failure; suggestions fall back to []|
+| Status Code | Meaning                           | Typical Cause                           |
+| ----------- | --------------------------------- | --------------------------------------- |
+| 200         | OK                                | Successful request                      |
+| 400         | Bad Request                       | Invalid body or query parameters        |
+| 401         | Unauthorized                      | Missing or invalid `Authorization`      |
+| 422         | Validation Error (if configured)  | Payload does not match expected shape   |
+| 503         | ML Service Unavailable (internal) | ML failure; suggestions fall back to [] |
 
-> Note: When the ML service fails, the API **does not** return 5xx to the client.  
+> Note: When the ML service fails, the API **does not** return 5xx to the client.
 > It returns a valid 200 response with empty `suggestions` arrays.
 
 ---
 
 ## 7. Developer Notes
 
-- Backend uses **ECMAScript Modules (ESM)**.
-- Gmail is accessed via internal services, not directly from the client.
-- ML integration is abstracted through `mlClient`.
-- Key configuration:
+* Backend uses **ECMAScript Modules (ESM)**.
+* Gmail is accessed via internal services, not directly from the client.
+* ML integration is abstracted through `mlClient`.
+* Event types are domain strings (e.g., `domain.suggestions.generated`). For the canonical list and payload contracts, see `docs/events_contract.md`.
+
+Key configuration:
 
 ```env
 ML_TIMEOUT_MS=5000
@@ -414,9 +433,8 @@ ML_BASE_URL=http://localhost:8000
 
 ## 8. Versioning & Updates
 
-- API version: **v1** (`/api/v1/...`).
-- Last update: 2025 — Email Cleaner Engineering Team.
+* API version: **v1** (`/api/v1/...`).
+* Last update: 2025 
 
 ---
 
-# END OF FILE
