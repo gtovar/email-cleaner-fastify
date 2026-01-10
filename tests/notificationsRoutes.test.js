@@ -16,7 +16,9 @@ const mockGetSummary = jest.fn(async (req, reply) => {
       isRead: false,
       category: 'demo',
       attachmentSizeMb: 0.1,
-      suggestions: ['archive']
+      suggestions: [
+        { action: 'archive', clasificacion: 'demo', confidence_score: 0.7 }
+      ]
     }
   ]);
 });
@@ -133,7 +135,9 @@ describe('Notifications Routes (contrato Fastify)', () => {
     expect(item).toMatchObject({
       id: 'test1',
       subject: '¡Prueba HU4!',
-      suggestions: ['archive']
+      suggestions: [
+        { action: 'archive', clasificacion: 'demo', confidence_score: 0.7 }
+      ]
     });
 
     expect(mockGetSummary).toHaveBeenCalledTimes(1);

@@ -6,8 +6,21 @@ import { DOMAIN_EVENTS } from '../src/events/eventBus.js';
 
 describe('buildNewSuggestionsEvent', () => {
   const suggestions = [
-    { id: 'email-1', subject: 'First subject', suggestions: ['archive', 'delete'] },
-    { id: 'email-2', subject: 'Second subject', suggestions: ['archive'] }
+    {
+      id: 'email-1',
+      subject: 'First subject',
+      suggestions: [
+        { action: 'archive', clasificacion: 'bulk', confidence_score: 0.8 },
+        { action: 'delete', clasificacion: 'stale_unread', confidence_score: 0.9 }
+      ]
+    },
+    {
+      id: 'email-2',
+      subject: 'Second subject',
+      suggestions: [
+        { action: 'archive', clasificacion: 'bulk', confidence_score: 0.8 }
+      ]
+    }
   ];
 
   test('creates a structured event with summary and timestamp', () => {
@@ -21,8 +34,21 @@ describe('buildNewSuggestionsEvent', () => {
 
     expect(event.summary.totalSuggestions).toBe(3);
     expect(event.summary.sampledEmails).toEqual([
-      { emailId: 'email-1', subject: 'First subject', suggestions: ['archive', 'delete'] },
-      { emailId: 'email-2', subject: 'Second subject', suggestions: ['archive'] }
+      {
+        emailId: 'email-1',
+        subject: 'First subject',
+        suggestions: [
+          { action: 'archive', clasificacion: 'bulk', confidence_score: 0.8 },
+          { action: 'delete', clasificacion: 'stale_unread', confidence_score: 0.9 }
+        ]
+      },
+      {
+        emailId: 'email-2',
+        subject: 'Second subject',
+        suggestions: [
+          { action: 'archive', clasificacion: 'bulk', confidence_score: 0.8 }
+        ]
+      }
     ]);
 
     expect(new Date(event.generatedAt).toString()).not.toBe('Invalid Date');
