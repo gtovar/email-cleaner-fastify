@@ -127,7 +127,18 @@ buildNewSuggestionsEvent({ userId, suggestions })
     {
       "emailId": "18c8f6e...",
       "subject": "Example",
-      "suggestions": ["archive", "delete"]
+      "suggestions": [
+        {
+          "action": "archive",
+          "clasificacion": "bulk",
+          "confidence_score": 0.8
+        },
+        {
+          "action": "delete",
+          "clasificacion": "stale_unread",
+          "confidence_score": 0.9
+        }
+      ]
     }
   ],
   "summary": {
@@ -136,7 +147,18 @@ buildNewSuggestionsEvent({ userId, suggestions })
       {
         "emailId": "18c8f6e...",
         "subject": "Example",
-        "suggestions": ["archive", "delete"]
+        "suggestions": [
+          {
+            "action": "archive",
+            "clasificacion": "bulk",
+            "confidence_score": 0.8
+          },
+          {
+            "action": "delete",
+            "clasificacion": "stale_unread",
+            "confidence_score": 0.9
+          }
+        ]
       }
     ]
   },
@@ -244,4 +266,3 @@ Registered in `registerNotificationEventListeners.js`:
   * `domain.suggestions.generated`
 
 ---
-

@@ -1250,7 +1250,7 @@ Example:
 
 Every reference must use its exact, complete identifier:
 
-- Files → `src/services/emailSuggester.js`  
+- Files → `src/services/suggestionService.js`  
 - Endpoints → `/api/v1/notifications/history`  
 - Environment variables → `ML_BASE_URL`  
 - Branches → `feat/hu12-fastify-ml-integration`  
@@ -1479,5 +1479,4 @@ Historical evolution lives in:
 * Git history
 * `Sprint_Log.md`
 * Version Log (at the bottom of PROJECT_STATE.md)
-
 

@@ -29,13 +29,13 @@ If the token is missing or invalid, the API will return **401 Unauthorized**.
 
 ### 2.1 GET /api/v1/emails
 
-Returns the list of base Gmail emails **without any AI processing**.
+Returns the list of Gmail emails with optional filters **without any AI processing**.
 
 #### Description
 
-* Fetches raw emails from Gmail.
-* No machine learning, no automatic classification.
-* This endpoint represents the “raw inbox” view.
+* Fetches emails from Gmail.
+* Applies optional Gmail query filters.
+* No ML classification or suggestions.
 
 #### Request
 
@@ -46,19 +46,33 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 #### Query Parameters
 
-* `pageToken` *(optional, string)* — Gmail pagination token (if supported by the current implementation).
+* `unread` *(optional, boolean)* — Only unread emails.
+* `olderThan` *(optional, integer)* — Older than N days.
+* `category` *(optional, string)* — Gmail category: `promotions`, `social`, `updates`, `forums`, `primary`.
+* `minAttachmentSize` *(optional, integer)* — Attachments larger than N MB.
+* `pageToken` *(optional, string)* — Gmail pagination token.
 
 #### Response 200 (example)
 
+Notes:
+- `category` on the email is the Gmail category (labels).
+- `clasificacion` on each suggestion is the ML classification label.
+
 ```json
 {
-  "Emails": [
+  "emails": [
     {
       "id": "18c8f6e...",
       "from": "facturas@cfe.mx",
       "subject": "Your power bill",
+      "date": "2025-11-18T02:32:11.000Z",
+      "labels": ["INBOX", "UNREAD"],
+      "isRead": false,
+      "attachmentSizeMb": 1.2,
+      "category": "promotions",
       "snippet": "Due on November 15...",
-      "date": "2025-11-18T02:32:11.000Z"
+      "hasAttachment": false,
+      "size": 52310
     }
   ],
   "nextPageToken": "xyz...",
@@ -81,7 +95,7 @@ Returns Gmail emails **enriched with AI-generated suggestions**.
 
 #### Description
 
-* Backend fetches base emails (similar to `/api/v1/emails`).
+* Backend fetches recent emails from Gmail.
 * Emails are sent to the ML service.
 * The response includes a `suggestions` array per email.
 
@@ -101,12 +115,15 @@ Authorization: Bearer <ACCESS_TOKEN>
       "id": "18c8f6e...",
       "from": "facturas@cfe.mx",
       "subject": "Your power bill",
-      "snippet": "Due on November 15...",
       "date": "2025-11-18T02:32:11.000Z",
+      "isRead": false,
+      "category": "promotions",
+      "attachmentSizeMb": 1.2,
       "suggestions": [
         {
           "action": "archive",
-          "reason": "low_priority"
+          "clasificacion": "promotions_old",
+          "confidence_score": 0.85
         }
       ]
     }
@@ -194,7 +211,13 @@ Authorization: Bearer <ACCESS_TOKEN>
     "isRead": false,
     "category": "demo",
     "attachmentSizeMb": 0.1,
-    "suggestions": ["archive"]
+    "suggestions": [
+      {
+        "action": "archive",
+        "clasificacion": "demo",
+        "confidence_score": 0.7
+      }
+    ]
   }
 ]
 ```
@@ -437,4 +460,3 @@ ML_BASE_URL=http://localhost:8000
 * Last update: 2025 
 
 ---
-

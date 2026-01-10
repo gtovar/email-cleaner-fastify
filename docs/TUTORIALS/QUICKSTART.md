@@ -131,6 +131,30 @@ curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/emails
 curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/suggestions
 ```
 
+Example response:
+```json
+{
+  "emails": [
+    {
+      "id": "18c8f6e...",
+      "from": "facturas@cfe.mx",
+      "subject": "Your power bill",
+      "date": "2025-11-18T02:32:11.000Z",
+      "isRead": false,
+      "category": "promotions",
+      "attachmentSizeMb": 1.2,
+      "suggestions": [
+        {
+          "action": "archive",
+          "clasificacion": "promotions_old",
+          "confidence_score": 0.85
+        }
+      ]
+    }
+  ]
+}
+```
+
 If ML is offline, backend returns suggestions as empty:
 ```json
 { "emails": [ { "id": "...", "suggestions": [] } ] }
@@ -148,7 +172,7 @@ npm test
 
 Expected:
 ```
-33 passed, 0 failed
+40 passed, 0 failed
 ```
 
 ### ML (pytest)
@@ -188,4 +212,3 @@ curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/sugges
 ---
 
 # END OF FILE
-

@@ -148,13 +148,13 @@ npm run coverage   # Reporte de cobertura en ./coverage
 | GOOGLE_CLIENT_SECRET | OAuth 2.0 Client Secret | Sí | supersecret |
 | GOOGLE_REDIRECT_URI | Redirect (OAuth) | Sí | http://localhost:3000/oauth/google/callback |
 | INTERNAL_JWT_SECRET| Inter-service / Security | No | xxxxx|
-| FASTAPI_URL | URL del microservicio ML | Sí | http://localhost:8000 |
+| ML_BASE_URL | URL del microservicio ML | Sí | http://localhost:8000 |
 | PORT | Puerto del backend | Sí | 3000 |
 | N8N_WEBHOOK_URL | Webhook para pruebas | No | http://localhost:5678/webhook/telegram-test |
 | TELEGRAM_BOT_TOKEN | Telegram | No | xxxxx |
 
 > *Usa `DATABASE_URL` o los `DB_*`. No ambos a la vez.
-⚠️ Los endpoints que consultan Gmail (`/mails`, `/suggestions`) requieren un token Google válido.
+⚠️ Los endpoints que consultan Gmail (`/api/v1/emails`, `/api/v1/suggestions`) requieren un token Google válido.
 Para probar sin OAuth real, use el flujo de **Notificaciones** con un token dummy (`Authorization: Bearer dummy`).
 
 ## 🧠 Especificación oficial de la API
@@ -175,19 +175,34 @@ La documentación de la API se genera directamente desde el código (esquemas de
 
 ## 🧪 Testing the Pipeline
 
-To test classification end-to-end:
+To test ML suggestions end-to-end (direct ML service):
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/emails/classify -H "Content-Type: application/json" -d '{"from": "invoices@cfe.mx", "subject": "Your electricity bill is ready", "body": "Due date: November 15. Amount: $350."}'
+curl -X POST http://localhost:8000/v1/suggest \
+  -H "Content-Type: application/json" \
+  -d '[{"id":"e1","from":"invoices@cfe.mx","subject":"Your electricity bill is ready","date":"2025-11-18T02:32:11.000Z","isRead":false,"category":"promotions","attachmentSizeMb":12.4}]'
 ```
 
 Expected result:
 ```json
-{
-  "category": "Finance/Utilities/CFE",
-  "action": "archive",
-  "confidence": 0.93
-}
+[
+  {
+    "id": "e1",
+    "from": "invoices@cfe.mx",
+    "subject": "Your electricity bill is ready",
+    "date": "2025-11-18T02:32:11.000Z",
+    "isRead": false,
+    "category": "promotions",
+    "attachmentSizeMb": 12.4,
+    "suggestions": [
+      {
+        "action": "move",
+        "clasificacion": "large_attachments_old",
+        "confidence_score": 0.8
+      }
+    ]
+  }
+]
 ```
 
 **Trigger notification test:**  
@@ -243,4 +258,4 @@ sed -i "s/Last updated:.*/Last updated: $(date '+%B %Y')/" README.md
 
 ---
 
-**Last updated:** November 2025
+**Last updated:** March 2026

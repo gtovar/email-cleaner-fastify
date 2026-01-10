@@ -21,7 +21,7 @@ Non-canonical content (learning notes, scratchpads) must live under a clearly la
 
 ### Naming (Exact coordinates)
 Always use full exact identifiers:
-- Files: `src/services/emailSuggesterService.js`
+- Files: `src/services/suggestionService.js`
 - Endpoints: `/api/v1/notifications/events`
 - Env vars: `ML_BASE_URL`
 - Tests: `tests/notificationsRoutes.test.js`
@@ -174,4 +174,3 @@ Crear ADR solo si decidimos oficialmente naming canónico.
 - Canonical docs must be **factual**:
   - Put guesses under a dedicated `## Hypotheses` section.
   - Avoid hedging in canonical sections (e.g., “maybe/probably/I think/we think”).
-

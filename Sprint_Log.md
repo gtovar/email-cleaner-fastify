@@ -15,14 +15,14 @@
 * Default path switched to `/v1/suggest`.
 * Payload changed to raw email arrays.
 
-### 2025-11-21 — emailSuggester updated
+### 2025-11-21 — suggestionService updated
 
 * Normalized ML enriched-array output.
 * Legacy mapping preserved.
 
 ### 2025-11-21 — Tests updated
 
-* `mlClient.test.js` and `emailSuggester.test.js` adjusted for v1 contract.
+* `mlClient.test.js` and `suggestionService.test.js` adjusted for v1 contract.
 
 ### 2025-11-22 — HU5 completed
 
@@ -34,7 +34,7 @@
 ### 2025-11-28 — HU12 validated
 
 * Fastify ↔ ML integration fallback behaviour tested.
-* emailSuggester fallback confirmed.
+* suggestionService fallback confirmed.
 
 ### 2025-11-28 — Merge HU5 + HU12 into `develop`
 
@@ -65,4 +65,3 @@
 - README_REENTRY: removida duplicidad y eliminado “rojo” obsoleto
 - PROJECT_STATE: metadata verificada (branch+commit) + HU4/HU5/HU6/HU10 clarificadas
 - Canon: “ActionHistory vs NotificationEvent” explícito para evitar drift mental
-
