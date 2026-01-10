@@ -54,13 +54,29 @@ async def suggest(emails: List[Email]):
     for email in emails:
         sug = []
         if not email.isRead and months_ago(email.date, now) >= 12:
-            sug.append("suggested-delete")
+            sug.append({
+                "action": "delete",
+                "clasificacion": "stale_unread",
+                "confidence_score": 0.9
+            })
         if email.category == "promotions" and months_ago(email.date, now) >= 6:
-            sug.append("suggested-archive")
+            sug.append({
+                "action": "archive",
+                "clasificacion": "promotions_old",
+                "confidence_score": 0.85
+            })
         if email.attachmentSizeMb > 10 and months_ago(email.date, now) >= 12:
-            sug.append("suggested-move-big-attachments")
+            sug.append({
+                "action": "move",
+                "clasificacion": "large_attachments_old",
+                "confidence_score": 0.8
+            })
         if days_ago(email.date, now) <= 3:
-            sug.append("suggested-review-recent")
+            sug.append({
+                "action": "review",
+                "clasificacion": "recent",
+                "confidence_score": 0.7
+            })
 
         suggestions[email.id] = sug
 

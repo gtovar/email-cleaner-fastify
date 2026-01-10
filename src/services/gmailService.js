@@ -27,6 +27,24 @@ export class GmailService {
         return this._fetchMetadataForMessages(messages);
     }
 
+    async listMessagesByQuery({ query, maxResults, pageToken }) {
+        const res = await this.gmail.users.messages.list({
+            userId: 'me',
+            q: query || '',
+            pageToken,
+            maxResults: maxResults || 20,
+        });
+
+        const messages = res.data.messages || [];
+        const emails = await this._fetchMetadataForMessages(messages);
+
+        return {
+            emails,
+            nextPageToken: res.data.nextPageToken || null,
+            total: res.data.resultSizeEstimate || 0,
+        };
+    }
+
     _buildQuery({ filter, dateBefore, combine }) {
         let queries = [];
         const combined = combine || [];
@@ -70,9 +88,12 @@ export class GmailService {
                 subject: headers.subject || '',
                 from: headers.from || '',
                 date: headers.date || '',
+                labels: msgData.data.labelIds || [],
                 isRead: !(msgData.data.labelIds?.includes('UNREAD')),
                 category: detectCategoryFromLabels(msgData.data.labelIds || []),
-                attachmentSizeMb: 0,
+                attachmentSizeMb: msgData.data.sizeEstimate
+                    ? msgData.data.sizeEstimate / (1024 * 1024)
+                    : 0,
                 snippet: msgData.data.snippet,
                 hasAttachment: (payload.parts || []).some(part => part.filename && part.filename !== ''),
                 size: msgData.data.sizeEstimate,

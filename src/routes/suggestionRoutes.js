@@ -19,10 +19,10 @@ const emailSuggestionSchema = {
                 type: 'object',
                 properties: {
                     action: { type: 'string' },
-                    category: { type: 'string' },
+                    clasificacion: { type: 'string' },
                     confidence_score: { type: 'number' }
                 },
-                required: ['action', 'category', 'confidence_score']
+                required: ['action', 'clasificacion', 'confidence_score']
             }
         }
     }
@@ -62,7 +62,7 @@ export default async function (fastify, opts) {
                                 suggestions: [
                                     {
                                         action: "archive",
-                                        category: "promotions",
+                                        clasificacion: "promotions_old",
                                         confidence_score: 0.91
                                     }
                                 ]

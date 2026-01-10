@@ -25,7 +25,9 @@ export async function getNotificationSummaryForUser({ models, userId }) {
       isRead: false,
       category: 'primary',
       attachmentSizeMb: 0,
-      suggestions: ['archive'],
+      suggestions: [
+        { action: 'archive', clasificacion: 'bulk', confidence_score: 0.8 }
+      ],
     },
     {
       id: 'test2',
@@ -35,8 +37,9 @@ export async function getNotificationSummaryForUser({ models, userId }) {
       isRead: false,
       category: 'updates',
       attachmentSizeMb: 0,
-      suggestions: ['keep'],
+      suggestions: [
+        { action: 'keep', clasificacion: 'important', confidence_score: 0.7 }
+      ],
     },
   ];
 }
-

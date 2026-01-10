@@ -17,7 +17,18 @@ export default async function (fastify, opts) {
       isRead: { type: 'boolean' },
       category: { type: 'string' },
       attachmentSizeMb: { type: 'number' },
-      suggestions: { type: 'array', items: { type: 'string' } }
+      suggestions: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            action: { type: 'string' },
+            clasificacion: { type: 'string' },
+            confidence_score: { type: 'number' }
+          },
+          required: ['action', 'clasificacion', 'confidence_score']
+        }
+      }
     }
   });
 
