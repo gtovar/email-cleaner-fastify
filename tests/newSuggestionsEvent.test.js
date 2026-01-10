@@ -33,6 +33,8 @@ describe('buildNewSuggestionsEvent', () => {
     });
 
     expect(event.summary.totalSuggestions).toBe(3);
+    expect(event.summary.actionCounts).toMatchObject({ archive: 2, delete: 1 });
+    expect(event.summary.clasificacionCounts).toMatchObject({ bulk: 2, stale_unread: 1 });
     expect(event.summary.sampledEmails).toEqual([
       {
         emailId: 'email-1',

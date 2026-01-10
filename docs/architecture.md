@@ -21,21 +21,15 @@ sequenceDiagram
   participant R as Fastify Route/Controller
   participant S as notificationsService.getSummaryForUser
   participant Q as summaryQueries
-  participant EB as EventBus
-  participant Sub as saveToNotificationEvent listener
-  participant Cmd as recordNotificationEventCommand
   participant DB as PostgreSQL (NotificationEvent)
 
   UI->>R: GET /api/v1/notifications/summary (Bearer token)
   R->>S: getSummaryForUser({ userId })
-  S->>Q: build suggestions for user
-  Q-->>S: suggestions[]
-  S->>EB: publish(domain.suggestions.generated, domainEvent)
-  EB-->>Sub: handle(domainEvent)
-  Sub->>Cmd: execute({ type, userId, summary })
-  Cmd->>DB: INSERT NotificationEvent
-  S-->>R: suggestions[]
-  R-->>UI: 200 suggestions[]
+  S->>Q: aggregate summary for user
+  Q->>DB: SELECT NotificationEvent (windowed)
+  Q-->>S: summary
+  S-->>R: summary
+  R-->>UI: 200 summary
 ```
 
 ```mermaid
@@ -43,10 +37,8 @@ flowchart LR
   UI[React UI] -->|GET /api/v1/notifications/summary + Bearer| MW[authMiddleware]
   MW --> CTRL[getSummary controller]
   CTRL --> SVC[notificationsService.getSummary]
-  SVC --> BUS[eventBus.publish: DOMAIN_EVENTS.SUGGESTIONS_GENERATED]
-  BUS --> L1[listener: saveToNotificationEvent]
-  L1 --> CMD[recordNotificationEventCommand]
-  CMD --> DB[(NotificationEvents table)]
+  SVC --> QRY[summaryQueries.getNotificationSummaryForUser]
+  QRY --> DB[(NotificationEvents table)]
   SVC --> UI
 ```
 

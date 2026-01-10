@@ -180,12 +180,12 @@ All routes share:
 
 ### 4.1 GET /api/v1/notifications/summary
 
-Returns a summary list of emails with suggested actions to review.
+Returns an aggregate summary of suggested actions for a time window.
 
 #### Description
 
 * Intended for “overview” dashboards.
-* Each item represents an email plus a list of suggested actions (e.g., archive, delete, move).
+* Aggregates counts from `NotificationEvent` records.
 
 #### Request
 
@@ -197,29 +197,31 @@ Authorization: Bearer <ACCESS_TOKEN>
 #### Query Parameters
 
 * `period` *(optional, string)* — `daily` or `weekly`.
-  Used to filter the summary window.
+  Used to filter the summary window (last 24 hours or last 7 days).
+  If omitted, the summary covers all time and `windowStart`/`windowEnd` are `null`.
 
 #### Response 200 (example)
 
 ```json
-[
-  {
-    "id": "test1",
-    "from": "noti@demo.com",
-    "subject": "Notification demo",
-    "date": "2025-11-18T02:32:11.000Z",
-    "isRead": false,
-    "category": "demo",
-    "attachmentSizeMb": 0.1,
-    "suggestions": [
-      {
-        "action": "archive",
-        "clasificacion": "demo",
-        "confidence_score": 0.7
-      }
-    ]
+{
+  "period": "weekly",
+  "windowStart": "2026-03-01T10:00:00.000Z",
+  "windowEnd": "2026-03-08T10:00:00.000Z",
+  "totalEvents": 4,
+  "totalSuggestions": 12,
+  "totalConfirmed": 3,
+  "suggestedActions": {
+    "archive": 7,
+    "delete": 5
+  },
+  "confirmedActions": {
+    "accept": 3
+  },
+  "clasificaciones": {
+    "promotions_old": 6,
+    "stale_unread": 6
   }
-]
+}
 ```
 
 #### Possible Status Codes

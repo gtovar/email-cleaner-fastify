@@ -5,10 +5,11 @@ import { notificationsService } from '../services/notificationsService.js';
 export async function getSummary(request, reply) {
   const { models, eventBus } = request.server;
   const userId = request.user?.id ?? "demo-user";
+  const { period } = request.query ?? {};
 
   const service = notificationsService({ models, eventBus });
 
-  const summary = await service.getSummaryForUser({ userId });
+  const summary = await service.getSummaryForUser({ userId, period });
 
   return reply.send(summary);
 }

@@ -32,6 +32,31 @@ export default async function (fastify, opts) {
     }
   });
 
+  fastify.addSchema({
+    $id: 'NotificationsSummary',
+    type: 'object',
+    properties: {
+      period: { type: 'string' },
+      windowStart: { type: 'string', nullable: true },
+      windowEnd: { type: 'string', nullable: true },
+      totalEvents: { type: 'integer' },
+      totalSuggestions: { type: 'integer' },
+      totalConfirmed: { type: 'integer' },
+      suggestedActions: {
+        type: 'object',
+        additionalProperties: { type: 'integer' }
+      },
+      confirmedActions: {
+        type: 'object',
+        additionalProperties: { type: 'integer' }
+      },
+      clasificaciones: {
+        type: 'object',
+        additionalProperties: { type: 'integer' }
+      }
+    }
+  });
+
   // ConfirmActionsRequest schema
   fastify.addSchema({
     $id: 'ConfirmActionsRequest',
@@ -119,8 +144,7 @@ export default async function (fastify, opts) {
       },
       response: {
         200: {
-          type: 'array',
-          items: { $ref: 'EmailSuggestion#' }
+          $ref: 'NotificationsSummary#'
         },
         401: { description: 'No autorizado' }
       }

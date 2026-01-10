@@ -143,6 +143,14 @@ buildNewSuggestionsEvent({ userId, suggestions })
   ],
   "summary": {
     "totalSuggestions": 5,
+    "actionCounts": {
+      "archive": 3,
+      "delete": 2
+    },
+    "clasificacionCounts": {
+      "bulk": 3,
+      "stale_unread": 2
+    },
     "sampledEmails": [
       {
         "emailId": "18c8f6e...",

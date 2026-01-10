@@ -52,7 +52,23 @@ describe('notificationsService', () => {
                 create: jest.fn(async (row) => {
                     eventsRecorded.push(row);
                     return row;
-                })
+                }),
+                findAll: jest.fn(async () => ([
+                    {
+                        type: DOMAIN_EVENTS.SUGGESTIONS_GENERATED,
+                        summary: {
+                            totalSuggestions: 3,
+                            actionCounts: { archive: 2, delete: 1 },
+                            clasificacionCounts: { bulk: 2, stale_unread: 1 }
+                        },
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        type: DOMAIN_EVENTS.SUGGESTION_CONFIRMED,
+                        summary: { totalConfirmed: 1, action: 'accept' },
+                        createdAt: new Date().toISOString()
+                    }
+                ]))
             }
         };
        
@@ -62,20 +78,22 @@ describe('notificationsService', () => {
         service = notificationsService({ models: fakeModels, eventBus, logger });
     });
 
-    test('getSummaryForUser publica domain.suggestions.generated y se persiste NotificationEvent', async () => {
+    test('getSummaryForUser devuelve summary agregado desde NotificationEvent', async () => {
         const summary = await service.getSummaryForUser({
             userId: 'demo-user',
             period: 'daily'
         });
 
-        expect(Array.isArray(summary)).toBe(true);
-        expect(summary.length).toBeGreaterThan(0);
-
-        expect(eventsRecorded).toHaveLength(1);
-        expect(eventsRecorded[0]).toMatchObject({
-            type: DOMAIN_EVENTS.SUGGESTIONS_GENERATED,
-            userId: 'demo-user'
+        expect(summary).toMatchObject({
+            period: 'daily',
+            totalEvents: 2,
+            totalSuggestions: 3,
+            totalConfirmed: 1,
+            suggestedActions: { archive: 2, delete: 1 },
+            confirmedActions: { accept: 1 },
+            clasificaciones: { bulk: 2, stale_unread: 1 }
         });
+        expect(eventsRecorded).toHaveLength(0);
     });
 
     test('confirmActions registra acción y devuelve conteo procesado', async () => {

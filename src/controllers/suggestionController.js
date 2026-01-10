@@ -3,6 +3,8 @@
 import { GmailService } from '../services/gmailService.js';
 import { google } from 'googleapis';
 import { suggestActions } from '../services/suggestionService.js';
+import { buildNewSuggestionsEvent } from '../events/builders/newSuggestionsEvent.builder.js';
+import { DOMAIN_EVENTS } from '../events/eventBus.js';
 
 /**
  * Controlador para Fastify: sugiere acciones automáticas para correos (sin ejecutarlas).
@@ -25,6 +27,12 @@ export async function getSuggestedEmails(request, reply) {
 
         // 4. Espera el resultado de las sugerencias
         const { emails: enrichedEmails } = await suggestActions(emails);
+
+        if (request.server?.eventBus?.publish) {
+            const userId = request.user?.id ?? 'demo-user';
+            const domainEvent = buildNewSuggestionsEvent({ userId, suggestions: enrichedEmails });
+            await request.server.eventBus.publish(DOMAIN_EVENTS.SUGGESTIONS_GENERATED, domainEvent);
+        }
 
         // 5. Responde con la estructura que espera Swagger
         reply
