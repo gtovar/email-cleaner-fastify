@@ -1,44 +1,44 @@
 # README_REENTRY.md — Email Cleaner & Smart Notifications (Fastify Backend)
 
-> Objetivo: volver al contexto en 1–2 minutos (sin leer docs largos).
+> Goal: restore context in 1–2 minutes without reading long docs.
 
-## 0) Checklist de re-entrada (orden estricto)
+## 0) Re-entry checklist (strict order)
 
-1) Ver branch + estado:
+1) Check branch + status (`type/huNN-short-desc`, base branch `develop`):
    - `git status -sb`
-2) Corre pruebas (verdad fuerte):
+2) Run tests (strong truth):
    - `npm test`
-3) Abre el checkpoint:
-   - `PROJECT_STATE.md` (estado real, factual)
-4) Si algo no cuadra:
-   - Busca la verdad en `src/index.js`, `src/routes/*`, `src/services/*`, `src/events/*`, `tests/*`
+3) Open the checkpoint:
+   - `PROJECT_STATE.md` (factual state)
+4) If something looks off:
+   - Verify in `src/index.js`, `src/routes/*`, `src/services/*`, `src/events/*`, `tests/*`
 
 ---
 
-## 1) Snapshot actual (lo mínimo que importa)
+## 1) Current snapshot (minimum that matters)
 
-- Branch: `docs/sync-truth-2026-01-08`
-- Último checkpoint: `PROJECT_STATE.md` (snapshot 2026-01-08)
+- Branch: `feat/hu17-unify-suggestions-summary`
+- Latest checkpoint: `PROJECT_STATE.md` (snapshot 2026-01-11)
 - Backend tests: PASS (Jest)
-- Endpoints principales:
+- Primary endpoints:
   - Gmail OAuth: `/auth/google`, `/auth/google/callback`
   - v1: `/api/v1/emails`, `/api/v1/suggestions`
-  - Notificaciones: `/api/v1/notifications/summary|confirm|history|events`
-- Arquitectura (hoy): CQRS-lite + EventBus in-memory + persistencia de eventos en `NotificationEvent`
+  - Notifications: `/api/v1/notifications/summary|confirm|history|events`
+- Architecture today: CQRS-lite + in-memory EventBus + `NotificationEvent` persistence
 
 ---
 
-## 2) Dónde tocar según la intención
+## 2) Where to change what
 
-- Agregar/ajustar endpoints: `src/routes/*` + `src/controllers/*`
-- Cambiar reglas de negocio: `src/services/*` + `src/commands/*`
-- Eventos / naming / listeners: `src/events/*` + `src/plugins/eventBus.js`
-- Persistencia: `src/models/*` + migraciones/seeders (si aplica)
+- Add/adjust endpoints: `src/routes/*` + `src/controllers/*`
+- Business rules: `src/services/*` + `src/commands/*`
+- Events / naming / listeners: `src/events/*` + `src/plugins/eventBus.js`
+- Persistence: `src/models/*` + migrations/seeders (if needed)
 - Tests: `tests/*.test.js`
 
 ---
 
-## 3) Comandos rápidos
+## 3) Quick commands
 
 ### Tests
 - `npm test`
@@ -53,7 +53,7 @@
 
 ---
 
-## 4) Reglas de documentación (para no olvidar)
+## 4) Documentation rules (do not forget)
 
-- PROJECT_STATE.md: solo hechos verificables (código/tests). Un “Next Immediate Action”. Sin logs pegados.
-- README_REENTRY.md: ultra corto, operativo, sin duplicados. Debe guiarte de regreso sin leer 20 archivos.
+- `PROJECT_STATE.md`: only verified facts (code/tests). One next immediate action.
+- `README_REENTRY.md`: short, operational, no duplicates. Must enable fast re-entry.

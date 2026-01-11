@@ -1,5 +1,5 @@
-// tests/emailSuggester.test.js
-// Tests para src/services/emailSuggester.js
+// tests/suggestionService.test.js
+// Tests para src/services/suggestionService.js
 
 import {
   describe,
@@ -17,7 +17,7 @@ jest.unstable_mockModule('../src/services/mlClient.js', () => ({
 }));
 
 // Import dinámico del módulo bajo prueba (para que el mock ya esté aplicado)
-const { suggestActions } = await import('../src/services/emailSuggesterService.js');
+const { suggestActions } = await import('../src/services/suggestionService.js');
 
 describe('suggestActions', () => {
   const originalTimeout = process.env.ML_TIMEOUT_MS;
@@ -44,8 +44,8 @@ describe('suggestActions', () => {
     classifyEmailsMock.mockResolvedValue({
       suggestionsById: {
         '1': [
-          '{"action":"archive","reason":"low_priority"}',
-          { action: 'keep', reason: 'important_contact' },
+          '{"action":"archive","classification":"bulk","confidence_score":0.9}',
+          { action: 'keep', classification: 'important_contact', confidence_score: 0.8 },
           123
         ],
         '2': ['delete']
@@ -67,9 +67,9 @@ describe('suggestActions', () => {
       id: '1',
       subject: 'Hello',
       suggestions: [
-        { action: 'archive', reason: 'low_priority' },
-        { action: 'keep', reason: 'important_contact' },
-        { action: '123' }
+        { action: 'archive', classification: 'bulk', confidence_score: 0.9 },
+        { action: 'keep', classification: 'important_contact', confidence_score: 0.8 },
+        { action: '123', classification: 'unknown', confidence_score: 0.5 }
       ]
     });
 
@@ -77,7 +77,7 @@ describe('suggestActions', () => {
       id: '2',
       subject: 'Promo',
       suggestions: [
-        { action: 'delete' }
+        { action: 'delete', classification: 'unknown', confidence_score: 0.5 }
       ]
     });
   });
@@ -90,8 +90,18 @@ describe('suggestActions', () => {
 
     // Simulamos el formato real del microservicio Python:
     classifyEmailsMock.mockResolvedValue([
-      { id: '1', suggestions: ['archive'] },
-      { id: '2', suggestions: ['delete'] }
+      {
+        id: '1',
+        suggestions: [
+          { action: 'archive', classification: 'promotions_old', confidence_score: 0.85 }
+        ]
+      },
+      {
+        id: '2',
+        suggestions: [
+          { action: 'delete', classification: 'stale_unread', confidence_score: 0.9 }
+        ]
+      }
     ]);
 
     const result = await suggestActions(emails);
@@ -100,13 +110,16 @@ describe('suggestActions', () => {
       {
         id: '1',
         subject: 'Hello',
-        // 'archive' se normaliza a { action: 'archive' }
-        suggestions: [{ action: 'archive' }]
+        suggestions: [
+          { action: 'archive', classification: 'promotions_old', confidence_score: 0.85 }
+        ]
       },
       {
         id: '2',
         subject: 'Promo',
-        suggestions: [{ action: 'delete' }]
+        suggestions: [
+          { action: 'delete', classification: 'stale_unread', confidence_score: 0.9 }
+        ]
       }
     ]);
   });
@@ -135,4 +148,3 @@ describe('suggestActions', () => {
     await expect(suggestActions(null)).rejects.toThrow(TypeError);
   });
 });
-

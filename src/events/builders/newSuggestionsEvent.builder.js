@@ -59,6 +59,24 @@ export function buildNewSuggestionsEvent({ userId, suggestions }) {
     0
   );
 
+  const actionCounts = {};
+  const classificationCounts = {};
+
+  for (const item of normalizedSuggestions) {
+    const list = Array.isArray(item?.suggestions) ? item.suggestions : [];
+    for (const suggestion of list) {
+      const action = typeof suggestion === 'string'
+        ? suggestion
+        : String(suggestion?.action ?? 'unknown');
+      const classification = typeof suggestion === 'object' && suggestion !== null
+        ? String(suggestion?.classification ?? suggestion?.category ?? 'unknown')
+        : 'unknown';
+
+      actionCounts[action] = (actionCounts[action] ?? 0) + 1;
+      classificationCounts[classification] = (classificationCounts[classification] ?? 0) + 1;
+    }
+  }
+
   // sampledEmails = muestra pequeña (máx 3 emails) con máx 3 suggestions por email
   // OJO: esto es una decisión de diseño: “evento ligero”
   const sampledEmails = normalizedSuggestions
@@ -80,6 +98,8 @@ export function buildNewSuggestionsEvent({ userId, suggestions }) {
 
     summary: {
       totalSuggestions,
+      actionCounts,
+      classificationCounts,
       sampledEmails,
     },
 

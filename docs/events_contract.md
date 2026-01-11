@@ -105,7 +105,7 @@ Additional fields MAY exist depending on the event and builder.
 
 ### When is it emitted?
 
-When the backend computes suggestions for a user (e.g., GET summary flow).
+When the backend computes suggestions for a user (e.g., GET /api/v1/suggestions) and the total suggestions count meets the publish threshold.
 
 ### Builder
 
@@ -127,16 +127,46 @@ buildNewSuggestionsEvent({ userId, suggestions })
     {
       "emailId": "18c8f6e...",
       "subject": "Example",
-      "suggestions": ["archive", "delete"]
+      "suggestions": [
+        {
+          "action": "archive",
+          "classification": "bulk",
+          "confidence_score": 0.8
+        },
+        {
+          "action": "delete",
+          "classification": "stale_unread",
+          "confidence_score": 0.9
+        }
+      ]
     }
   ],
   "summary": {
     "totalSuggestions": 5,
+    "actionCounts": {
+      "archive": 3,
+      "delete": 2
+    },
+    "classificationCounts": {
+      "bulk": 3,
+      "stale_unread": 2
+    },
     "sampledEmails": [
       {
         "emailId": "18c8f6e...",
         "subject": "Example",
-        "suggestions": ["archive", "delete"]
+        "suggestions": [
+          {
+            "action": "archive",
+            "classification": "bulk",
+            "confidence_score": 0.8
+          },
+          {
+            "action": "delete",
+            "classification": "stale_unread",
+            "confidence_score": 0.9
+          }
+        ]
       }
     ]
   },
@@ -244,4 +274,3 @@ Registered in `registerNotificationEventListeners.js`:
   * `domain.suggestions.generated`
 
 ---
-

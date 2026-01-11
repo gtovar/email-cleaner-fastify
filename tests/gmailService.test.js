@@ -80,9 +80,10 @@ describe('GmailService', () => {
         subject: 'Hello',
         from: 'team@example.com',
         date: '2024-01-01',
+        labels: ['INBOX', 'UNREAD'],
         isRead: false,
         category: 'primary',
-        attachmentSizeMb: 0,
+        attachmentSizeMb: 0.001953125,
         snippet: 'Hi there',
         hasAttachment: true,
         size: 2048
@@ -92,9 +93,10 @@ describe('GmailService', () => {
         subject: '',
         from: '',
         date: '',
+        labels: ['CATEGORY_PROMOTIONS'],
         isRead: true,
         category: 'promotions',
-        attachmentSizeMb: 0,
+        attachmentSizeMb: 0.0009765625,
         snippet: 'Promo',
         hasAttachment: false,
         size: 1024

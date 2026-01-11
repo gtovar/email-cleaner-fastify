@@ -29,13 +29,13 @@ If the token is missing or invalid, the API will return **401 Unauthorized**.
 
 ### 2.1 GET /api/v1/emails
 
-Returns the list of base Gmail emails **without any AI processing**.
+Returns the list of Gmail emails with optional filters **without any AI processing**.
 
 #### Description
 
-* Fetches raw emails from Gmail.
-* No machine learning, no automatic classification.
-* This endpoint represents the “raw inbox” view.
+* Fetches emails from Gmail.
+* Applies optional Gmail query filters.
+* No ML classification or suggestions.
 
 #### Request
 
@@ -46,19 +46,33 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 #### Query Parameters
 
-* `pageToken` *(optional, string)* — Gmail pagination token (if supported by the current implementation).
+* `unread` *(optional, boolean)* — Only unread emails.
+* `olderThan` *(optional, integer)* — Older than N days.
+* `category` *(optional, string)* — Gmail category: `promotions`, `social`, `updates`, `forums`, `primary`.
+* `minAttachmentSize` *(optional, integer)* — Attachments larger than N MB.
+* `pageToken` *(optional, string)* — Gmail pagination token.
 
 #### Response 200 (example)
 
+Notes:
+- `category` on the email is the Gmail category (labels).
+- `classification` on each suggestion is the ML classification label.
+
 ```json
 {
-  "Emails": [
+  "emails": [
     {
       "id": "18c8f6e...",
       "from": "facturas@cfe.mx",
       "subject": "Your power bill",
+      "date": "2025-11-18T02:32:11.000Z",
+      "labels": ["INBOX", "UNREAD"],
+      "isRead": false,
+      "attachmentSizeMb": 1.2,
+      "category": "promotions",
       "snippet": "Due on November 15...",
-      "date": "2025-11-18T02:32:11.000Z"
+      "hasAttachment": false,
+      "size": 52310
     }
   ],
   "nextPageToken": "xyz...",
@@ -81,7 +95,7 @@ Returns Gmail emails **enriched with AI-generated suggestions**.
 
 #### Description
 
-* Backend fetches base emails (similar to `/api/v1/emails`).
+* Backend fetches recent emails from Gmail.
 * Emails are sent to the ML service.
 * The response includes a `suggestions` array per email.
 
@@ -101,12 +115,15 @@ Authorization: Bearer <ACCESS_TOKEN>
       "id": "18c8f6e...",
       "from": "facturas@cfe.mx",
       "subject": "Your power bill",
-      "snippet": "Due on November 15...",
       "date": "2025-11-18T02:32:11.000Z",
+      "isRead": false,
+      "category": "promotions",
+      "attachmentSizeMb": 1.2,
       "suggestions": [
         {
           "action": "archive",
-          "reason": "low_priority"
+          "classification": "promotions_old",
+          "confidence_score": 0.85
         }
       ]
     }
@@ -163,12 +180,13 @@ All routes share:
 
 ### 4.1 GET /api/v1/notifications/summary
 
-Returns a summary list of emails with suggested actions to review.
+Returns an aggregate summary of suggested actions for a time window.
 
 #### Description
 
 * Intended for “overview” dashboards.
-* Each item represents an email plus a list of suggested actions (e.g., archive, delete, move).
+* Aggregates counts from `NotificationEvent` records.
+* `NotificationEvent` records are created only when generated suggestions reach the publish threshold.
 
 #### Request
 
@@ -180,23 +198,31 @@ Authorization: Bearer <ACCESS_TOKEN>
 #### Query Parameters
 
 * `period` *(optional, string)* — `daily` or `weekly`.
-  Used to filter the summary window.
+  Used to filter the summary window (last 24 hours or last 7 days).
+  If omitted, the summary covers all time and `windowStart`/`windowEnd` are `null`.
 
 #### Response 200 (example)
 
 ```json
-[
-  {
-    "id": "test1",
-    "from": "noti@demo.com",
-    "subject": "Notification demo",
-    "date": "2025-11-18T02:32:11.000Z",
-    "isRead": false,
-    "category": "demo",
-    "attachmentSizeMb": 0.1,
-    "suggestions": ["archive"]
+{
+  "period": "weekly",
+  "windowStart": "2026-03-01T10:00:00.000Z",
+  "windowEnd": "2026-03-08T10:00:00.000Z",
+  "totalEvents": 4,
+  "totalSuggestions": 12,
+  "totalConfirmed": 3,
+  "suggestedActions": {
+    "archive": 7,
+    "delete": 5
+  },
+  "confirmedActions": {
+    "accept": 3
+  },
+  "classifications": {
+    "promotions_old": 6,
+    "stale_unread": 6
   }
-]
+}
 ```
 
 #### Possible Status Codes
@@ -437,4 +463,3 @@ ML_BASE_URL=http://localhost:8000
 * Last update: 2025 
 
 ---
-

@@ -1,4 +1,4 @@
-// src/services/emailSuggesterService.js
+// src/services/suggestionService.js
 // Servicio de alto nivel para pedir sugerencias de acción al microservicio de ML.
 //
 // Responsabilidad:
@@ -79,25 +79,41 @@ function normalizeSuggestionList(list) {
     return [];
   }
 
+  const defaultConfidence = 0.5;
+
   return list.map((s) => {
     if (typeof s === 'string') {
       try {
         const parsed = JSON.parse(s);
         if (typeof parsed === 'object' && parsed !== null) {
-          return parsed;
+          const action = parsed.action ?? 'unknown';
+          const classification = parsed.classification ?? parsed.category ?? 'unknown';
+          const confidence_score = typeof parsed.confidence_score === 'number'
+            ? parsed.confidence_score
+            : defaultConfidence;
+          return { ...parsed, action, classification, confidence_score };
         }
       } catch {
         // ignoramos error y seguimos al fallback
       }
 
-      return { action: s };
+      return { action: s, classification: 'unknown', confidence_score: defaultConfidence };
     }
 
     if (typeof s === 'object' && s !== null) {
-      return s;
+      const action = s.action ?? 'unknown';
+      const classification = s.classification ?? s.category ?? 'unknown';
+      const confidence_score = typeof s.confidence_score === 'number'
+        ? s.confidence_score
+        : defaultConfidence;
+      return { ...s, action, classification, confidence_score };
     }
 
-    return { action: String(s) };
+    return {
+      action: String(s),
+      classification: 'unknown',
+      confidence_score: defaultConfidence
+    };
   });
 }
 
@@ -148,4 +164,3 @@ export async function suggestActions(emails) {
     };
   }
 }
-

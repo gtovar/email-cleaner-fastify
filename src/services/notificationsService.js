@@ -2,7 +2,6 @@ import { executeGmailAction } from './actionExecutor.js';
 import { summaryQueries } from '../queries/notifications/index.js';
 import { confirmActionCommand } from "../commands/notifications/confirmActionCommand.js";
 import { buildNewSuggestionsEvent } from '../events/builders/newSuggestionsEvent.builder.js';
-import { DOMAIN_EVENTS } from "../events/eventBus.js";
 
 
 export const notificationsService = ({ models, eventBus, logger }) => ({
@@ -10,25 +9,19 @@ export const notificationsService = ({ models, eventBus, logger }) => ({
    * GET /api/v1/notifications/summary
    *
    * Orquesta el flujo:
-   *  - Lee el summary vía Query (CQRS: solo lectura)
-   *  - Publica un evento de dominio en el EventBus si hay sugerencias
+   *  - Lee el summary agregado vía Query (CQRS: solo lectura)
    *  - Devuelve el summary al controller
    */
-  async getSummaryForUser({ userId = 'demo-user' } = {}) {
+  async getSummaryForUser({ userId = 'demo-user', period } = {}) {
     // 1) Delegar la lectura a la capa de Queries
-    const suggestions = await summaryQueries.getNotificationSummaryForUser({
+    const summary = await summaryQueries.getNotificationSummaryForUser({
       models,
       userId,
+      period,
     });
 
-    // 2) Si hay sugerencias, publicar evento de dominio
-    if (Array.isArray(suggestions) && suggestions.length > 0 && eventBus?.publish) {
-      const domainEvent = buildNewSuggestionsEvent({ userId, suggestions });
-      await eventBus.publish(DOMAIN_EVENTS.SUGGESTIONS_GENERATED, domainEvent);
-    }
-
-    // 3) Devolver tal cual al frontend
-    return suggestions;
+    // 2) Devolver tal cual al frontend
+    return summary;
   },
 
   // POST /api/v1/notifications/confirm

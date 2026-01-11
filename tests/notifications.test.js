@@ -1,4 +1,5 @@
 import { describe, expect, test, jest, beforeEach, afterEach } from '@jest/globals';
+import { Op } from 'sequelize';
 import { registerNotificationEventListeners } from '../src/events/subscribers/registerNotificationEventListeners.js';
 import { DOMAIN_EVENTS } from '../src/events/eventBus.js';
 import { notificationsService } from '../src/services/notificationsService.js';
@@ -52,7 +53,23 @@ describe('notificationsService', () => {
                 create: jest.fn(async (row) => {
                     eventsRecorded.push(row);
                     return row;
-                })
+                }),
+                findAll: jest.fn(async () => ([
+                    {
+                        type: DOMAIN_EVENTS.SUGGESTIONS_GENERATED,
+                        summary: {
+                            totalSuggestions: 3,
+                            actionCounts: { archive: 2, delete: 1 },
+                            classificationCounts: { bulk: 2, stale_unread: 1 }
+                        },
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        type: DOMAIN_EVENTS.SUGGESTION_CONFIRMED,
+                        summary: { totalConfirmed: 1, action: 'accept' },
+                        createdAt: new Date().toISOString()
+                    }
+                ]))
             }
         };
        
@@ -62,20 +79,26 @@ describe('notificationsService', () => {
         service = notificationsService({ models: fakeModels, eventBus, logger });
     });
 
-    test('getSummaryForUser publica domain.suggestions.generated y se persiste NotificationEvent', async () => {
+    afterEach(() => {
+        jest.useRealTimers();
+    });
+
+    test('getSummaryForUser devuelve summary agregado desde NotificationEvent', async () => {
         const summary = await service.getSummaryForUser({
             userId: 'demo-user',
             period: 'daily'
         });
 
-        expect(Array.isArray(summary)).toBe(true);
-        expect(summary.length).toBeGreaterThan(0);
-
-        expect(eventsRecorded).toHaveLength(1);
-        expect(eventsRecorded[0]).toMatchObject({
-            type: DOMAIN_EVENTS.SUGGESTIONS_GENERATED,
-            userId: 'demo-user'
+        expect(summary).toMatchObject({
+            period: 'daily',
+            totalEvents: 2,
+            totalSuggestions: 3,
+            totalConfirmed: 1,
+            suggestedActions: { archive: 2, delete: 1 },
+            confirmedActions: { accept: 1 },
+            classifications: { bulk: 2, stale_unread: 1 }
         });
+        expect(eventsRecorded).toHaveLength(0);
     });
 
     test('confirmActions registra acción y devuelve conteo procesado', async () => {
@@ -97,5 +120,33 @@ describe('notificationsService', () => {
             action: 'accept'
         });
         expect(recorded[0].timestamp).toBeDefined();
+    });
+
+    test('getSummaryForUser applies daily/weekly windows to NotificationEvent query', async () => {
+        const now = new Date('2026-01-10T12:00:00Z');
+        jest.useFakeTimers();
+        jest.setSystemTime(now);
+
+        const models = {
+            NotificationEvent: {
+                findAll: jest.fn(async () => [])
+            }
+        };
+        const localService = notificationsService({ models, eventBus: createFakeEventBus(), logger: {} });
+
+        await localService.getSummaryForUser({ userId: 'demo-user', period: 'daily' });
+        const dailyWhere = models.NotificationEvent.findAll.mock.calls[0][0].where;
+        expect(dailyWhere.userId).toBe('demo-user');
+        expect(dailyWhere.createdAt[Op.between]).toBeDefined();
+
+        await localService.getSummaryForUser({ userId: 'demo-user', period: 'weekly' });
+        const weeklyWhere = models.NotificationEvent.findAll.mock.calls[1][0].where;
+        expect(weeklyWhere.userId).toBe('demo-user');
+        expect(weeklyWhere.createdAt[Op.between]).toBeDefined();
+
+        await localService.getSummaryForUser({ userId: 'demo-user' });
+        const allWhere = models.NotificationEvent.findAll.mock.calls[2][0].where;
+        expect(allWhere.userId).toBe('demo-user');
+        expect(allWhere.createdAt).toBeUndefined();
     });
 });
