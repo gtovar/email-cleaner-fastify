@@ -5,16 +5,16 @@
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
 REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
 BRANCH: feat/hu17-unify-suggestions-summary
-COMMIT: 31238d4
+COMMIT: 6e16e3d
 
-SNAPSHOT_DATE: 2026-01-10 18:24 CST (America/Monterrey)
+SNAPSHOT_DATE: 2026-01-11 15:04 CST (America/Monterrey)
 WORKING_TREE_STATUS: Clean (git status: clean)
 
 RUNTIME: Node.js (Fastify)
 DB: PostgreSQL via Sequelize
 TEST_STATUS: PASS (Jest)
 
-LAST_VERIFIED_TESTS_DATE: 2026-01-10
+LAST_VERIFIED_TESTS_DATE: 2026-01-11
 
 ---
 
@@ -27,8 +27,9 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-10
   - `/api/v1/emails`
   - `/api/v1/suggestions`
   - `/api/v1/notifications/summary`, `/confirm`, `/history`, `/events`
-- Notifications summary now returns an aggregate object based on `NotificationEvent` records (windowed by `period`).
+- Notifications summary returns an aggregate object based on `NotificationEvent` records (windowed by `period`).
 - Suggestions use `classification` as the ML label field (English-only contract).
+- `domain.suggestions.generated` is published only when total suggestions are >= 10.
 
 ---
 
@@ -72,10 +73,11 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-10
 
 ## 5. Next Immediate Action
 
-- Address README "Last updated" hook failure (sed portability) to avoid commit friction.
+- Verify EventBus threshold behavior in production-like environments.
 
 ---
 
 ## 6. Version Log
 
 - 2026-01-10: Notifications summary uses aggregated `NotificationEvent` data and suggestions use `classification` (commit: 31238d4).
+- 2026-01-11: Suggestions event publish threshold set to >= 10 (commit: e2b229e).
