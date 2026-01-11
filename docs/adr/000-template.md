@@ -1,17 +1,16 @@
-# ADR NNN: Título breve
+# ADR NNN: Short title
 
-* Status: proposed | accepted | superseded
-* Date: YYYY-MM-DD
+- Status: proposed | accepted | superseded
+- Date: YYYY-MM-DD
 
-## Contexto
+## Context
 
-(Explicar el problema o decisión que motivó este ADR.)
+(Explain the problem or decision that motivated this ADR.)
 
-## Decisión
+## Decision
 
-(Qué se decidió exactamente.)
+(Describe the decision precisely.)
 
-## Consecuencias
+## Consequences
 
-(Impactos positivos y negativos, riesgos, mitigaciones.)
-
+(List positive and negative impacts, risks, and mitigations.)

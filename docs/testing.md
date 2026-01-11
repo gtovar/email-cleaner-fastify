@@ -1,31 +1,28 @@
+# Testing with Jest
 
-# 🧪 Testing with Jest
+This project uses Jest as the test runner.
 
-Este proyecto utiliza Jest como motor de pruebas. Migrar a Jest ofrece una experiencia de testing más rica, con mocks, spies, snapshots y reportes de cobertura integrados.
-
-## Ejecución de la suite
-
-Ejecuta todas las pruebas una vez:
+## Run the full suite
 
 ```bash
 npm test
 ```
 
-Modo observador (vuelve a ejecutar al detectar cambios):
+## Watch mode
 
 ```bash
 npm run test:watch
 ```
 
-Generar un reporte de cobertura en la carpeta `coverage/`:
+## Coverage report
 
 ```bash
 npm run coverage
 ```
 
-## Configuración
+## Configuration
 
-El proyecto se escribe en módulos ECMAScript (véase `package.json` con `"type": "module"`).  La configuración de Jest se define en el mismo `package.json` para tratar los archivos `.js` como ESM y usar el entorno de prueba de Node:
+The project uses ECMAScript Modules (`"type": "module"` in `package.json`). Jest is configured in `package.json` to run with Node ESM and no transforms:
 
 ```json
 "jest": {
@@ -34,22 +31,20 @@ El proyecto se escribe en módulos ECMAScript (véase `package.json` con `"type"
 }
 ```
 
-No se aplica transformación con Babel; si en el futuro incorporas TypeScript o JSX, deberás ajustar la configuración.
+If TypeScript or JSX is introduced, update the Jest configuration accordingly.
 
-## Escribir pruebas
+## Writing tests
 
-Las pruebas viven en el directorio `tests/` y siguen las convenciones de Jest.  Usa las funciones globales `test()` y `expect()`, o impórtalas desde `@jest/globals`.  Por ejemplo:
+Tests live under `tests/` and follow Jest conventions. Use `test()` / `expect()` or import from `@jest/globals`.
 
 ```js
 import { test, expect } from '@jest/globals';
 import { buildGmailQuery } from '../src/utils/filters.js';
 
-test('buildGmailQuery añade banderas', () => {
+test('buildGmailQuery adds flags', () => {
   const q = buildGmailQuery({ unread: 'true', category: 'promotions' });
   expect(q).toBe('is:unread category:promotions');
 });
 ```
 
-Para pruebas asíncronas, declara la función `async` o retorna una promesa.
-
-
+For async tests, use `async` or return a Promise.
