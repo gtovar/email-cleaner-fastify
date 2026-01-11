@@ -1,4 +1,5 @@
 import { describe, expect, test, jest, beforeEach, afterEach } from '@jest/globals';
+import { Op } from 'sequelize';
 import { registerNotificationEventListeners } from '../src/events/subscribers/registerNotificationEventListeners.js';
 import { DOMAIN_EVENTS } from '../src/events/eventBus.js';
 import { notificationsService } from '../src/services/notificationsService.js';
@@ -78,6 +79,10 @@ describe('notificationsService', () => {
         service = notificationsService({ models: fakeModels, eventBus, logger });
     });
 
+    afterEach(() => {
+        jest.useRealTimers();
+    });
+
     test('getSummaryForUser devuelve summary agregado desde NotificationEvent', async () => {
         const summary = await service.getSummaryForUser({
             userId: 'demo-user',
@@ -115,5 +120,33 @@ describe('notificationsService', () => {
             action: 'accept'
         });
         expect(recorded[0].timestamp).toBeDefined();
+    });
+
+    test('getSummaryForUser applies daily/weekly windows to NotificationEvent query', async () => {
+        const now = new Date('2026-01-10T12:00:00Z');
+        jest.useFakeTimers();
+        jest.setSystemTime(now);
+
+        const models = {
+            NotificationEvent: {
+                findAll: jest.fn(async () => [])
+            }
+        };
+        const localService = notificationsService({ models, eventBus: createFakeEventBus(), logger: {} });
+
+        await localService.getSummaryForUser({ userId: 'demo-user', period: 'daily' });
+        const dailyWhere = models.NotificationEvent.findAll.mock.calls[0][0].where;
+        expect(dailyWhere.userId).toBe('demo-user');
+        expect(dailyWhere.createdAt[Op.between]).toBeDefined();
+
+        await localService.getSummaryForUser({ userId: 'demo-user', period: 'weekly' });
+        const weeklyWhere = models.NotificationEvent.findAll.mock.calls[1][0].where;
+        expect(weeklyWhere.userId).toBe('demo-user');
+        expect(weeklyWhere.createdAt[Op.between]).toBeDefined();
+
+        await localService.getSummaryForUser({ userId: 'demo-user' });
+        const allWhere = models.NotificationEvent.findAll.mock.calls[2][0].where;
+        expect(allWhere.userId).toBe('demo-user');
+        expect(allWhere.createdAt).toBeUndefined();
     });
 });
