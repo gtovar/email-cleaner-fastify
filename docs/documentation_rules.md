@@ -44,80 +44,80 @@ Any new canonical doc MUST be referenced in:
 - [ ] Doc Health checks pass (fences, canonical links)
 
 
-# Decision Maker para crear doc nuevo vs actualizar existente
+# Decision maker: create a new doc vs update an existing one
 
-La regla principal (default):
+Default rule:
 
-> **Actualizar un doc existente**.
-> **Crear doc nuevo solo si pasa un set de gates**.
+> **Update an existing document.**
+> **Create a new document only if it passes the gates below.**
 
-### Gate 0 — Evidence Gate (obligatorio)
+### Gate 0 — Evidence gate (mandatory)
 
-**Pregunta:** ¿Tengo evidencia primaria para lo que voy a documentar?
-Evidencia primaria = (diff, código, tests, snapshot, commit).
+**Question:** Do we have primary evidence for what we are documenting?
+Primary evidence = diff, code, tests, snapshot, commit.
 
-* Si **NO**: no se crea doc canónico. Se registra como **“Open Question”** en `SPRINT_LOG.md` o como nota temporal.
-* Si **SÍ**: continúa.
+* If **NO**: do not create a canonical doc. Record it as an **Open Question** in `SPRINT_LOG.md` or as a temporary note.
+* If **YES**: continue.
 
-### Gate 1 — “Owner Doc” Gate (single source of truth)
+### Gate 1 — Owner doc gate (single source of truth)
 
-**Pregunta:** ¿Existe ya un documento cuyo propósito cubre este contenido?
-Mapa de ownership (regla de asignación):
+**Question:** Does a document already exist whose scope covers this content?
+Ownership map:
 
-* **Contrato HTTP** → `docs/API_REFERENCE.md`
-* **Contrato de eventos** → `docs/events_contract.md`
-* **Decisión arquitectónica con tradeoffs** → `docs/adr/XXX-*.md`
-* **Arquitectura/flows** → `docs/architecture.md` + `docs/DESIGN_DOCUMENT.md`
-* **Proceso / reentrada** → `README_REENTRY.md` + `docs/workflow.md`
-* **Historia / evolución** → `SPRINT_LOG.md`
-* **Estado factual** → `PROJECT_STATE.md`
+* **HTTP contract** -> `docs/API_REFERENCE.md`
+* **Event contract** -> `docs/events_contract.md`
+* **Architectural decision with tradeoffs** -> `docs/adr/XXX-*.md`
+* **Architecture/flows** -> `docs/architecture.md` + `docs/DESIGN_DOCUMENT.md`
+* **Process / re-entry** -> `README_REENTRY.md` + `docs/workflow.md`
+* **History / evolution** -> `SPRINT_LOG.md`
+* **Factual state** -> `PROJECT_STATE.md`
 
-Si existe owner doc: **actualiza ahí**.
-Crear doc nuevo en este punto solo se permite si Gate 2 lo justifica (split).
+If an owner doc exists: **update it**.
+Creating a new doc at this point is only allowed if Gate 2 justifies a split.
 
-### Gate 2 — Split Gate (cuándo NO cabe en el doc owner)
+### Gate 2 — Split gate (when it does not fit the owner doc)
 
-Crear doc nuevo (o separar) está permitido si se cumple **al menos 1** condición fuerte:
+Creating a new doc (or splitting) is allowed if **at least one** condition holds:
 
-**C2.1 — Audiencia distinta**
+**C2.1 — Different audience**
 
-* El contenido es para una audiencia distinta (ej. operador vs contribuidor vs usuario final) y mezclarlo degrada claridad.
+* The content is for a different audience (e.g., operator vs contributor vs end user) and mixing it reduces clarity.
 
-**C2.2 — Cambio de naturaleza**
+**C2.2 — Different nature**
 
-* El doc owner es referencia pura (ej. API_REFERENCE) y estás intentando meter tutorial/razonamiento: eso debe ir a `TUTORIALS/` o `DESIGN_DOCUMENT`.
+* The owner doc is reference-only (e.g., API_REFERENCE) and you are trying to add tutorial or reasoning; that belongs in `TUTORIALS/` or `DESIGN_DOCUMENT`.
 
-**C2.3 — Tamaño/Complejidad**
+**C2.3 — Size/complexity**
 
-* La sección nueva sería > ~20–30% del doc actual **o** introduce un “sub-sistema” completo (ej. EventBus + listeners + EventStore + idempotencia) que se consulta recurrentemente.
+* The new section would be > ~20–30% of the current doc **or** it introduces a complete subsystem (e.g., EventBus + listeners + EventStore + idempotency) that must be referenced repeatedly.
 
-**C2.4 — Reuso recurrente**
+**C2.4 — Reuse**
 
-* La misma duda/tema aparece ≥2 veces y su ausencia genera drift (coste alto de olvido).
+* The same question appears >= 2 times and the absence of a doc causes drift (high cost of forgetting).
 
-**C2.5 — Estabilidad**
+**C2.5 — Stability**
 
-* El contenido tiene probabilidad alta de mantenerse ≥1 sprint (no es algo “en transición hoy”).
+* The content is likely to remain stable for >= 1 sprint (not in flux today).
 
-Si ninguna se cumple: **no hay doc nuevo**; se añade al owner doc o al Sprint_Log como provisional.
+If none apply: **no new doc**; add it to the owner doc or to Sprint_Log as provisional.
 
-### Gate 3 — Anti-duplication Gate (obligatorio)
+### Gate 3 — Anti-duplication gate (mandatory)
 
-Si se crea doc nuevo:
+If a new doc is created:
 
-* Debe declarar su **Scope** y su **Owner**.
-* Debe incluir una línea de “Single Source of Truth”:
-  “Este doc es la fuente de verdad para X; otros docs solo linkean.”
-* Debe actualizar `docs/index.md` para añadir el enlace (si aplica).
-* Debe evitar copiar contenido que “ya vive” en otro doc (regla del protocolo de PROJECT_STATE extrapolada a todo el set).
+* It must declare its **Scope** and **Owner**.
+* It must include a “Single Source of Truth” line:
+  “This doc is the source of truth for X; other docs only link to it.”
+* It must update `docs/index.md` to add the link (if applicable).
+* It must avoid copying content that already lives elsewhere (PROJECT_STATE anti-duplication principle).
 
 ---
 
-## Resultado: plantilla de decisión (lo que se registra cada vez)
+## Decision record template (required output)
 
-Esto es lo mínimo que debe salir cada vez que discutamos “¿doc nuevo?”:
+This is the minimum output every time we discuss “new doc?”:
 
-**Doc Decision Record (DDR)** (no necesariamente un archivo; puede ser un bloque en Sprint_Log si no amerita ADR)
+**Doc Decision Record (DDR)** (not necessarily a file; can live in Sprint_Log if no ADR is needed)
 
 * Topic:
 * Evidence:
@@ -136,36 +136,36 @@ Esto es lo mínimo que debe salir cada vez que discutamos “¿doc nuevo?”:
 
 ---
 
-# Scoring (opcional) para que sea todavía más mecánico
+# Scoring (optional) to reduce subjectivity
 
-Si quieres reducir subjetividad, usa un score 0–10:
+Use a 0–10 score:
 
 * Evidence strength (0–2)
-* Owner fit gap (0–2) (0 = cabe perfecto; 2 = no cabe)
+* Owner fit gap (0–2) (0 = perfect fit; 2 = does not fit)
 * Audience separation (0–2)
 * Reuse frequency (0–2)
 * Stability horizon (0–2)
 
-**Regla:**
+Rule:
 
-* Score ≤ 4 → Update existing doc
-* Score 5–6 → Update existing + link + Sprint_Log note (si hay transición)
-* Score ≥ 7 → Create new doc (o split), con G3 anti-duplication
+* Score <= 4 -> Update existing doc
+* Score 5–6 -> Update existing + link + Sprint_Log note (if in transition)
+* Score >= 7 -> Create new doc (or split), with G3 anti-duplication
 
 ---
 
-## Aplicación rápida a tu caso típico (DL-01 Domain Events)
+## Quick application to the typical case (DL-01 Domain Events)
 
-* Evidence: sí (código + tests + diff) → G0 pasa.
-* Owner doc existe: `docs/events_contract.md` → G1: update ahí.
-* ¿Split? normalmente no (a menos que metas tutorial/arquitectura profunda) → G2 no.
-* ¿ADR? solo si la decisión “domain.* vs NEW_*” se declara canónica y estable → eso sí sería ADR (tradeoff + dirección).
+* Evidence: yes (code + tests + diff) -> G0 passes.
+* Owner doc exists: `docs/events_contract.md` -> G1: update there.
+* Split? usually no (unless adding tutorial/architecture depth) -> G2 no.
+* ADR? only if the decision “domain.* vs NEW_*” is declared canonical and stable -> then it is an ADR (tradeoff + direction).
 
-**Decisión mecánica:**
-Actualizar `docs/events_contract.md`.
-Crear ADR solo si decidimos oficialmente naming canónico.
+Mechanical decision:
+Update `docs/events_contract.md`.
+Create an ADR only if we officially decide canonical naming.
 
-
+---
 
 ## Language & Tone (Canonical)
 

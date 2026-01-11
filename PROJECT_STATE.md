@@ -1,5 +1,7 @@
 # PROJECT_STATE.md
 
+Last updated: 2026-01-11 15:21 CST — Commit: pending
+
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
@@ -7,7 +9,7 @@ REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
 BRANCH: feat/hu17-unify-suggestions-summary
 COMMIT: pending
 
-SNAPSHOT_DATE: 2026-01-11 15:14 CST (America/Monterrey)
+SNAPSHOT_DATE: 2026-01-11 15:21 CST (America/Monterrey)
 WORKING_TREE_STATUS: Clean (git status: clean)
 
 RUNTIME: Node.js (Fastify)
@@ -64,20 +66,43 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-11
 
 ---
 
-## 4. Current Technical Risks
+## 4. User Story Status (Evidence-Driven)
+
+### HU17 — Suggestions vs Summary alignment (backend)
+
+**Status:** IN_PROGRESS
+
+**Evidence:**
+- Routes: `/api/v1/suggestions`, `/api/v1/notifications/summary`
+- Services: `src/services/suggestionService.js`, `src/services/notificationsService.js`
+- Tests: `tests/notifications.test.js`
+
+**Open items:**
+- Verify `domain.suggestions.generated` threshold behavior in production-like environment.
+
+**Technical risks:**
+- Summary windowing uses `createdAt` timestamps; time zone alignment should be verified for production reporting.
+
+**Recent change:**
+- Summary aggregation and suggestions contract aligned to `classification` (commit: e2b229e).
+
+---
+
+## 5. Current Technical Risks
 
 - Logging: confirm/action command and event listeners log payloads; ensure no sensitive data is logged in production.
 - Summary windowing uses `createdAt` timestamps; time zone alignment should be verified for production reporting.
 
 ---
 
-## 5. Next Immediate Action
+## 6. Next Immediate Action
 
-- Verify EventBus threshold behavior in production-like environments.
+➡️ Verify EventBus threshold behavior in production-like environment.
 
 ---
 
-## 6. Version Log
+## 7. Version Log
 
 - 2026-01-10: Notifications summary uses aggregated `NotificationEvent` data and suggestions use `classification` (commit: 31238d4).
 - 2026-01-11: Suggestions event publish threshold set to >= 10 (commit: e2b229e).
+- 2026-01-11: Project state metadata updated (commit: pending).

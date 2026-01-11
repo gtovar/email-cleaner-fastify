@@ -18,7 +18,7 @@
 ## 1) Current snapshot (minimum that matters)
 
 - Branch: `feat/hu17-unify-suggestions-summary`
-- Latest checkpoint: `PROJECT_STATE.md` (snapshot 2026-01-10)
+- Latest checkpoint: `PROJECT_STATE.md` (snapshot 2026-01-11)
 - Backend tests: PASS (Jest)
 - Primary endpoints:
   - Gmail OAuth: `/auth/google`, `/auth/google/callback`
