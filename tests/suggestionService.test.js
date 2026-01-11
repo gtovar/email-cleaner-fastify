@@ -44,8 +44,8 @@ describe('suggestActions', () => {
     classifyEmailsMock.mockResolvedValue({
       suggestionsById: {
         '1': [
-          '{"action":"archive","clasificacion":"bulk","confidence_score":0.9}',
-          { action: 'keep', clasificacion: 'important_contact', confidence_score: 0.8 },
+          '{"action":"archive","classification":"bulk","confidence_score":0.9}',
+          { action: 'keep', classification: 'important_contact', confidence_score: 0.8 },
           123
         ],
         '2': ['delete']
@@ -67,9 +67,9 @@ describe('suggestActions', () => {
       id: '1',
       subject: 'Hello',
       suggestions: [
-        { action: 'archive', clasificacion: 'bulk', confidence_score: 0.9 },
-        { action: 'keep', clasificacion: 'important_contact', confidence_score: 0.8 },
-        { action: '123', clasificacion: 'unknown', confidence_score: 0.5 }
+        { action: 'archive', classification: 'bulk', confidence_score: 0.9 },
+        { action: 'keep', classification: 'important_contact', confidence_score: 0.8 },
+        { action: '123', classification: 'unknown', confidence_score: 0.5 }
       ]
     });
 
@@ -77,7 +77,7 @@ describe('suggestActions', () => {
       id: '2',
       subject: 'Promo',
       suggestions: [
-        { action: 'delete', clasificacion: 'unknown', confidence_score: 0.5 }
+        { action: 'delete', classification: 'unknown', confidence_score: 0.5 }
       ]
     });
   });
@@ -93,13 +93,13 @@ describe('suggestActions', () => {
       {
         id: '1',
         suggestions: [
-          { action: 'archive', clasificacion: 'promotions_old', confidence_score: 0.85 }
+          { action: 'archive', classification: 'promotions_old', confidence_score: 0.85 }
         ]
       },
       {
         id: '2',
         suggestions: [
-          { action: 'delete', clasificacion: 'stale_unread', confidence_score: 0.9 }
+          { action: 'delete', classification: 'stale_unread', confidence_score: 0.9 }
         ]
       }
     ]);
@@ -111,14 +111,14 @@ describe('suggestActions', () => {
         id: '1',
         subject: 'Hello',
         suggestions: [
-          { action: 'archive', clasificacion: 'promotions_old', confidence_score: 0.85 }
+          { action: 'archive', classification: 'promotions_old', confidence_score: 0.85 }
         ]
       },
       {
         id: '2',
         subject: 'Promo',
         suggestions: [
-          { action: 'delete', clasificacion: 'stale_unread', confidence_score: 0.9 }
+          { action: 'delete', classification: 'stale_unread', confidence_score: 0.9 }
         ]
       }
     ]);

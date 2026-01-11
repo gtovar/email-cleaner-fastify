@@ -197,7 +197,7 @@ Expected result:
     "suggestions": [
       {
         "action": "move",
-        "clasificacion": "large_attachments_old",
+        "classification": "large_attachments_old",
         "confidence_score": 0.8
       }
     ]

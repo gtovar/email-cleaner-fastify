@@ -23,10 +23,10 @@ export default async function (fastify, opts) {
           type: 'object',
           properties: {
             action: { type: 'string' },
-            clasificacion: { type: 'string' },
+            classification: { type: 'string' },
             confidence_score: { type: 'number' }
           },
-          required: ['action', 'clasificacion', 'confidence_score']
+          required: ['action', 'classification', 'confidence_score']
         }
       }
     }
@@ -50,7 +50,7 @@ export default async function (fastify, opts) {
         type: 'object',
         additionalProperties: { type: 'integer' }
       },
-      clasificaciones: {
+      classifications: {
         type: 'object',
         additionalProperties: { type: 'integer' }
       }

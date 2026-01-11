@@ -49,7 +49,7 @@ The system combines **Fastify (Node.js)** for high‑performance I/O, **FastAPI 
 1. **Start:** Gmail API fetches new emails via OAuth2.  
 2. **Pre‑Processing:** Fastify normalizes payloads and builds JSON structure.  
 3. **POST Request:** Backend sends the payload to the ML service.  
-4. **Classification:** FastAPI applies the ML model and returns **clasificacion** + action.  
+4. **Classification:** FastAPI applies the ML model and returns **classification** + action.  
 5. **End:** Fastify saves the result in PostgreSQL and triggers n8n notifications.
 
 *(See `architecture.md` for the corresponding Mermaid flow diagram.)*

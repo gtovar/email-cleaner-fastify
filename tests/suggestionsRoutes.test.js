@@ -21,7 +21,7 @@ const mockGetSuggestedEmails = jest.fn(async (req, reply) => {
         suggestions: [
           {
             action: 'archive',
-            clasificacion: 'promotions_old',
+            classification: 'promotions_old',
             confidence_score: 0.91
           }
         ]
@@ -98,7 +98,7 @@ describe('GET /api/v1/suggestions (contrato Fastify)', () => {
     const suggestion = email.suggestions[0];
     expect(suggestion).toMatchObject({
         action: 'archive',
-        clasificacion: 'promotions_old'
+        classification: 'promotions_old'
     });
       expect(typeof suggestion.confidence_score).toBe('number');
 

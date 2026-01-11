@@ -60,7 +60,7 @@ export function buildNewSuggestionsEvent({ userId, suggestions }) {
   );
 
   const actionCounts = {};
-  const clasificacionCounts = {};
+  const classificationCounts = {};
 
   for (const item of normalizedSuggestions) {
     const list = Array.isArray(item?.suggestions) ? item.suggestions : [];
@@ -68,12 +68,12 @@ export function buildNewSuggestionsEvent({ userId, suggestions }) {
       const action = typeof suggestion === 'string'
         ? suggestion
         : String(suggestion?.action ?? 'unknown');
-      const clasificacion = typeof suggestion === 'object' && suggestion !== null
-        ? String(suggestion?.clasificacion ?? suggestion?.category ?? 'unknown')
+      const classification = typeof suggestion === 'object' && suggestion !== null
+        ? String(suggestion?.classification ?? suggestion?.category ?? 'unknown')
         : 'unknown';
 
       actionCounts[action] = (actionCounts[action] ?? 0) + 1;
-      clasificacionCounts[clasificacion] = (clasificacionCounts[clasificacion] ?? 0) + 1;
+      classificationCounts[classification] = (classificationCounts[classification] ?? 0) + 1;
     }
   }
 
@@ -99,7 +99,7 @@ export function buildNewSuggestionsEvent({ userId, suggestions }) {
     summary: {
       totalSuggestions,
       actionCounts,
-      clasificacionCounts,
+      classificationCounts,
       sampledEmails,
     },
 

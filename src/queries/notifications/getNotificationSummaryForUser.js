@@ -25,7 +25,7 @@ function createEmptySummary({ period, start, end }) {
     totalConfirmed: 0,
     suggestedActions: {},
     confirmedActions: {},
-    clasificaciones: {}
+    classifications: {}
   };
 }
 
@@ -70,9 +70,9 @@ export async function getNotificationSummaryForUser({ models, userId, period } =
         summary.suggestedActions[action] = (summary.suggestedActions[action] ?? 0) + Number(count || 0);
       }
 
-      const clasificacionCounts = payloadSummary.clasificacionCounts || {};
-      for (const [label, count] of Object.entries(clasificacionCounts)) {
-        summary.clasificaciones[label] = (summary.clasificaciones[label] ?? 0) + Number(count || 0);
+      const classificationCounts = payloadSummary.classificationCounts || {};
+      for (const [label, count] of Object.entries(classificationCounts)) {
+        summary.classifications[label] = (summary.classifications[label] ?? 0) + Number(count || 0);
       }
     }
 

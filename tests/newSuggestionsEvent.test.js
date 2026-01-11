@@ -10,15 +10,15 @@ describe('buildNewSuggestionsEvent', () => {
       id: 'email-1',
       subject: 'First subject',
       suggestions: [
-        { action: 'archive', clasificacion: 'bulk', confidence_score: 0.8 },
-        { action: 'delete', clasificacion: 'stale_unread', confidence_score: 0.9 }
+        { action: 'archive', classification: 'bulk', confidence_score: 0.8 },
+        { action: 'delete', classification: 'stale_unread', confidence_score: 0.9 }
       ]
     },
     {
       id: 'email-2',
       subject: 'Second subject',
       suggestions: [
-        { action: 'archive', clasificacion: 'bulk', confidence_score: 0.8 }
+        { action: 'archive', classification: 'bulk', confidence_score: 0.8 }
       ]
     }
   ];
@@ -34,21 +34,21 @@ describe('buildNewSuggestionsEvent', () => {
 
     expect(event.summary.totalSuggestions).toBe(3);
     expect(event.summary.actionCounts).toMatchObject({ archive: 2, delete: 1 });
-    expect(event.summary.clasificacionCounts).toMatchObject({ bulk: 2, stale_unread: 1 });
+    expect(event.summary.classificationCounts).toMatchObject({ bulk: 2, stale_unread: 1 });
     expect(event.summary.sampledEmails).toEqual([
       {
         emailId: 'email-1',
         subject: 'First subject',
         suggestions: [
-          { action: 'archive', clasificacion: 'bulk', confidence_score: 0.8 },
-          { action: 'delete', clasificacion: 'stale_unread', confidence_score: 0.9 }
+          { action: 'archive', classification: 'bulk', confidence_score: 0.8 },
+          { action: 'delete', classification: 'stale_unread', confidence_score: 0.9 }
         ]
       },
       {
         emailId: 'email-2',
         subject: 'Second subject',
         suggestions: [
-          { action: 'archive', clasificacion: 'bulk', confidence_score: 0.8 }
+          { action: 'archive', classification: 'bulk', confidence_score: 0.8 }
         ]
       }
     ]);

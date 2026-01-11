@@ -146,7 +146,7 @@ Example response:
       "suggestions": [
         {
           "action": "archive",
-          "clasificacion": "promotions_old",
+          "classification": "promotions_old",
           "confidence_score": 0.85
         }
       ]

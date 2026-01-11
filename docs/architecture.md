@@ -113,7 +113,7 @@ flowchart LR
 
 ### 4️⃣ Classification: FastAPI (Python ML)
 - Executes a machine‑learning model for text classification.  
-- Returns both the **predicted clasificacion** and **recommended action** (archive, notify, label).
+- Returns both the **predicted classification** and **recommended action** (archive, notify, label).
 
 ### 5️⃣ Persistence & Notification
 - Fastify writes classification results to PostgreSQL.  

@@ -59,7 +59,7 @@ describe('notificationsService', () => {
                         summary: {
                             totalSuggestions: 3,
                             actionCounts: { archive: 2, delete: 1 },
-                            clasificacionCounts: { bulk: 2, stale_unread: 1 }
+                            classificationCounts: { bulk: 2, stale_unread: 1 }
                         },
                         createdAt: new Date().toISOString()
                     },
@@ -91,7 +91,7 @@ describe('notificationsService', () => {
             totalConfirmed: 1,
             suggestedActions: { archive: 2, delete: 1 },
             confirmedActions: { accept: 1 },
-            clasificaciones: { bulk: 2, stale_unread: 1 }
+            classifications: { bulk: 2, stale_unread: 1 }
         });
         expect(eventsRecorded).toHaveLength(0);
     });

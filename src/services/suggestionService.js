@@ -87,31 +87,31 @@ function normalizeSuggestionList(list) {
         const parsed = JSON.parse(s);
         if (typeof parsed === 'object' && parsed !== null) {
           const action = parsed.action ?? 'unknown';
-          const clasificacion = parsed.clasificacion ?? parsed.category ?? 'unknown';
+          const classification = parsed.classification ?? parsed.category ?? 'unknown';
           const confidence_score = typeof parsed.confidence_score === 'number'
             ? parsed.confidence_score
             : defaultConfidence;
-          return { ...parsed, action, clasificacion, confidence_score };
+          return { ...parsed, action, classification, confidence_score };
         }
       } catch {
         // ignoramos error y seguimos al fallback
       }
 
-      return { action: s, clasificacion: 'unknown', confidence_score: defaultConfidence };
+      return { action: s, classification: 'unknown', confidence_score: defaultConfidence };
     }
 
     if (typeof s === 'object' && s !== null) {
       const action = s.action ?? 'unknown';
-      const clasificacion = s.clasificacion ?? s.category ?? 'unknown';
+      const classification = s.classification ?? s.category ?? 'unknown';
       const confidence_score = typeof s.confidence_score === 'number'
         ? s.confidence_score
         : defaultConfidence;
-      return { ...s, action, clasificacion, confidence_score };
+      return { ...s, action, classification, confidence_score };
     }
 
     return {
       action: String(s),
-      clasificacion: 'unknown',
+      classification: 'unknown',
       confidence_score: defaultConfidence
     };
   });

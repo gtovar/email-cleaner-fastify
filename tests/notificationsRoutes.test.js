@@ -16,7 +16,7 @@ const mockGetSummary = jest.fn(async (req, reply) => {
     totalConfirmed: 1,
     suggestedActions: { archive: 3, delete: 1 },
     confirmedActions: { accept: 1 },
-    clasificaciones: { bulk: 2, stale_unread: 2 }
+    classifications: { bulk: 2, stale_unread: 2 }
   });
 });
 

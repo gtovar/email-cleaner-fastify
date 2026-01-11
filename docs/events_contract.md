@@ -130,12 +130,12 @@ buildNewSuggestionsEvent({ userId, suggestions })
       "suggestions": [
         {
           "action": "archive",
-          "clasificacion": "bulk",
+          "classification": "bulk",
           "confidence_score": 0.8
         },
         {
           "action": "delete",
-          "clasificacion": "stale_unread",
+          "classification": "stale_unread",
           "confidence_score": 0.9
         }
       ]
@@ -147,7 +147,7 @@ buildNewSuggestionsEvent({ userId, suggestions })
       "archive": 3,
       "delete": 2
     },
-    "clasificacionCounts": {
+    "classificationCounts": {
       "bulk": 3,
       "stale_unread": 2
     },
@@ -158,12 +158,12 @@ buildNewSuggestionsEvent({ userId, suggestions })
         "suggestions": [
           {
             "action": "archive",
-            "clasificacion": "bulk",
+            "classification": "bulk",
             "confidence_score": 0.8
           },
           {
             "action": "delete",
-            "clasificacion": "stale_unread",
+            "classification": "stale_unread",
             "confidence_score": 0.9
           }
         ]

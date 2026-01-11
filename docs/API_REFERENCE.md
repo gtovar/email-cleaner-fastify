@@ -56,7 +56,7 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 Notes:
 - `category` on the email is the Gmail category (labels).
-- `clasificacion` on each suggestion is the ML classification label.
+- `classification` on each suggestion is the ML classification label.
 
 ```json
 {
@@ -122,7 +122,7 @@ Authorization: Bearer <ACCESS_TOKEN>
       "suggestions": [
         {
           "action": "archive",
-          "clasificacion": "promotions_old",
+          "classification": "promotions_old",
           "confidence_score": 0.85
         }
       ]
@@ -217,7 +217,7 @@ Authorization: Bearer <ACCESS_TOKEN>
   "confirmedActions": {
     "accept": 3
   },
-  "clasificaciones": {
+  "classifications": {
     "promotions_old": 6,
     "stale_unread": 6
   }
