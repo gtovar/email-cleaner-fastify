@@ -7,18 +7,17 @@ import { DOMAIN_EVENTS } from '../src/events/eventBus.js';
 const mockGetSummary = jest.fn(async (req, reply) => {
   expect(req.user).toEqual({ googleAccessToken: 'dummy-token' });
 
-  return reply.send([
-    {
-      id: 'test1',
-      from: 'noti@demo.com',
-      subject: '¡Prueba HU4!',
-      date: '2025-11-14T06:59:21.250Z',
-      isRead: false,
-      category: 'demo',
-      attachmentSizeMb: 0.1,
-      suggestions: ['archive']
-    }
-  ]);
+  return reply.send({
+    period: 'weekly',
+    windowStart: '2026-03-01T10:00:00.000Z',
+    windowEnd: '2026-03-08T10:00:00.000Z',
+    totalEvents: 2,
+    totalSuggestions: 4,
+    totalConfirmed: 1,
+    suggestedActions: { archive: 3, delete: 1 },
+    confirmedActions: { accept: 1 },
+    classifications: { bulk: 2, stale_unread: 2 }
+  });
 });
 
 const mockConfirmActions = jest.fn(async (req, reply) => {
@@ -126,14 +125,11 @@ describe('Notifications Routes (contrato Fastify)', () => {
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.body);
 
-    expect(Array.isArray(body)).toBe(true);
-    expect(body.length).toBeGreaterThan(0);
-
-    const item = body[0];
-    expect(item).toMatchObject({
-      id: 'test1',
-      subject: '¡Prueba HU4!',
-      suggestions: ['archive']
+    expect(body).toMatchObject({
+      period: 'weekly',
+      totalEvents: 2,
+      totalSuggestions: 4,
+      totalConfirmed: 1
     });
 
     expect(mockGetSummary).toHaveBeenCalledTimes(1);

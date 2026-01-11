@@ -13,6 +13,10 @@ export default async function (fastify, opts) {
       from: { type: 'string' },
       date: { type: 'string' },
       labels: { type: 'array', items: { type: 'string' } },
+      isRead: { type: 'boolean' },
+      category: { type: 'string' },
+      attachmentSizeMb: { type: 'number' },
+      snippet: { type: 'string' },
       hasAttachment: { type: 'boolean' },
       size: { type: 'integer' }
     }

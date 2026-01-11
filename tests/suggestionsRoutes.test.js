@@ -21,7 +21,7 @@ const mockGetSuggestedEmails = jest.fn(async (req, reply) => {
         suggestions: [
           {
             action: 'archive',
-            category: 'promotions',
+            classification: 'promotions_old',
             confidence_score: 0.91
           }
         ]
@@ -46,7 +46,7 @@ describe('GET /api/v1/suggestions (contrato Fastify)', () => {
     app = Fastify({ logger: false });
 
     // Registramos solo la ruta de sugerencias, sin plugin de DB ni nada extra
-    await app.register(suggestionRoutes);
+    await app.register(suggestionRoutes, { prefix: 'api/v1' });
 
     await app.ready();
   });
@@ -95,15 +95,14 @@ describe('GET /api/v1/suggestions (contrato Fastify)', () => {
       expect(Array.isArray(email.suggestions)).toBe(true);
       expect(email.suggestions.length).toBe(1);
 
-      const suggestion = email.suggestions[0];
-      expect(suggestion).toMatchObject({
-          action: 'archive',
-          category: 'promotions'
-      });
+    const suggestion = email.suggestions[0];
+    expect(suggestion).toMatchObject({
+        action: 'archive',
+        classification: 'promotions_old'
+    });
       expect(typeof suggestion.confidence_score).toBe('number');
 
     // Verificamos que Fastify realmente haya llamado al controlador mockeado
     expect(mockGetSuggestedEmails).toHaveBeenCalledTimes(1);
   });
 });
-

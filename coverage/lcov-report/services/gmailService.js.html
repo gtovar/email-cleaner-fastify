@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">89.74% </span>
+                <span class="strong">81.39% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>35/39</span>
+                <span class='fraction'>35/43</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">60.86% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>28/46</span>
+                <span class='fraction'>30/60</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">87.5% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>7/7</span>
+                <span class='fraction'>7/8</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">96.66% </span>
+                <span class="strong">85.29% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>29/30</span>
+                <span class='fraction'>29/34</span>
             </div>
         
             
@@ -148,7 +148,28 @@
 <a name='L83'></a><a href='#L83'>83</a>
 <a name='L84'></a><a href='#L84'>84</a>
 <a name='L85'></a><a href='#L85'>85</a>
-<a name='L86'></a><a href='#L86'>86</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -175,6 +196,24 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -224,6 +263,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -260,6 +302,24 @@ export class GmailService {
 &nbsp;
         const messages = res.data.messages || <span class="branch-1 cbranch-no" title="branch not covered" >[];</span>
         return this._fetchMetadataForMessages(messages);
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    as</span>ync listMessagesByQuery({ query, maxResults, pageToken }) {
+        const res = <span class="cstat-no" title="statement not covered" >await this.gmail.users.messages.list({</span>
+            userId: 'me',
+            q: query || '',
+            pageToken,
+            maxResults: maxResults || 20,
+        });
+&nbsp;
+        const messages = <span class="cstat-no" title="statement not covered" >res.data.messages || [];</span>
+        const emails = <span class="cstat-no" title="statement not covered" >await this._fetchMetadataForMessages(messages);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        return {</span>
+            emails,
+            nextPageToken: res.data.nextPageToken || null,
+            total: res.data.resultSizeEstimate || 0,
+        };
     }
 &nbsp;
     _buildQuery({ filter, dateBefore, combine }) {
@@ -305,9 +365,12 @@ export class GmailService {
                 subject: headers.subject || '',
                 from: headers.from || '',
                 date: headers.date || '',
+                labels: msgData.data.labelIds || <span class="branch-1 cbranch-no" title="branch not covered" >[],</span>
                 isRead: !(msgData.data.labelIds?.includes('UNREAD')),
                 category: detectCategoryFromLabels(msgData.data.labelIds || <span class="branch-1 cbranch-no" title="branch not covered" >[])</span>,
-                attachmentSizeMb: 0,
+                attachmentSizeMb: msgData.data.sizeEstimate
+                    ? msgData.data.sizeEstimate / (1024 * 1024)
+                    : <span class="branch-1 cbranch-no" title="branch not covered" >0,</span>
                 snippet: msgData.data.snippet,
                 hasAttachment: (payload.parts || <span class="branch-1 cbranch-no" title="branch not covered" >[])</span>.some(part =&gt; part.filename &amp;&amp; part.filename !== ''),
                 size: msgData.data.sizeEstimate,
@@ -325,7 +388,7 @@ export class GmailService {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-15T01:13:18.821Z
+                at 2026-01-10T22:44:53.533Z
             </div>
         <script src="../prettify.js"></script>
         <script>

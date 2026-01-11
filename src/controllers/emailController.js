@@ -1,7 +1,5 @@
 import { google } from 'googleapis';
-import { suggestActions } from '../services/emailSuggesterService.js';
-
-
+import { GmailService } from '../services/gmailService.js';
 /**
  * Lista correos de Gmail aplicando filtros personalizados.
  */
@@ -13,6 +11,7 @@ export async function listEmails(req, reply) {
   oauth2Client.setCredentials({ access_token: user.googleAccessToken });
 
   const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+  const gmailService = new GmailService(gmail);
 
   let query = [];
   if (unread) query.push('is:unread');
@@ -21,36 +20,16 @@ export async function listEmails(req, reply) {
   if (minAttachmentSize) query.push(`larger:${minAttachmentSize}M`);
 
   try {
-    const res = await gmail.users.messages.list({
-      userId: 'me',
-      q: query.join(' '),
+    const { emails, nextPageToken, total } = await gmailService.listMessagesByQuery({
+      query: query.join(' '),
       pageToken,
       maxResults: 20,
     });
 
-    const emails = await Promise.all(
-      (res.data.messages || []).map(async (msg) => {
-        const mail = await gmail.users.messages.get({ userId: 'me', id: msg.id });
-        const headers = mail.data.payload.headers;
-        return {
-          id: msg.id,
-          subject: headers.find(h => h.name === 'Subject')?.value,
-          from: headers.find(h => h.name === 'From')?.value,
-          date: headers.find(h => h.name === 'Date')?.value,
-          labels: mail.data.labelIds,
-          isRead: !mail.data.labelIds.includes('UNREAD'), // necesario para sugerencias
-          attachmentSizeMb: mail.data.sizeEstimate / (1024 * 1024),
-          category: category || 'general', // fallback para testing
-        };
-      })
-    );
-
-    const { emails: emailsWithSuggestions } = await suggestActions(emails);
-
     reply.send({
-      emails: emailsWithSuggestions,
-      nextPageToken: res.data.nextPageToken,
-      total: res.data.resultSizeEstimate,
+      emails,
+      nextPageToken,
+      total,
     });
 
   } catch (err) {

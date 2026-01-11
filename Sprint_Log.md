@@ -1,68 +1,63 @@
-## 📌 Sprint_Log.md — Backend Fastify
+## Sprint_Log.md — Backend Fastify
 
-*(Email Cleaner & Smart Notifications — Backend)*
-*Last updated: 2025-11-30 23:58 CST*
+(Email Cleaner & Smart Notifications — Backend)
+Last updated: 2026-01-11 15:21 CST
 
 ---
 
 ### 2025-11-20 — HU5 started
-
-* ML contract v1 defined (`/v1/suggest`).
-* Branch created: `feature/hu5-ml-schema-alignment`.
+- ML contract v1 defined (`/v1/suggest`).
+- Branch created: `feature/hu5-ml-schema-alignment`.
 
 ### 2025-11-21 — mlClient updated
+- Default path switched to `/v1/suggest`.
+- Payload changed to raw email arrays.
 
-* Default path switched to `/v1/suggest`.
-* Payload changed to raw email arrays.
-
-### 2025-11-21 — emailSuggester updated
-
-* Normalized ML enriched-array output.
-* Legacy mapping preserved.
+### 2025-11-21 — suggestionService updated
+- Normalized ML enriched-array output.
+- Legacy mapping preserved.
 
 ### 2025-11-21 — Tests updated
-
-* `mlClient.test.js` and `emailSuggester.test.js` adjusted for v1 contract.
+- `tests/mlClient.test.js` and `tests/suggestionService.test.js` aligned to v1.
 
 ### 2025-11-22 — HU5 completed
-
-* Full backend test suite green.
-* Contract v1 validated with curl.
+- Full backend test suite green.
+- Contract v1 validated with curl.
 
 ---
 
 ### 2025-11-28 — HU12 validated
+- Fastify ↔ ML integration fallback behavior tested.
+- suggestionService fallback confirmed.
 
-* Fastify ↔ ML integration fallback behaviour tested.
-* emailSuggester fallback confirmed.
-
-### 2025-11-28 — Merge HU5 + HU12 into `develop`
-
-* Backend stabilized under ML v1 contract.
-* All tests passing.
+### 2025-11-28 — Merge HU5 + HU12 into develop
+- Backend stabilized under ML v1 contract.
+- All tests passing.
 
 ---
 
 ### 2025-11-30 — Documentation synchronized
-
-* PROJECT_STATE.md backend rewritten using template.
-* README_REENTRY.md backend updated.
-* Sprint_Log backend updated to this point.
+- PROJECT_STATE.md rewritten using template.
+- README_REENTRY.md updated.
+- Sprint_Log updated to this point.
 
 ### 2025-12-03 — HU16 Notification Event Pipeline completed
-- Added NotificationEvent model and migration.  
-- getSummary() now emits and persists NEW_SUGGESTIONS events.  
-- Added GET /api/v1/notifications/events feed with pagination and filters.  
-- Updated tests and API documentation accordingly.
+- Added NotificationEvent model and migration.
+- `/api/v1/notifications/events` added with pagination and filters.
+- Tests and API docs updated.
 
-- 2025-12-05: inicio `eat-experimental-CQRS` (fbb11b8)
-- 2025-12-30: `ids → emailIds`, normalización rutas internas, rename de domain events
+---
 
-## 2026-01-08 — Doc Sync + Canon de HUs (truth alignment)
+### 2026-01-08 — Doc sync + HU canon alignment
+- Backend tests: PASS (12 suites, 40 tests).
+- Canon: ActionHistory vs NotificationEvent clarified.
 
-- Backend tests: PASS (12 suites, 40 tests)
-- Frontend tests: PASS (vitest 6 files, 21 tests)
-- README_REENTRY: removida duplicidad y eliminado “rojo” obsoleto
-- PROJECT_STATE: metadata verificada (branch+commit) + HU4/HU5/HU6/HU10 clarificadas
-- Canon: “ActionHistory vs NotificationEvent” explícito para evitar drift mental
+### 2026-01-10 — Notifications summary aggregated
+- `/api/v1/notifications/summary` now aggregates from NotificationEvent.
+- Period windowing (`daily|weekly`) covered by tests.
 
+### 2026-01-10 — Suggestions contract unified
+- Suggestions now use `classification` field (English-only).
+
+### 2026-01-11 — Doc health sync
+- Updated `PROJECT_STATE.md` and `README_REENTRY.md` snapshot references.

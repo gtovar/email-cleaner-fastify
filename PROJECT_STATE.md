@@ -1,20 +1,22 @@
 # PROJECT_STATE.md
 
+Last updated: 2026-01-11 15:21 CST — Commit: pending
+
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
 REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
-BRANCH: docs/sync-truth-2026-01-08
-COMMIT: b9fff3c
+BRANCH: feat/hu17-unify-suggestions-summary
+COMMIT: pending
 
-SNAPSHOT_DATE: 2026-01-08 02:01 CST (America/Monterrey)
+SNAPSHOT_DATE: 2026-01-11 15:21 CST (America/Monterrey)
 WORKING_TREE_STATUS: Clean (git status: clean)
 
 RUNTIME: Node.js (Fastify)
 DB: PostgreSQL via Sequelize
 TEST_STATUS: PASS (Jest)
 
-LAST_VERIFIED_TESTS_DATE: 2026-01-08
+LAST_VERIFIED_TESTS_DATE: 2026-01-11
 
 ---
 
@@ -27,10 +29,9 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-08
   - `/api/v1/emails`
   - `/api/v1/suggestions`
   - `/api/v1/notifications/summary`, `/confirm`, `/history`, `/events`
-- Domain event bus exists with canonical event names:
-  - `domain.suggestions.generated`
-  - `domain.suggestions.confirmed`
-- Confirmation flow persists per-email actions in `ActionHistory` and emits `domain.suggestions.confirmed`.
+- Notifications summary returns an aggregate object based on `NotificationEvent` records (windowed by `period`).
+- Suggestions use `classification` as the ML label field (English-only contract).
+- `domain.suggestions.generated` is published only when total suggestions are >= 10.
 
 ---
 
@@ -41,8 +42,8 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-08
 - Entrypoint: `src/index.js` registers plugins (Sequelize, EventBus, Swagger) and routes.
 - Routes are registered with explicit prefixes:
   - `emailRoutes` → prefix `/api/v1`
+  - `suggestionRoutes` → prefix `/api/v1`
   - `notificationsRoutes` → prefix `/api/v1/notifications`
-  - `suggestionRoutes` currently defines `/api/v1/suggestions` directly (no prefix).
 - CORS is configured for `http://localhost:5173`.
 
 ### 3.2 CQRS-lite / Commands / Domain Events
@@ -56,7 +57,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-08
 ### 3.3 Persistence (Sequelize Models)
 
 - `ActionHistory`: stores per-email actions (userId, emailId, action, timestamp, details).
-- `NotificationEvent`: stores a denormalized event record (type, userId, summary JSONB).
+- `NotificationEvent`: stores a denormalized event record (type, userId, summary JSONB) used for aggregated summary views.
 
 ### 3.4 External Integrations
 
@@ -65,19 +66,43 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-08
 
 ---
 
-## 4. Current Technical Risks
+## 4. User Story Status (Evidence-Driven)
+
+### HU17 — Suggestions vs Summary alignment (backend)
+
+**Status:** IN_PROGRESS
+
+**Evidence:**
+- Routes: `/api/v1/suggestions`, `/api/v1/notifications/summary`
+- Services: `src/services/suggestionService.js`, `src/services/notificationsService.js`
+- Tests: `tests/notifications.test.js`
+
+**Open items:**
+- Verify `domain.suggestions.generated` threshold behavior in production-like environment.
+
+**Technical risks:**
+- Summary windowing uses `createdAt` timestamps; time zone alignment should be verified for production reporting.
+
+**Recent change:**
+- Summary aggregation and suggestions contract aligned to `classification` (commit: e2b229e).
+
+---
+
+## 5. Current Technical Risks
 
 - Logging: confirm/action command and event listeners log payloads; ensure no sensitive data is logged in production.
+- Summary windowing uses `createdAt` timestamps; time zone alignment should be verified for production reporting.
 
 ---
 
-## 5. Next Immediate Action
+## 6. Next Immediate Action
 
-- Update documentation to match the current code truth:
-  - PROJECT_STATE.md and README_REENTRY.md must match the protocol templates and reflect this snapshot without “NOT VERIFIED” notes.
+➡️ Verify EventBus threshold behavior in production-like environment.
 
 ---
 
-## 6. Version Log
+## 7. Version Log
 
-- 2026-01-08: Docs sync checkpoint on branch `docs/sync-truth-2026-01-08` (tests PASS; docs need protocol alignment).
+- 2026-01-10: Notifications summary uses aggregated `NotificationEvent` data and suggestions use `classification` (commit: 31238d4).
+- 2026-01-11: Suggestions event publish threshold set to >= 10 (commit: e2b229e).
+- 2026-01-11: Project state metadata updated (commit: pending).

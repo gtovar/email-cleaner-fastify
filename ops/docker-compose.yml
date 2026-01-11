@@ -29,7 +29,6 @@ services:
     ports: ["3000:3000"]
     environment:
       DATABASE_URL: postgres://email:email@db:5432/email_cleaner
-      FASTAPI_URL: http://fastapi:8000
       ML_BASE_URL: http://fastapi:8000
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}

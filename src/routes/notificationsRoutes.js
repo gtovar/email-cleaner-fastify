@@ -17,7 +17,43 @@ export default async function (fastify, opts) {
       isRead: { type: 'boolean' },
       category: { type: 'string' },
       attachmentSizeMb: { type: 'number' },
-      suggestions: { type: 'array', items: { type: 'string' } }
+      suggestions: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            action: { type: 'string' },
+            classification: { type: 'string' },
+            confidence_score: { type: 'number' }
+          },
+          required: ['action', 'classification', 'confidence_score']
+        }
+      }
+    }
+  });
+
+  fastify.addSchema({
+    $id: 'NotificationsSummary',
+    type: 'object',
+    properties: {
+      period: { type: 'string' },
+      windowStart: { type: 'string', nullable: true },
+      windowEnd: { type: 'string', nullable: true },
+      totalEvents: { type: 'integer' },
+      totalSuggestions: { type: 'integer' },
+      totalConfirmed: { type: 'integer' },
+      suggestedActions: {
+        type: 'object',
+        additionalProperties: { type: 'integer' }
+      },
+      confirmedActions: {
+        type: 'object',
+        additionalProperties: { type: 'integer' }
+      },
+      classifications: {
+        type: 'object',
+        additionalProperties: { type: 'integer' }
+      }
     }
   });
 
@@ -108,8 +144,7 @@ export default async function (fastify, opts) {
       },
       response: {
         200: {
-          type: 'array',
-          items: { $ref: 'EmailSuggestion#' }
+          $ref: 'NotificationsSummary#'
         },
         401: { description: 'No autorizado' }
       }

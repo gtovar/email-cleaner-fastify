@@ -91,7 +91,7 @@ npm start
 - Deployment: [despliegue-cloudrun.md](despliegue-cloudrun.md)
 
 ## Contribution
-1. Create branch `feature/<name>`  
+1. Create branch `type/huNN-short-desc` (e.g., `feat/hu17-unify-suggestions-summary`) from `develop`  
 2. Run `npm test`  
 3. Open PR with clear description
 
