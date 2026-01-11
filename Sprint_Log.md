@@ -1,7 +1,7 @@
 ## Sprint_Log.md — Backend Fastify
 
 (Email Cleaner & Smart Notifications — Backend)
-Last updated: 2026-01-11 15:21 CST
+Last updated: 2026-01-11 15:24 CST
 
 ---
 
@@ -61,3 +61,6 @@ Last updated: 2026-01-11 15:21 CST
 
 ### 2026-01-11 — Doc health sync
 - Updated `PROJECT_STATE.md` and `README_REENTRY.md` snapshot references.
+
+### 2026-01-11 — Coverage artifacts removed
+- Removed `coverage/` from the repo and ignored it in `.gitignore`.
