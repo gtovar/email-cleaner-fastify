@@ -100,7 +100,8 @@ curl -X POST http://localhost:8000/v1/suggest \
 | [🌱 Seeders Guide](./seeders.guia.md) | Load initial or reference data |
 | [🚀 Deploy to Cloud Run](./despliegue-cloudrun.md) | Cloud Build + Cloud Run deployment steps |
 | [🤝 Contribution Guide](https://github.com/gtovar/email-cleaner-fastify/blob/main/CONTRIBUTION.md) | Collaboration and commit standards |
-| [📦 Events Contract](./events_contract.md) | Event names, payloads, semantics y consumers |
+| [📦 Events Contract](./events_contract.md) | Event names, payloads, semantics and consumers |
+| [🧭 ADR Index](./adr) | Architecture decisions and tradeoffs |
 | [Documentation Rules](./documentation_rules.md) | Project-wide rules: canonical doc ownership, language/tone policy, and update protocols. |
 
 

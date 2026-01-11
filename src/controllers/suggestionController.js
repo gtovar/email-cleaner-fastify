@@ -31,7 +31,16 @@ export async function getSuggestedEmails(request, reply) {
         if (request.server?.eventBus?.publish) {
             const userId = request.user?.id ?? 'demo-user';
             const domainEvent = buildNewSuggestionsEvent({ userId, suggestions: enrichedEmails });
-            await request.server.eventBus.publish(DOMAIN_EVENTS.SUGGESTIONS_GENERATED, domainEvent);
+            const totalSuggestions = domainEvent?.summary?.totalSuggestions ?? 0;
+
+            if (totalSuggestions >= 10) {
+                await request.server.eventBus.publish(DOMAIN_EVENTS.SUGGESTIONS_GENERATED, domainEvent);
+            } else {
+                request.log.info(
+                    { userId, totalSuggestions },
+                    'Skipping suggestions event publish: below threshold'
+                );
+            }
         }
 
         // 5. Responde con la estructura que espera Swagger

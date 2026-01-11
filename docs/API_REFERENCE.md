@@ -186,6 +186,7 @@ Returns an aggregate summary of suggested actions for a time window.
 
 * Intended for “overview” dashboards.
 * Aggregates counts from `NotificationEvent` records.
+* `NotificationEvent` records are created only when generated suggestions reach the publish threshold.
 
 #### Request
 

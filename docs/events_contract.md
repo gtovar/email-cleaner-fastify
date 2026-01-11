@@ -105,7 +105,7 @@ Additional fields MAY exist depending on the event and builder.
 
 ### When is it emitted?
 
-When the backend computes suggestions for a user (e.g., GET summary flow).
+When the backend computes suggestions for a user (e.g., GET /api/v1/suggestions) and the total suggestions count meets the publish threshold.
 
 ### Builder
 
