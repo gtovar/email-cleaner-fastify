@@ -1,38 +1,33 @@
 # PROJECT_STATE.md
 
-Last updated: 2026-01-11 17:44 CST — Commit: pending
+Last updated: 2026-01-11 23:51 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
 REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
-BRANCH: feat/hu18-oauth-flow
+BRANCH: develop
 COMMIT: pending
 
-SNAPSHOT_DATE: 2026-01-11 17:44 CST (America/Monterrey)
-WORKING_TREE_STATUS: Clean (git status: clean)
+SNAPSHOT_DATE: 2026-01-11 23:51 CST (America/Monterrey)
+WORKING_TREE_STATUS: Dirty (modified files present)
 
 RUNTIME: Node.js (Fastify)
 DB: PostgreSQL via Sequelize
 TEST_STATUS: PASS (Jest)
 
-LAST_VERIFIED_TESTS_DATE: 2026-01-11
+LAST_VERIFIED_TESTS_DATE: 2026-01-11 23:51 CST
 
 ---
 
 ## 2. Executive Summary
 
-- All backend Jest tests are passing (12 test suites / 40 tests) on the snapshot branch.
-- HTTP API is exposed via Fastify with Swagger UI at `/docs`.
-- Core endpoints implemented:
-  - `/auth/google` + `/auth/google/callback`
-  - `/api/v1/emails`
-  - `/api/v1/suggestions`
-  - `/api/v1/notifications/summary`, `/confirm`, `/history`, `/events`
-- Notifications summary returns an aggregate object based on `NotificationEvent` records (windowed by `period`).
-- Suggestions use `classification` as the ML label field (English-only contract).
-- `domain.suggestions.generated` is published only when total suggestions are >= 10.
-- OAuth sessions are issued as httpOnly cookies after Google login and validated via JWT.
+- Fastify API exposes OAuth routes and v1 endpoints for emails, suggestions, and notifications.
+- OAuth flow issues `session_token` cookie and redirects to `${FRONTEND_ORIGIN}/auth/callback`.
+- Auth middleware accepts session cookie or Bearer session JWT and sets `request.user`.
+- `/api/v1/emails` returns raw Gmail emails without ML.
+- `/api/v1/suggestions` enriches emails with ML suggestions and publishes domain events when threshold is met.
+- `/api/v1/notifications/summary` aggregates `NotificationEvent` records by period.
 
 ---
 
@@ -40,30 +35,35 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-11
 
 ### 3.1 Fastify Backend
 
-- Entrypoint: `src/index.js` registers plugins (Sequelize, EventBus, Swagger) and routes.
-- Routes are registered with explicit prefixes:
-  - `emailRoutes` → prefix `/api/v1`
-  - `suggestionRoutes` → prefix `/api/v1`
-  - `notificationsRoutes` → prefix `/api/v1/notifications`
-- CORS is configured for `http://localhost:5173`.
+- Entrypoint: `src/index.js` registers CORS, cookie, Sequelize, EventBus, and routes.
+- Routes are registered with prefixes:
+  - `emailRoutes` → `/api/v1`
+  - `suggestionRoutes` → `/api/v1`
+  - `notificationsRoutes` → `/api/v1/notifications`
+- CORS is configured for `FRONTEND_ORIGIN` with `credentials: true`.
+- Swagger is configured with a bearer scheme (documentation only).
 
 ### 3.2 CQRS-lite / Commands / Domain Events
 
-- Write-path commands exist for:
-  - Confirming suggested actions: `src/commands/notifications/confirmActionCommand.js`
-  - Recording notification events: `src/commands/notification_events/recordNotificationEventCommand.js`
-- In-memory EventBus exists (`src/events/eventBus.js`) and is injected via a Fastify plugin (`src/plugins/eventBus.js`).
-- Subscribers persist domain events to `NotificationEvent` (`registerNotificationEventListeners` → `saveToNotificationEvent`).
+- Commands:
+  - `src/commands/notifications/confirmActionCommand.js`
+  - `src/commands/notification_events/recordNotificationEventCommand.js`
+- EventBus:
+  - In-memory bus via `src/events/eventBus.js`.
+  - Registered through `src/plugins/eventBus.js`.
+- Subscribers persist events to `NotificationEvent`.
 
 ### 3.3 Persistence (Sequelize Models)
 
-- `ActionHistory`: stores per-email actions (userId, emailId, action, timestamp, details).
-- `NotificationEvent`: stores a denormalized event record (type, userId, summary JSONB) used for aggregated summary views.
+- `ActionHistory`: per-email actions (userId, emailId, action, timestamp, details).
+- `NotificationEvent`: denormalized event record (type, userId, summary JSONB).
 
 ### 3.4 External Integrations
 
-- Gmail OAuth routes exist (`/auth/google`, `/auth/google/callback`).
-- n8n webhook listener exists but is currently a safe no-op (logs only).
+- Gmail OAuth routes: `/auth/google`, `/auth/google/callback`.
+- Token lookup via `src/services/tokenService.js`.
+- ML service integration via `src/services/suggestionService.js` and `src/services/mlClient.js`.
+- n8n webhook listener exists (safe no-op).
 
 ---
 
@@ -76,16 +76,16 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-11
 **Evidence:**
 - Routes: `/api/v1/suggestions`, `/api/v1/notifications/summary`
 - Services: `src/services/suggestionService.js`, `src/services/notificationsService.js`
-- Tests: `tests/notifications.test.js`
+- Event publish threshold in `src/controllers/suggestionController.js`
 
 **Open items:**
-- Verify `domain.suggestions.generated` threshold behavior in production-like environment.
+- Re-validate `/api/v1/notifications/events` behavior.
 
 **Technical risks:**
-- Summary windowing uses `createdAt` timestamps; time zone alignment should be verified for production reporting.
+- Summary windowing uses `createdAt`; time zone alignment should be verified.
 
 **Recent change:**
-- Summary aggregation and suggestions contract aligned to `classification` (commit: e2b229e).
+- Suggestions event publish threshold enforced in controller (commit: pending).
 
 ### HU18 — Google OAuth session flow (backend)
 
@@ -97,32 +97,29 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-11
 - Controllers: `src/controllers/authController.js`
 
 **Open items:**
-- Ensure frontend callback and cookie-based auth are fully validated in integration tests.
+- None.
 
 **Technical risks:**
-- Misconfigured `FRONTEND_ORIGIN` can break OAuth redirect or cookie domain alignment.
+- Misconfigured `FRONTEND_ORIGIN` can break OAuth redirects and cookies.
 
 **Recent change:**
-- Session cookie issuance and JWT validation introduced (commit: pending).
+- Session cookie issuance and JWT validation added (commit: pending).
 
 ---
 
 ## 5. Current Technical Risks
 
-- Logging: confirm/action command and event listeners log payloads; ensure no sensitive data is logged in production.
-- Summary windowing uses `createdAt` timestamps; time zone alignment should be verified for production reporting.
+- OAuth cookies require correct SameSite/Secure settings in production.
+- Summary windowing uses `createdAt`; time zones must be validated.
 
 ---
 
 ## 6. Next Immediate Action
 
-➡️ Run backend auth tests after cookie-based session update.
+➡️ Commit doc alignment changes.
 
 ---
 
 ## 7. Version Log
 
-- 2026-01-10: Notifications summary uses aggregated `NotificationEvent` data and suggestions use `classification` (commit: 31238d4).
-- 2026-01-11: Suggestions event publish threshold set to >= 10 (commit: e2b229e).
-- 2026-01-11: Project state metadata updated (commit: pending).
-- 2026-01-11: OAuth session flow updated to httpOnly cookies (commit: pending).
+- 2026-01-11 23:51 CST — Doc alignment and tests verified (commit: pending)

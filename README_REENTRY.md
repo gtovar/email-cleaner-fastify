@@ -17,15 +17,15 @@
 
 ## 1) Current snapshot (minimum that matters)
 
-- Branch: `feat/hu18-oauth-flow`
-- Latest checkpoint: `PROJECT_STATE.md` (snapshot 2026-01-11)
-- Backend tests: PASS (Jest)
+- Branch: `develop`
+- Latest checkpoint: `PROJECT_STATE.md`
+- Backend tests: PASS (Jest, 12 suites / 41 tests)
 - Auth flow: Google OAuth sets httpOnly `session_token` cookie and validates JWT via `authMiddleware`
 - Primary endpoints:
   - Gmail OAuth: `/auth/google`, `/auth/google/callback`
   - v1: `/api/v1/emails`, `/api/v1/suggestions`
   - Notifications: `/api/v1/notifications/summary|confirm|history|events`
-- Architecture today: CQRS-lite + in-memory EventBus + `NotificationEvent` persistence
+- Architecture: CQRS-lite + in-memory EventBus + `NotificationEvent` persistence
 
 ---
 
