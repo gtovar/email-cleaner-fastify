@@ -1,35 +1,30 @@
-# Workflow de Desarrollo (versión adaptada)
+# Development Workflow
 
-Este proyecto utiliza un flujo de trabajo basado en:
+This project uses:
+- GitHub Flow
+- Lightweight Scrum
+- Continuous re-entry workflow
 
-* GitHub Flow
-* Scrum adaptado a desarrollador individual
-* Continuous Re-entry Workflow
-
-## Ciclo de trabajo
-
-1. Reentrada (abrir `README_REENTRY.md`)
-2. Revisar estado (`PROJECT_STATE.md`)
-3. Crear/abrir issues según HU activa
-4. `make up` para levantar servicios
-5. Desarrollar + pruebas + documentación
-6. Crear Pull Request con checklist DoR/DoD
+## Work cycle
+1. Re-entry (`README_REENTRY.md`)
+2. Check state (`PROJECT_STATE.md`)
+3. Create/open issues for the active HU
+4. Start services (`make -C ops up`)
+5. Develop + tests + documentation
+6. Open PR with DoR/DoD checklist
 7. CI: lint + test + build
-8. Merge → actualizar Sprint_Log.md y PROJECT_STATE.md
+8. Merge → update `Sprint_Log.md` and `PROJECT_STATE.md`
 
 - Working branch: `develop`
-- Branch naming: `type/huNN-short-desc` (ejemplo: `feat/hu17-unify-suggestions-summary`)
-- Flow: branch desde `develop` → PR/merge de regreso a `develop`; `main` se actualiza solo desde `develop` en releases/checkpoints
+- Branch naming: `type/huNN-short-desc` (example: `feat/hu17-unify-suggestions-summary`)
+- Flow: branch from `develop` → PR/merge back to `develop`; `main` updates only from `develop` at releases/checkpoints
 
-## Escalabilidad
-
-Este workflow permite incorporar más desarrolladores sin cambios estructurales:
-issues, PRs, ADRs y documentación ya están preparados para colaboración incremental.
+## Scalability
+This workflow supports additional collaborators with minimal changes.
 
 ## Audit Policy (Canonical)
-
 - Default mode: NORMAL (warnings do not block work).
-- Strict mode: run only before
+- Strict mode: run only before:
   - merging into canonical branches (e.g., develop/main), or
   - starting a large feature (contract/db/cross-cutting changes).
 

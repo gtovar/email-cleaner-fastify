@@ -5,25 +5,24 @@
 [![Docs](https://img.shields.io/badge/docs-MkDocs%20Material-brightgreen)](https://gtovar.github.io/email-cleaner-fastify/)
 [![Pages](https://github.com/gtovar/email-cleaner-fastify/actions/workflows/docs.yml/badge.svg)](../../actions/workflows/docs.yml)
 
-
-An intelligent system that automatically classifies your emails, prioritizes what truly matters, and alerts you when action is needed.  
-Built with **Fastify (Node.js)** for backend logic, **FastAPI (Python)** for machine learning, and **n8n** for smart automation.
+An intelligent system that classifies your emails, prioritizes what matters, and alerts you when action is needed.
+Built with **Fastify (Node.js)** for backend logic, **FastAPI (Python)** for ML, and **n8n** for automation.
 
 ---
 
 ## 🚀 Overview
 
-Managing dozens of emails daily can easily lead to **decision fatigue** and **loss of focus**.  
+Managing dozens of emails daily can lead to decision fatigue and loss of focus.
 This system connects securely to Gmail, classifies messages with ML models, and filters what deserves your attention.
 
 ---
 
 ## 🧠 Core Features
 
-- **Smart Classification** — NLP-based categorization of incoming emails.  
-- **Priority Notifications** — Only alerts you for messages that matter.  
-- **Seamless Gmail Integration** — OAuth2-based secure connection.  
-- **Multi-service Architecture** — Node.js backend + Python ML microservice.  
+- **Smart classification** — NLP-based categorization of incoming emails.
+- **Priority notifications** — Only alerts you for messages that matter.
+- **Seamless Gmail integration** — OAuth2-based secure connection.
+- **Multi-service architecture** — Node.js backend + Python ML microservice.
 - **Automation-ready** — n8n workflows for Telegram or Slack notifications.
 
 ---
@@ -42,32 +41,29 @@ This system connects securely to Gmail, classifies messages with ML models, and 
 
 ## ⚙️ Setup Instructions
 
-> ⚠️ **Requirements:** Node.js ≥ 20.0  •  Python ≥ 3.10  •  Docker (optional)  
-> Ensure you have both environments active before running the backend and ML microservice.
+> Requirements: Node.js ≥ 20, Python ≥ 3.10, Docker (optional).
 
-### 1. Clone the Repository
+### 1) Clone the repository
 
 ```bash
 git clone https://github.com/gtovar/email-cleaner-fastify.git
 cd email-cleaner-fastify
 ```
 
-### 2. Environment Setup
-
-Copy the environment example and fill in your Gmail credentials:
+### 2) Environment setup
 
 ```bash
 cp .env.example .env
 ```
 
-### 3. Install Dependencies
+### 3) Install dependencies
 
 **Backend:**
 ```bash
 npm install
 ```
 
-**ML Microservice:**
+**ML microservice:**
 ```bash
 cd python/classifier
 python -m venv venv
@@ -75,54 +71,53 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Run the Services
+### 4) Run the services
 
-**Fastify Backend:**
+**Fastify backend:**
 ```bash
 npm run dev
 # http://localhost:3000
 ```
 
-**Python Classifier (FastAPI):**
+**Python classifier (FastAPI):**
 ```bash
 uvicorn main:app --reload --port 8000
 # http://localhost:8000/docs
 ```
 
-### 5. Database
+### 5) Database
+
 ```bash
 npm run db:migrate
-npm run db:seed      # opcional
-# rollback:
-npm run db:rollback  # opcional
+npm run db:seed      # optional
+npm run db:rollback  # optional
 ```
 
-### 6. Docker (local)
+### 6) Docker (local)
 
 ```bash
-  docker compose -f ops/docker-compose.yml up --build
+docker compose -f ops/docker-compose.yml up --build
 ```
 
 ### Smoke test
+
 ```bash
 curl -s http://localhost:3000/api/v1/health/db
-curl -s http://localhost:3000/api/v1/notifications/summary -H "Authorization: Bearer dummy"
-curl -s http://localhost:3000/api/v1/notifications/history -H "Authorization: Bearer dummy"
 ```
 
-## 🧪 Ejecutar pruebas
+---
 
-Este proyecto usa [Jest](https://jestjs.io/) como test runner principal.
+## 🧪 Run tests
 
-Comandos disponibles:
+This project uses Jest.
 
 ```bash
-npm test         # Ejecuta la suite una sola vez
-npm run test:watch # Modo interactivo de Jest
-npm run coverage   # Reporte de cobertura en ./coverage
+npm test         # Run all tests once
+npm run test:watch # Watch mode
+npm run coverage   # Coverage report in ./coverage
 ```
-> Jest se ejecuta en modo ESM con `NODE_OPTIONS=--experimental-vm-modules` para mantener la compatibilidad con `type: "module"`.
-> Nota: el script de npm test ya incluye las opciones necesarias para ejecutar Jest con módulos ECMAScript en Node, por lo que no necesitas exportar variables extra manualmente.
+
+---
 
 ## Repository layout
 
@@ -130,52 +125,60 @@ npm run coverage   # Reporte de cobertura en ./coverage
 - python/classifier/      # FastAPI microservice (ML)
 - migrations/             # Sequelize migrations & seeds
 - ops/
-  └─ docker-compose.yml   # Orquestación local (DB, n8n, Fastify, FastAPI)
-- docs/                   # Fuente de la documentación (MkDocs)
+  └─ docker-compose.yml   # Local orchestration (DB, n8n, Fastify, FastAPI)
+- docs/                   # Documentation source (MkDocs)
 - .github/workflows/      # CI/CD (GitHub Actions)
-- README.md               # Guía principal (fuente de verdad junto con docs/)
+- README.md               # Main guide (source of truth with docs/)
+
+---
 
 ### Environment variables
-| Variable | Descripción | Obligatoria | Ejemplo |
+
+| Variable | Description | Required | Example |
 |---|---|---:|---|
-| DATABASE_URL | Cadena de conexión PostgreSQL | Sí | postgres://user:pass@localhost:5432/email_cleaner |
-| DB_HOST | Host de la base | No* | 127.0.0.1 |
-| DB_PORT | Puerto DB | No* | 5432 |
-| DB_USERNAME | Usuario DB | No* | postgres |
-| DB_PASSWORD | Password DB | No* | secret |
-| DB_DATABASE | Nombre DB | No* | email_cleaner |
-| GOOGLE_CLIENT_ID | OAuth 2.0 Client ID | Sí | xxx.apps.googleusercontent.com |
-| GOOGLE_CLIENT_SECRET | OAuth 2.0 Client Secret | Sí | supersecret |
-| GOOGLE_REDIRECT_URI | Redirect (OAuth) | Sí | http://localhost:3000/oauth/google/callback |
-| INTERNAL_JWT_SECRET| Inter-service / Security | No | xxxxx|
-| ML_BASE_URL | URL del microservicio ML | Sí | http://localhost:8000 |
-| PORT | Puerto del backend | Sí | 3000 |
-| N8N_WEBHOOK_URL | Webhook para pruebas | No | http://localhost:5678/webhook/telegram-test |
+| DATABASE_URL | PostgreSQL connection string | Yes | postgres://user:pass@localhost:5432/email_cleaner |
+| DB_HOST | DB host | No* | 127.0.0.1 |
+| DB_PORT | DB port | No* | 5432 |
+| DB_USERNAME | DB user | No* | postgres |
+| DB_PASSWORD | DB password | No* | secret |
+| DB_DATABASE | DB name | No* | email_cleaner |
+| GOOGLE_CLIENT_ID | OAuth 2.0 Client ID | Yes | xxx.apps.googleusercontent.com |
+| GOOGLE_CLIENT_SECRET | OAuth 2.0 Client Secret | Yes | supersecret |
+| GOOGLE_REDIRECT_URI | OAuth redirect | Yes | http://localhost:3000/auth/google/callback |
+| FRONTEND_ORIGIN | Frontend origin | Yes | http://localhost:5173 |
+| INTERNAL_JWT_SECRET | Inter-service / security | No | xxxxx |
+| ML_BASE_URL | ML microservice URL | Yes | http://localhost:8000 |
+| PORT | Backend port | Yes | 3000 |
+| N8N_WEBHOOK_URL | Webhook for tests | No | http://localhost:5678/webhook/telegram-test |
 | TELEGRAM_BOT_TOKEN | Telegram | No | xxxxx |
 
-> *Usa `DATABASE_URL` o los `DB_*`. No ambos a la vez.
-⚠️ Los endpoints que consultan Gmail (`/api/v1/emails`, `/api/v1/suggestions`) requieren un token Google válido.
-Para probar sin OAuth real, use el flujo de **Notificaciones** con un token dummy (`Authorization: Bearer dummy`).
+> *Use `DATABASE_URL` or `DB_*`, not both.
 
-## 🧠 Especificación oficial de la API
-La documentación de la API se genera directamente desde el código (esquemas definidos en las rutas y en `src/index.js`) y se muestra en **/docs** al ejecutar el servidor.
+### Auth note
+
+Gmail endpoints (`/api/v1/emails`, `/api/v1/suggestions`) require a valid session:
+- cookie `session_token`, or
+- `Authorization: Bearer <SESSION_TOKEN>` for API tools.
+
+---
+
+## 🧠 API reference
+
+The API documentation is generated from code and available at `/docs` when the server is running.
 
 ---
 
 ### OAuth modes
-- `OAUTH_MODE=mock` → flujo simulado (recomendado si aun no tienes configurado GCP OAuth)
-- `OAUTH_MODE=google` → requiere configurar GCP OAuth (ver docs/operations/oauth-google.md).
+
+- `OAUTH_MODE=mock` → documented only (not implemented in code yet).
+- `OAUTH_MODE=google` → requires GCP OAuth setup (see `docs/operations/oauth-google.md`).
   - `GOOGLE_CLIENT_ID`
   - `GOOGLE_CLIENT_SECRET`
-  - `GOOGLE_REDIRECT_URI` (p. ej., `http://localhost:3000/oauth/google/callback`)
-  - Pasos detallados: ver `docs/operations/oauth-google.md`.
+  - `GOOGLE_REDIRECT_URI` (e.g., `http://localhost:3000/auth/google/callback`)
 
-> Nota: El modo `mock` se implementará en una iteración futura. Por ahora solo se documenta el comportamiento deseado para asegurar reproducibilidad en local sin secretos.
+---
 
-
-## 🧪 Testing the Pipeline
-
-To test ML suggestions end-to-end (direct ML service):
+## 🧪 Testing the ML pipeline (direct ML service)
 
 ```bash
 curl -X POST http://localhost:8000/v1/suggest \
@@ -205,57 +208,44 @@ Expected result:
 ]
 ```
 
-**Trigger notification test:**  
-Tests Telegram notification webhook from n8n flow.
-
+**Trigger notification test:**
 ```bash
 curl -X POST http://localhost:5678/webhook/telegram-test
 ```
 
 ---
 
-## 📦 Related Documentation
+## 📦 Related documentation
 
-| File                     | Description                           |
-| ------------------------ | ------------------------------------- |
-| [Design Document.md](docs//DESIGN_DOCUMENT.md) | Technical architecture and key decisions |
-| [API Reference.md](docs/API_REFERENCE.md) | REST endpoints and examples |
-| [architecture.md](docs/architecture.md) | REST endpoints and examples |
-| [despliegue-cloudrun.md](docs/despliegue-cloudrun.md) | Deployment guide for Google Cloud Run | 
-| [migraciones.md](docs/migraciones.md) | Sequelize migration workflow |
-| [seeders.guia.md](docs/seeders.guia.md) | Load initial or reference data |
+| File | Description |
+| --- | --- |
+| [DESIGN_DOCUMENT.md](docs/DESIGN_DOCUMENT.md) | Technical architecture and key decisions |
+| [API_REFERENCE.md](docs/API_REFERENCE.md) | REST endpoints and examples |
+| [architecture.md](docs/architecture.md) | System data-flow diagram |
+| [despliegue-cloudrun.md](docs/despliegue-cloudrun.md) | Cloud Run deployment guide |
+| [migraciones.md](docs/migraciones.md) | Sequelize migration workflow |
+| [seeders.guia.md](docs/seeders.guia.md) | Seeders guide |
 
-📘 **Full documentation:** [https://gtovar.github.io/email-cleaner-fastify/](https://gtovar.github.io/email-cleaner-fastify/)
+📘 Full documentation: https://gtovar.github.io/email-cleaner-fastify/
 
 ---
 
 ## 🧰 Tech Stack Summary
 
-- **Backend:** Node.js (Fastify), PostgreSQL  
-- **ML Service:** Python (FastAPI, scikit‑learn)  
-- **Infra:** Docker, Cloud Run, Secret Manager  
-- **Notifications:** n8n + Telegram integration  
-- **CI/CD:** GitHub Actions (build + deploy + lint)  
-- **Monitoring:** ELK Stack / Prometheus (optional phase 4)
+- **Backend:** Node.js (Fastify), PostgreSQL
+- **ML Service:** Python (FastAPI, scikit-learn)
+- **Infra:** Docker, Cloud Run, Secret Manager
+- **Notifications:** n8n + Telegram integration
+- **CI/CD:** GitHub Actions (build + deploy + lint)
 
 ---
 
 ## 🧾 Maintainers
 
-Maintained by **Gilberto Tovar**  
-📧 contacto@gilbertotovar.com  
-🌐 [www.gilbertotovar.com](https://www.gilbertotovar.com)
+Maintained by **Gilberto Tovar**
+- Email: contacto@gilbertotovar.com
+- Web: https://www.gilbertotovar.com
 
 ---
 
-## 🧩 Developer Tools
-
-**pre-commit hook:** updates the "Last updated" footer automatically.
-
-```bash
-sed -i "s/Last updated:.*/Last updated: $(date '+%B %Y')/" README.md
-```
-
----
-
-**Last updated:** March 2026
+**Last updated: January 2026

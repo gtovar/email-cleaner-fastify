@@ -1,5 +1,34 @@
-Playbook de OAuth Google en docs/operations/oauth-google.md con:
+# Google OAuth Playbook
 
-Crear proyecto en GCP, activar Gmail API, configurar OAuth consent screen, registrar Redirect URI http://localhost:3000/oauth2/callback, obtener GMAIL_CLIENT_ID/SECRET.
+This document describes how to configure Google OAuth for the Fastify backend.
 
-Exportar variables vía .env y nunca commitear secretos.
+## 1) Create a Google Cloud project
+- Create or select a GCP project.
+- Enable the **Gmail API**.
+
+## 2) Configure OAuth consent screen
+- Select the user type (internal or external).
+- Add the scopes required by Gmail (read-only unless you need write actions).
+
+## 3) Create OAuth credentials
+- Create an **OAuth client ID** (Web application).
+- Add the redirect URI:
+  - `http://localhost:3000/auth/google/callback`
+
+## 4) Configure environment variables
+Set these in your backend `.env` file:
+
+```env
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_REDIRECT_URI=http://localhost:3000/auth/google/callback
+FRONTEND_ORIGIN=http://localhost:5173
+```
+
+## 5) Validate the flow
+- Visit `GET /auth/google` to start the OAuth flow.
+- After consent, the backend:
+  - stores Google tokens,
+  - issues a `session_token` cookie,
+  - redirects to `${FRONTEND_ORIGIN}/auth/callback`.
+

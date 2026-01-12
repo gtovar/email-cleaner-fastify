@@ -3,18 +3,18 @@ Fast and simple guide to run the entire system locally.
 
 ---
 
-## 1. Requirements
+## 1) Requirements
 
 - Node.js 18+
 - Python 3.10+
 - pip + venv
 - Uvicorn
 - Docker (optional, recommended)
-- Google OAuth2 credentials (Client ID, Secret, Redirect URI)
+- Google OAuth credentials (Client ID, Secret, Redirect URI)
 
 ---
 
-## 2. Install Dependencies
+## 2) Install dependencies
 
 ### Backend (Fastify)
 ```bash
@@ -36,7 +36,7 @@ npm install
 
 ---
 
-## 3. Environment Variables
+## 3) Environment variables
 
 Each module includes a `.env.example`. Copy it to `.env`:
 
@@ -44,7 +44,7 @@ Each module includes a `.env.example`. Copy it to `.env`:
 cp .env.example .env
 ```
 
-Important variables for the backend:
+Important backend variables:
 
 ```env
 ML_BASE_URL=http://localhost:8000
@@ -52,14 +52,15 @@ ML_TIMEOUT_MS=5000
 
 GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
-GOOGLE_REDIRECT_URI=...
+GOOGLE_REDIRECT_URI=http://localhost:3000/auth/google/callback
+FRONTEND_ORIGIN=http://localhost:5173
 ```
 
 ---
 
-## 4. Run in Development Mode
+## 4) Run in development mode
 
-### A) Fastify Backend
+### A) Fastify backend
 ```bash
 cd email-cleaner-fastify
 npm run dev
@@ -70,10 +71,10 @@ Available at:
 http://localhost:3000
 ```
 
-### B) FastAPI ML Service
+### B) FastAPI ML service
 ```bash
-cd email-cleaner-fasitfy/python
-uvicorn app:app --reload --host 0.0.0.0 --port 8000
+cd email-cleaner-fastify/python/classifier
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Available at:
@@ -81,7 +82,7 @@ Available at:
 http://localhost:8000
 ```
 
-### C) React Frontend
+### C) React frontend
 ```bash
 cd email-cleaner-react
 npm run dev
@@ -94,7 +95,7 @@ http://localhost:5173
 
 ---
 
-## 5. Run with Docker (Recommended)
+## 5) Run with Docker (recommended)
 
 ```bash
 cd ops
@@ -103,76 +104,48 @@ docker compose -f docker-compose.yml up --build
 
 This starts:
 - Postgres
-- Fastify Backend
+- Fastify backend
 - FastAPI ML
-- React Frontend
+- React frontend
 
 ---
 
-## 6. Authentication (Google OAuth)
+## 6) Authentication (Google OAuth)
 
-Use your Gmail OAuth `access_token` in the headers:
+Use the browser flow:
+- Visit `GET /auth/google`
+- Complete OAuth consent
+- Backend sets `session_token` cookie and redirects to `${FRONTEND_ORIGIN}/auth/callback`
 
-```bash
--H "Authorization: Bearer <ACCESS_TOKEN>"
+API tools can send the session JWT as:
 ```
-
----
-
-## 7. Test the API
-
-### Base Email List (no AI)
-```bash
-curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/emails
-```
-
-### Email List with AI Suggestions
-```bash
-curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/suggestions
-```
-
-Example response:
-```json
-{
-  "emails": [
-    {
-      "id": "18c8f6e...",
-      "from": "facturas@cfe.mx",
-      "subject": "Your power bill",
-      "date": "2025-11-18T02:32:11.000Z",
-      "isRead": false,
-      "category": "promotions",
-      "attachmentSizeMb": 1.2,
-      "suggestions": [
-        {
-          "action": "archive",
-          "classification": "promotions_old",
-          "confidence_score": 0.85
-        }
-      ]
-    }
-  ]
-}
-```
-
-If ML is offline, backend returns suggestions as empty:
-```json
-{ "emails": [ { "id": "...", "suggestions": [] } ] }
+Authorization: Bearer <SESSION_TOKEN>
 ```
 
 ---
 
-## 8. Run Tests
+## 7) Test the API
+
+### Base email list (no AI)
+```bash
+curl -H "Authorization: Bearer <SESSION_TOKEN>" \
+  http://localhost:3000/api/v1/emails
+```
+
+### Email list with AI suggestions
+```bash
+curl -H "Authorization: Bearer <SESSION_TOKEN>" \
+  http://localhost:3000/api/v1/suggestions
+```
+
+---
+
+## 8) Run tests
 
 ### Backend (Jest)
 ```bash
 cd email-cleaner-fastify
 npm test
-```
-
-Expected:
-```
-40 passed, 0 failed
 ```
 
 ### ML (pytest)
@@ -183,7 +156,7 @@ pytest
 
 ---
 
-## 9. Smoke Test
+## 9) Smoke test
 
 ### Backend health:
 ```bash
@@ -195,20 +168,13 @@ curl http://localhost:3000/api/v1/health
 curl http://localhost:8000/docs
 ```
 
-### Suggestions:
-```bash
-curl -H "Authorization: Bearer <TOKEN>"      http://localhost:3000/api/v1/suggestions
-```
-
 ---
 
-## 10. Main Endpoints
+## 10) Main endpoints
 
 - `/api/v1/emails`
 - `/api/v1/suggestions`
-- `/health`
-- `http://localhost:8000/docs` (ML OpenAPI)
-
----
-
-# END OF FILE
+- `/api/v1/notifications/summary`
+- `/api/v1/notifications/history`
+- `/api/v1/notifications/confirm`
+- `/api/v1/health`

@@ -1,79 +1,83 @@
-# Entorno Local (Docker / Host)
+# Local Environment (Docker / Host)
 
-## Requisitos
-- Docker Desktop o Colima
-- Make (opcional)
+## Requirements
+- Docker Desktop or Colima
+- Make (optional)
 
-## Levantar todo
+## Start everything
 ```bash
 docker compose -f ops/docker-compose.yml up --build
 ```
-## Flujo rápido (3 pasos)
-1) Arranque servicios:
+
+## Quick flow (3 steps)
+1) Start services:
 ```bash
 make -C ops up
 ```
-2) Migraciones (elige una):
+
+2) Run migrations (choose one):
 ```bash
-# Host-local (DB mapeada a 5432)
+# Host-local (DB mapped to 5432)
 npm run db:migrate
-# Ó dentro del contenedor Fastify
+# Or inside the Fastify container
 make -C ops migrate-in
 ```
+
 3) Smoke test:
 ```bash
 curl -s http://localhost:3000/api/v1/health/db
 ```
-Salida esperada: `{"db":"ok"}`
+Expected output: `{"db":"ok"}`
 
-
+---
 
 ## Smoke tests
 
-### 1) Migraciones
+### 1) Migrations
 ```bash
 npm run db:migrate
-npm run db:seed   # opcional
+npm run db:seed   # optional
 ```
 
-### 2) Salud de BD
+### 2) DB health
 ```bash
 curl -s http://localhost:3000/api/v1/health/db
-# -> {"db":"ok"}
 ```
 
-### 3) Api oficial
+### 3) API readiness
+- OAuth flow: `GET /auth/google`
+- Suggestions: `GET /api/v1/suggestions` (requires session cookie)
 
-## Tabla de equivalencias (Host vs Docker)
+---
 
-| Componente | Docker (recomendado) | Host-local (alternativa) |
-|------------|-----------------------------|--------------------------------|
-| App JS | http://localhost:3000
-| http://localhost:3000
-|
-| FastAPI | http://fastapi:8000
-| http://localhost:8000
-|
-| DB Host | db | 127.0.0.1 |
-| DB Puerto | 5432 | 5432 |
+## Host vs Docker mapping
+
+| Component | Docker (recommended) | Host-local (alternative) |
+| --- | --- | --- |
+| Fastify API | http://localhost:3000 | http://localhost:3000 |
+| FastAPI ML | http://fastapi:8000 | http://localhost:8000 |
+| DB host | db | 127.0.0.1 |
+| DB port | 5432 | 5432 |
 | Sequelize | DB_HOST=db | DB_HOST=127.0.0.1 |
 | Health DB | /api/v1/health/db | /api/v1/health/db |
 
-> Nota: si defines DATABASE_URL, tendrá prioridad en Sequelize.
-
-## Notas
-- OAuth Google: postergado. La integración se documentará cuando pase de “experimental” a “listo para QA”. De momento no se requiere mock ni setup adicional.
+> Note: if you set `DATABASE_URL`, it takes precedence in Sequelize.
 
 ---
 
-## Mock de OAuth (documentación)
+## OAuth note (local)
+The canonical auth flow is cookie-based:
+- Backend sets `session_token` after `/auth/google/callback`.
+- Frontend uses `credentials: "include"` for API requests.
 
-⚠️ `OAUTH_MODE=mock` documentado; **implementación pendiente**.
-Para pruebas sin OAuth real, use los endpoints de **Notificaciones** con `Authorization: Bearer dummy`.
+For API tools you can pass the session JWT as:
+```
+Authorization: Bearer <SESSION_TOKEN>
+```
 
 ---
 
-## Servicios disponibles
+## Available services
 - Fastify: http://localhost:3000
 - FastAPI (ML): http://localhost:8000/docs
 - Postgres: localhost:5432
@@ -81,11 +85,10 @@ Para pruebas sin OAuth real, use los endpoints de **Notificaciones** con `Author
 
 ---
 
-## Makefile (en la carpeta ops)
-Ejecutar comandos con:
+## Makefile (ops)
+Run commands with:
 ```bash
 make -f ops/Makefile up
 make -f ops/Makefile migrate
 make -f ops/Makefile smoke
 ```
-

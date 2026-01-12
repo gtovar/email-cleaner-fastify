@@ -23,7 +23,7 @@ sequenceDiagram
   participant Q as summaryQueries
   participant DB as PostgreSQL (NotificationEvent)
 
-  UI->>R: GET /api/v1/notifications/summary (Bearer token)
+  UI->>R: GET /api/v1/notifications/summary (session cookie)
   R->>S: getSummaryForUser({ userId })
   S->>Q: aggregate summary for user
   Q->>DB: SELECT NotificationEvent (windowed)
@@ -34,7 +34,7 @@ sequenceDiagram
 
 ```mermaid
 flowchart LR
-  UI[React UI] -->|GET /api/v1/notifications/summary + Bearer| MW[authMiddleware]
+  UI[React UI] -->|GET /api/v1/notifications/summary + session cookie| MW[authMiddleware]
   MW --> CTRL[getSummary controller]
   CTRL --> SVC[notificationsService.getSummary]
   SVC --> QRY[summaryQueries.getNotificationSummaryForUser]
@@ -74,19 +74,19 @@ sequenceDiagram
   S-->>R: { success, processed, emailIds, action, data }
   R-->>UI: 200 response
 ```
-#### Semántica (para evitar confusión futura)
-- `ActionHistory` responde: “¿Qué acción ejecutó/confirmó el usuario sobre qué email?”
-- `NotificationEvent` responde: “¿Qué eventos del dominio ocurrieron y cómo viajan por el pipeline?”
-- Ambos coexisten a propósito: UI necesita historial simple; el sistema necesita eventos auditables.
+#### Semantics (to avoid future confusion)
+- `ActionHistory` answers: "Which action did the user execute/confirm on which email?"
+- `NotificationEvent` answers: "Which domain events occurred and how do they travel through the pipeline?"
+- Both coexist by design: the UI needs a simple history; the system needs auditable events.
 
 
 ```mermaid
 flowchart LR
-  UI[React UI] -->|POST /api/v1/notifications/confirm {ids|emailIds, action}| MW[authMiddleware]
+  UI[React UI] -->|POST /api/v1/notifications/confirm {emailIds, action}| MW[authMiddleware]
   MW --> CTRL[confirmActions controller]
   CTRL --> SVC[notificationsService.confirmActions]
   SVC --> CMD1[confirmActionCommand]
-  CMD1 --> EXT[Gmail API / side effects (si aplica)]
+  CMD1 --> EXT[Gmail API / side effects (if applicable)]
   SVC --> BUS[eventBus.publish: DOMAIN_EVENTS.SUGGESTION_CONFIRMED]
   BUS --> L1[listener: saveToNotificationEvent]
   L1 --> CMD2[recordNotificationEventCommand]

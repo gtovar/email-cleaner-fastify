@@ -1,31 +1,20 @@
-*(Guía editorial para mantener consistencia)*
+# Documentation Style Guide
 
-```
+## Principles
+- Externalize knowledge (explain the "why").
+- Reduce cognitive load (tables, diagrams, code blocks).
+- Enable fast re-entry (clear titles, numbered steps).
 
-# Guía de Estilo de Documentación
-
-## Principios
-
-* Externalización del conocimiento (explicar el “por qué”).
-* Descarga cognitiva (tablas, diagramas, bloques de código).
-* Recuperación de contexto (títulos claros, pasos numerados).
-
-## Convenciones
-
-* Archivos en inglés o español consistente.
-* Estructura mínima:
-
-  * Contexto
-  * Objetivo
-  * Pasos o detalles técnicos
-  * Resultados esperados
-* Usar ejemplos autocontenidos y copiable/pegable.
-* Endpoints documentados con:
-
-  * Método
-  * Ruta
-  * Parámetros
-  * Ejemplo JSON
-
-```
-
+## Conventions
+- Use English for canonical docs (see `docs/documentation_rules.md`).
+- Minimum structure:
+  - Context
+  - Objective
+  - Steps or technical details
+  - Expected results
+- Provide self-contained examples that can be copied.
+- Document endpoints with:
+  - Method
+  - Path
+  - Parameters
+  - JSON example

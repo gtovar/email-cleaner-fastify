@@ -1,34 +1,33 @@
-# 🗄️ Database Migration Guide
+# Database Migration Guide
 
-This document explains how to version, create, and deploy schema changes for **Email Cleaner & Smart Notifications** using **Sequelize Migrations**.  
-Aligned with the *Code Style Guide* and *Infrastructure Roadmap*.
-
----
-
-## 🎯 Purpose
-
-- Maintain consistent database schemas across environments (local, staging, production).  
-- Allow safe rollbacks on deployment errors.  
-- Enable traceable and auditable schema changes via PRs.  
+This document explains how to version, create, and deploy schema changes for **Email Cleaner & Smart Notifications** using **Sequelize Migrations**.
 
 ---
 
-## 🧩 1. Tools & Dependencies
+## Purpose
 
-| Tool                 | Version | Purpose                       |
-| -------------------- | ------- | ----------------------------- |
-| **Sequelize**        | ^7.x    | ORM                           |
-| **sequelize‑cli**    | ^7.x    | CLI for migration management  |
-| **umzug** (optional) | ^4.x    | Programmatic migration runner |
+- Maintain consistent database schemas across environments (local, staging, production).
+- Allow safe rollbacks on deployment errors.
+- Enable traceable and auditable schema changes via PRs.
 
-Install the CLI:  
+---
+
+## 1) Tools & dependencies
+
+| Tool | Version | Purpose |
+| --- | --- | --- |
+| Sequelize | ^7.x | ORM |
+| sequelize-cli | ^7.x | CLI for migration management |
+| umzug (optional) | ^4.x | Programmatic migration runner |
+
+Install the CLI:
 ```bash
 npm install --save-dev sequelize-cli
 ```
 
 ---
 
-## 📁 2. Directory Structure
+## 2) Directory structure
 
 ```plaintext
 email-cleaner/
@@ -39,31 +38,29 @@ email-cleaner/
     └── config.js         # Environment-specific DB configuration
 ```
 
-This layout matches Sequelize’s default conventions and supports CI/CD pipelines.
-
 ---
 
-## 🧱 3. Naming Convention
+## 3) Naming convention
 
 ```
 YYYYMMDDHHmmss-description.js
 ```
 
-Example:  
+Example:
 `20250718104500-add-column-is_archived-to-emails.js`
 
 Timestamps in UTC ensure proper ordering and deterministic execution.
 
 ---
 
-## ⚙️ 4. Core Commands
+## 4) Core commands
 
-| Action                   | Command                                                     |
-| ------------------------ | ----------------------------------------------------------- |
-| Generate migration       | `npx sequelize-cli migration:generate --name <description>` |
-| Apply pending migrations | `npx sequelize-cli db:migrate --env local`                  |
-| Undo last migration      | `npx sequelize-cli db:migrate:undo --env local`             |
-| View migration status    | `npx sequelize-cli db:migrate:status`                       |
+| Action | Command |
+| --- | --- |
+| Generate migration | `npx sequelize-cli migration:generate --name <description>` |
+| Apply pending migrations | `npx sequelize-cli db:migrate --env local` |
+| Undo last migration | `npx sequelize-cli db:migrate:undo --env local` |
+| View migration status | `npx sequelize-cli db:migrate:status` |
 
 Recommended `package.json` scripts:
 ```json
@@ -75,17 +72,17 @@ Recommended `package.json` scripts:
 
 ---
 
-## 🧠 5. Best Practices
+## 5) Best practices
 
-1. **Transactional:** wrap migrations in `queryInterface.sequelize.transaction(...)`.  
-2. **Reversible:** always implement `down()` for rollback.  
-3. **Idempotent:** never modify an applied migration — create a new one.  
-4. **Auditable:** describe each change in PRs and include `db:migrate:status` output.  
+1. **Transactional:** wrap migrations in `queryInterface.sequelize.transaction(...)`.
+2. **Reversible:** always implement `down()` for rollback.
+3. **Idempotent:** never modify an applied migration — create a new one.
+4. **Auditable:** describe each change in PRs and include `db:migrate:status` output.
 5. **Seeders:** use only for static or reference data, never for user content.
 
 ---
 
-## 🔄 6. CI/CD Integration
+## 6) CI/CD integration
 
 Include this step before deployment in `cloudbuild.yaml`:
 
@@ -100,19 +97,17 @@ Include this step before deployment in `cloudbuild.yaml`:
       npx sequelize-cli db:migrate --env production
 ```
 
-Ensures the database is up-to-date before deploying the service.
-
 ---
 
-## 🚧 7. Production Rollback
+## 7) Production rollback
 
-1. Run `db:migrate:undo --env production`.  
-2. If already deployed, roll back Cloud Run revision.  
+1. Run `db:migrate:undo --env production`.
+2. If already deployed, roll back the Cloud Run revision.
 3. Log and document the rollback in the incident record.
 
 ---
 
-## 📘 8. Migration Example
+## 8) Migration example
 
 ```js
 'use strict';
@@ -132,14 +127,14 @@ module.exports = {
 
 ---
 
-## ❓ 9. FAQ
+## 9) FAQ
 
-| Question                         | Answer                                          |
-| -------------------------------- | ----------------------------------------------- |
-| Can I edit an applied migration? | 🚫 No — always create a new one.                 |
-| How do I run a single migration? | Use `--to <timestamp>` with `db:migrate`.       |
-| How do I test migrations in CI?  | Execute `db:migrate` before running unit tests. |
+| Question | Answer |
+| --- | --- |
+| Can I edit an applied migration? | No — always create a new one. |
+| How do I run a single migration? | Use `--to <timestamp>` with `db:migrate`. |
+| How do I test migrations in CI? | Execute `db:migrate` before running unit tests. |
 
 ---
 
-**Last updated:** July 2025 — Architecture Team  
+**Last updated:** July 2025 — Architecture Team

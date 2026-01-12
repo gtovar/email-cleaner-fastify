@@ -1,20 +1,15 @@
-# ADR 002: Elección de Framework Backend
+# ADR 002: Backend framework choice
 
-* Status: accepted
-* Date: 2025-10-21
+- Status: accepted
+- Date: 2025-10-21
 
-## Contexto
+## Context
+The project initially explored Fastify, but some early experiments used Express. A single official backend framework was required.
 
-El proyecto inició explorando Fastify, pero algunas implementaciones iniciales se hicieron en Express. Se requiere consolidar una opción oficial.
+## Decision
+Fastify is the official backend framework. Express is archived.
 
-## Decisión
-
-Fastify será el framework backend oficial.
-Express queda archivado.
-
-## Consecuencias
-
-* Mejor rendimiento y menor overhead.
-* Plugins y hooks avanzados.
-
-- Requiere ajustar middlewares y estructura previa.
+## Consequences
+- Better performance and lower overhead.
+- Plugin and hook system aligned with project architecture.
+- Requires migration of any legacy Express code.

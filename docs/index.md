@@ -47,9 +47,9 @@ cp .env.example .env
 | Variable | Description | Required | Example |
 |---|---|---:|---|
 | DATABASE_URL | PostgreSQL connection string | Yes | postgres://user:pass@localhost:5432/email_cleaner |
-| GMAIL_CLIENT_ID | OAuth 2.0 Client ID | Yes | xxx.apps.googleusercontent.com |
-| GMAIL_CLIENT_SECRET | OAuth 2.0 Client Secret | Yes | supersecret |
-| GMAIL_REDIRECT_URI | Redirect (OAuth) | Yes | http://localhost:3000/oauth/google/callback |
+| GOOGLE_CLIENT_ID | OAuth 2.0 Client ID | Yes | xxx.apps.googleusercontent.com |
+| GOOGLE_CLIENT_SECRET | OAuth 2.0 Client Secret | Yes | supersecret |
+| GOOGLE_REDIRECT_URI | Redirect (OAuth) | Yes | http://localhost:3000/auth/google/callback |
 | INTERNAL_JWT_SECRET | Inter-service / security | No | xxxxx |
 | ML_BASE_URL | ML microservice URL | Yes | http://localhost:8000 |
 | PORT | Backend port | Yes | 3000 |
@@ -94,15 +94,23 @@ curl -X POST http://localhost:8000/v1/suggest \
 | Section | Description |
 | -------- | ------------ |
 | [Design Document](./DESIGN_DOCUMENT.md) | Technical architecture and key decisions |
+| [Architecture Diagram](./architecture.md) | System data-flow diagrams |
 | [API Reference](./API_REFERENCE.md) | REST endpoints and examples |
 | [Quickstart Guide](./TUTORIALS/QUICKSTART.md) | Run the project locally in minutes |
+| [Local Operations](./operations/local.md) | Local environment setup (Docker/Host) |
+| [Google OAuth](./operations/oauth-google.md) | Google OAuth configuration |
 | [Database Migrations](./migraciones.md) | Sequelize migration workflow |
 | [Seeders Guide](./seeders.guia.md) | Load initial or reference data |
 | [Deploy to Cloud Run](./despliegue-cloudrun.md) | Cloud Build + Cloud Run deployment steps |
+| [Testing](./testing.md) | Jest testing guide |
 | [Contribution Guide](https://github.com/gtovar/email-cleaner-fastify/blob/main/CONTRIBUTION.md) | Collaboration and commit standards |
 | [Events Contract](./events_contract.md) | Event names, payloads, semantics and consumers |
 | [ADR Index](./adr) | Architecture decisions and tradeoffs |
 | [Documentation Rules](./documentation_rules.md) | Project-wide rules: canonical doc ownership, language/tone policy, and update protocols. |
+| [Workflow](./workflow.md) | Development workflow |
+| [Git Hygiene](./git_hygiene.md) | Working tree protocol |
+| [Roadmap](./roadmap.md) | High-level roadmap placeholder |
+| [Scrum](./scrum.md) | Scrum process placeholder |
 
 
 ---

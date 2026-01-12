@@ -1,21 +1,15 @@
-# ADR 001: Autenticación Gmail con OAuth2
+# ADR 001: Gmail authentication via OAuth2
 
-* Status: accepted
-* Date: 2025-10-16
+- Status: accepted
+- Date: 2025-10-16
 
-## Contexto
+## Context
+Secure access to Gmail is required. IMAP is simpler but less secure and provides fewer permission controls.
 
-Se requiere acceso seguro a Gmail.
-IMAP es simple pero menos seguro y tiene menos controles de permisos.
+## Decision
+Adopt OAuth2 with the minimum required scopes and refreshable tokens.
 
-## Decisión
-
-Adoptar OAuth2 con scopes mínimos necesarios y tokens refrescables.
-
-## Consecuencias
-
-* Seguridad alineada al estándar de Google.
-* Menor riesgo de exposición.
-
-- Configuración inicial más compleja.
-
+## Consequences
+- Security aligned with Google standards.
+- Reduced risk of credential exposure.
+- Initial configuration is more complex.

@@ -17,7 +17,7 @@ All protected endpoints require a valid **app session cookie** (`session_token`)
 
 The cookie is set by the backend after Google OAuth completes:
 - `GET /auth/google` initiates OAuth
-- `GET /auth/google/callback` exchanges the code, stores Google tokens, and sets the session cookie
+- `GET /auth/google/callback` exchanges the code, stores Google tokens, sets the session cookie, and redirects to `${FRONTEND_ORIGIN}/auth/callback`
 
 For API tools, the same JWT can also be sent as `Authorization: Bearer <SESSION_TOKEN>`.
 
@@ -248,7 +248,7 @@ Confirms actions for one or more emails (e.g., accept or reject suggested action
 
 ```http
 POST /api/v1/notifications/confirm HTTP/1.1
-Authorization: Bearer <ACCESS_TOKEN>
+Cookie: session_token=<SESSION_TOKEN>
 Content-Type: application/json
 ```
 
@@ -313,7 +313,7 @@ Returns the history of actions taken on emails for the authenticated user.
 
 ```http
 GET /api/v1/notifications/history HTTP/1.1
-Authorization: Bearer <ACCESS_TOKEN>
+Cookie: session_token=<SESSION_TOKEN>
 ```
 
 #### Query Parameters
@@ -363,7 +363,7 @@ Lists notification events with pagination. Useful to consume a timeline of syste
 
 ```http
 GET /api/v1/notifications/events HTTP/1.1
-Authorization: Bearer <ACCESS_TOKEN>
+Cookie: session_token=<SESSION_TOKEN>
 ```
 
 #### Query Parameters
@@ -432,7 +432,7 @@ GET /api/v1/health HTTP/1.1
 | ----------- | --------------------------------- | --------------------------------------- |
 | 200         | OK                                | Successful request                      |
 | 400         | Bad Request                       | Invalid body or query parameters        |
-| 401         | Unauthorized                      | Missing or invalid `Authorization`      |
+| 401         | Unauthorized                      | Missing or invalid session token        |
 | 422         | Validation Error (if configured)  | Payload does not match expected shape   |
 | 503         | ML Service Unavailable (internal) | ML failure; suggestions fall back to [] |
 
