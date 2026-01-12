@@ -1,15 +1,15 @@
 # PROJECT_STATE.md
 
-Last updated: 2026-01-11 15:21 CST — Commit: pending
+Last updated: 2026-01-11 17:44 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
 REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
-BRANCH: feat/hu17-unify-suggestions-summary
+BRANCH: feat/hu18-oauth-flow
 COMMIT: pending
 
-SNAPSHOT_DATE: 2026-01-11 15:21 CST (America/Monterrey)
+SNAPSHOT_DATE: 2026-01-11 17:44 CST (America/Monterrey)
 WORKING_TREE_STATUS: Clean (git status: clean)
 
 RUNTIME: Node.js (Fastify)
@@ -32,6 +32,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-11
 - Notifications summary returns an aggregate object based on `NotificationEvent` records (windowed by `period`).
 - Suggestions use `classification` as the ML label field (English-only contract).
 - `domain.suggestions.generated` is published only when total suggestions are >= 10.
+- OAuth sessions are issued as httpOnly cookies after Google login and validated via JWT.
 
 ---
 
@@ -86,6 +87,24 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-11
 **Recent change:**
 - Summary aggregation and suggestions contract aligned to `classification` (commit: e2b229e).
 
+### HU18 — Google OAuth session flow (backend)
+
+**Status:** IN_PROGRESS
+
+**Evidence:**
+- Routes: `/auth/google`, `/auth/google/callback`
+- Middleware: `src/middlewares/authMiddleware.js`
+- Controllers: `src/controllers/authController.js`
+
+**Open items:**
+- Ensure frontend callback and cookie-based auth are fully validated in integration tests.
+
+**Technical risks:**
+- Misconfigured `FRONTEND_ORIGIN` can break OAuth redirect or cookie domain alignment.
+
+**Recent change:**
+- Session cookie issuance and JWT validation introduced (commit: pending).
+
 ---
 
 ## 5. Current Technical Risks
@@ -97,7 +116,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-11
 
 ## 6. Next Immediate Action
 
-➡️ Verify EventBus threshold behavior in production-like environment.
+➡️ Run backend auth tests after cookie-based session update.
 
 ---
 
@@ -106,3 +125,4 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-11
 - 2026-01-10: Notifications summary uses aggregated `NotificationEvent` data and suggestions use `classification` (commit: 31238d4).
 - 2026-01-11: Suggestions event publish threshold set to >= 10 (commit: e2b229e).
 - 2026-01-11: Project state metadata updated (commit: pending).
+- 2026-01-11: OAuth session flow updated to httpOnly cookies (commit: pending).

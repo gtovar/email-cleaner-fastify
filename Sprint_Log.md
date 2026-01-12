@@ -1,7 +1,7 @@
 ## Sprint_Log.md — Backend Fastify
 
 (Email Cleaner & Smart Notifications — Backend)
-Last updated: 2026-01-11 15:24 CST
+Last updated: 2026-01-11 17:44 CST
 
 ---
 
@@ -64,3 +64,6 @@ Last updated: 2026-01-11 15:24 CST
 
 ### 2026-01-11 — Coverage artifacts removed
 - Removed `coverage/` from the repo and ignored it in `.gitignore`.
+
+### 2026-01-11 — OAuth session flow updated
+- Added httpOnly session cookie flow and JWT verification.

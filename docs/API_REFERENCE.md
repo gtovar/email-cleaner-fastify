@@ -13,13 +13,13 @@ All routes below are **stable v1** endpoints.
 
 ## 1. Authentication
 
-All protected endpoints require a valid **Google OAuth2 Bearer token**.
+All protected endpoints require a valid **app session cookie** (`session_token`).
 
-Include it in the `Authorization` header:
+The cookie is set by the backend after Google OAuth completes:
+- `GET /auth/google` initiates OAuth
+- `GET /auth/google/callback` exchanges the code, stores Google tokens, and sets the session cookie
 
-```bash
--H "Authorization: Bearer <ACCESS_TOKEN>"
-```
+For API tools, the same JWT can also be sent as `Authorization: Bearer <SESSION_TOKEN>`.
 
 If the token is missing or invalid, the API will return **401 Unauthorized**.
 
@@ -41,7 +41,7 @@ Returns the list of Gmail emails with optional filters **without any AI processi
 
 ```http
 GET /api/v1/emails HTTP/1.1
-Authorization: Bearer <ACCESS_TOKEN>
+Cookie: session_token=<SESSION_TOKEN>
 ```
 
 #### Query Parameters
@@ -103,7 +103,7 @@ Returns Gmail emails **enriched with AI-generated suggestions**.
 
 ```http
 GET /api/v1/suggestions HTTP/1.1
-Authorization: Bearer <ACCESS_TOKEN>
+Cookie: session_token=<SESSION_TOKEN>
 ```
 
 #### Response 200 (example)
@@ -173,7 +173,7 @@ The Notifications API exposes endpoints to:
 
 All routes share:
 
-* `Authorization: Bearer <ACCESS_TOKEN>`
+* `Cookie: session_token=<SESSION_TOKEN>`
 * Prefix: `/api/v1/notifications/...`
 
 ---
@@ -192,7 +192,7 @@ Returns an aggregate summary of suggested actions for a time window.
 
 ```http
 GET /api/v1/notifications/summary HTTP/1.1
-Authorization: Bearer <ACCESS_TOKEN>
+Cookie: session_token=<SESSION_TOKEN>
 ```
 
 #### Query Parameters
