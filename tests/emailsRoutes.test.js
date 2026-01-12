@@ -8,11 +8,13 @@
 
 import { describe, it, expect, beforeAll, afterAll, jest } from '@jest/globals';
 import Fastify from 'fastify';
+import cookie from '@fastify/cookie';
+import jwt from 'jsonwebtoken';
 
 // 1) Mock del controlador para NO llamar Gmail ni el clasificador real
 const mockListEmails = jest.fn(async (req, reply) => {
   // Verificamos que authMiddleware haya puesto el token
-  expect(req.user).toEqual({ googleAccessToken: 'dummy-token' });
+  expect(req.user).toMatchObject({ email: 'user@example.com' });
 
   return reply.send({
     emails: [
@@ -42,9 +44,13 @@ const mailRoutes = mailRoutesModule.default;
 
 describe('Emails Routes (contrato Fastify /api/v1/emails)', () => {
   let app;
+  const jwtSecret = 'test-secret';
+  const sessionToken = jwt.sign({ email: 'user@example.com' }, jwtSecret, { expiresIn: 3600 });
 
   beforeAll(async () => {
     app = Fastify({ logger: false });
+    process.env.INTERNAL_JWT_SECRET = jwtSecret;
+    await app.register(cookie);
     await app.register(mailRoutes, {prefix: 'api/v1'});
     await app.ready();
   });
@@ -53,7 +59,7 @@ describe('Emails Routes (contrato Fastify /api/v1/emails)', () => {
     await app.close();
   });
 
-  it('GET /api/v1/emails → 401 si no se envía Authorization', async () => {
+  it('GET /api/v1/emails → 401 si no se envía cookie', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/api/v1/emails'
@@ -61,15 +67,15 @@ describe('Emails Routes (contrato Fastify /api/v1/emails)', () => {
 
     expect(res.statusCode).toBe(401);
     const body = JSON.parse(res.body);
-    expect(body).toEqual({ error: 'Falta token o formato inválido' });
+    expect(body).toEqual({ error: 'Missing or invalid auth token' });
   });
 
-  it('GET /api/v1/emails → 200 con Bearer token y shape esperado', async () => {
+  it('GET /api/v1/emails → 200 con cookie y shape esperado', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/api/v1/emails',
       headers: {
-        Authorization: 'Bearer dummy-token'
+        cookie: `session_token=${sessionToken}`
       }
     });
 
@@ -96,4 +102,3 @@ describe('Emails Routes (contrato Fastify /api/v1/emails)', () => {
     expect(mockListEmails).toHaveBeenCalledTimes(1);
   });
 });
-

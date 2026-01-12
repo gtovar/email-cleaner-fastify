@@ -2,11 +2,13 @@
 import { describe, it, expect, beforeAll, afterAll, jest } from '@jest/globals';
 
 import Fastify from 'fastify';
+import cookie from '@fastify/cookie';
+import jwt from 'jsonwebtoken';
 
 // Mock del controlador de sugerencias para no llamar Gmail ni Python
 const mockGetSuggestedEmails = jest.fn(async (req, reply) => {
   // Verificamos que el middleware de auth haya puesto el token en request.user
-  expect(req.user).toEqual({ googleAccessToken: 'dummy-token' });
+  expect(req.user).toMatchObject({ email: 'user@example.com' });
 
   return reply.send({
     emails: [
@@ -41,9 +43,13 @@ const suggestionRoutes = suggestionRoutesModule.default;
 
 describe('GET /api/v1/suggestions (contrato Fastify)', () => {
   let app;
+  const jwtSecret = 'test-secret';
+  const sessionToken = jwt.sign({ email: 'user@example.com' }, jwtSecret, { expiresIn: 3600 });
 
   beforeAll(async () => {
     app = Fastify({ logger: false });
+    process.env.INTERNAL_JWT_SECRET = jwtSecret;
+    await app.register(cookie);
 
     // Registramos solo la ruta de sugerencias, sin plugin de DB ni nada extra
     await app.register(suggestionRoutes, { prefix: 'api/v1' });
@@ -55,7 +61,7 @@ describe('GET /api/v1/suggestions (contrato Fastify)', () => {
     await app.close();
   });
 
-  it('responde 401 si no se envía Authorization Bearer', async () => {
+  it('responde 401 si no se envía cookie de sesión', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/api/v1/suggestions'
@@ -64,7 +70,7 @@ describe('GET /api/v1/suggestions (contrato Fastify)', () => {
     expect(res.statusCode).toBe(401);
 
     const body = JSON.parse(res.body);
-    expect(body).toEqual({ error: 'Falta token o formato inválido' });
+    expect(body).toEqual({ error: 'Missing or invalid auth token' });
   });
 
   it('responde 200 y devuelve emails con sugerencias cuando el token es válido', async () => {
@@ -72,7 +78,7 @@ describe('GET /api/v1/suggestions (contrato Fastify)', () => {
       method: 'GET',
       url: '/api/v1/suggestions',
       headers: {
-        Authorization: 'Bearer dummy-token'
+        cookie: `session_token=${sessionToken}`
       }
     });
 

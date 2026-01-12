@@ -1,11 +1,13 @@
 // tests/notificationsRoutes.test.js
 import { describe, it, expect, beforeAll, afterAll, jest } from '@jest/globals';
 import Fastify from 'fastify';
+import cookie from '@fastify/cookie';
+import jwt from 'jsonwebtoken';
 import { DOMAIN_EVENTS } from '../src/events/eventBus.js';
 
 // 1) Mocks del controlador de notificaciones
 const mockGetSummary = jest.fn(async (req, reply) => {
-  expect(req.user).toEqual({ googleAccessToken: 'dummy-token' });
+  expect(req.user).toMatchObject({ email: 'user@example.com' });
 
   return reply.send({
     period: 'weekly',
@@ -35,7 +37,7 @@ const mockConfirmActions = jest.fn(async (req, reply) => {
 });
 
 const mockGetHistory = jest.fn(async (req, reply) => {
-  expect(req.user).toEqual({ googleAccessToken: 'dummy-token' });
+  expect(req.user).toMatchObject({ email: 'user@example.com' });
 
   return reply.send({
     total: 1,
@@ -91,9 +93,13 @@ const notificationsRoutes = notificationsRoutesModule.default;
 
 describe('Notifications Routes (contrato Fastify)', () => {
   let app;
+  const jwtSecret = 'test-secret';
+  const sessionToken = jwt.sign({ email: 'user@example.com' }, jwtSecret, { expiresIn: 3600 });
 
   beforeAll(async () => {
     app = Fastify({ logger: false });
+    process.env.INTERNAL_JWT_SECRET = jwtSecret;
+    await app.register(cookie);
     await app.register(notificationsRoutes, { prefix: '/api/v1/notifications' });
     await app.ready();
   });
@@ -102,7 +108,7 @@ describe('Notifications Routes (contrato Fastify)', () => {
     await app.close();
   });
 
-  it('GET /api/v1/notifications/summary → 401 si no se envía Authorization', async () => {
+  it('GET /api/v1/notifications/summary → 401 si no se envía cookie', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/api/v1/notifications/summary'
@@ -110,15 +116,15 @@ describe('Notifications Routes (contrato Fastify)', () => {
 
     expect(res.statusCode).toBe(401);
     const body = JSON.parse(res.body);
-    expect(body).toEqual({ error: 'Falta token o formato inválido' });
+    expect(body).toEqual({ error: 'Missing or invalid auth token' });
   });
 
-  it('GET /api/v1/notifications/summary → 200 con Bearer token', async () => {
+  it('GET /api/v1/notifications/summary → 200 con cookie válida', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/api/v1/notifications/summary',
       headers: {
-        Authorization: 'Bearer dummy-token'
+        cookie: `session_token=${sessionToken}`
       }
     });
 
@@ -135,7 +141,7 @@ describe('Notifications Routes (contrato Fastify)', () => {
     expect(mockGetSummary).toHaveBeenCalledTimes(1);
   });
 
-  it('POST /api/v1/notifications/confirm → 401 sin token', async () => {
+  it('POST /api/v1/notifications/confirm → 401 sin cookie', async () => {
     const res = await app.inject({
       method: 'POST',
       url: '/api/v1/notifications/confirm',
@@ -147,15 +153,15 @@ describe('Notifications Routes (contrato Fastify)', () => {
 
     expect(res.statusCode).toBe(401);
     const body = JSON.parse(res.body);
-    expect(body).toEqual({ error: 'Falta token o formato inválido' });
+    expect(body).toEqual({ error: 'Missing or invalid auth token' });
   });
 
-  it('POST /api/v1/notifications/confirm → 200 con token y body válido', async () => {
+  it('POST /api/v1/notifications/confirm → 200 con cookie y body válido', async () => {
     const res = await app.inject({
       method: 'POST',
       url: '/api/v1/notifications/confirm',
       headers: {
-        Authorization: 'Bearer dummy-token',
+        cookie: `session_token=${sessionToken}`,
         'content-type': 'application/json'
       },
       payload: JSON.stringify({
@@ -184,7 +190,7 @@ describe('Notifications Routes (contrato Fastify)', () => {
     expect(mockConfirmActions).toHaveBeenCalledTimes(1);
   });
 
-  it('GET /api/v1/notifications/history → 401 sin token', async () => {
+  it('GET /api/v1/notifications/history → 401 sin cookie', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/api/v1/notifications/history'
@@ -192,15 +198,15 @@ describe('Notifications Routes (contrato Fastify)', () => {
 
     expect(res.statusCode).toBe(401);
     const body = JSON.parse(res.body);
-    expect(body).toEqual({ error: 'Falta token o formato inválido' });
+    expect(body).toEqual({ error: 'Missing or invalid auth token' });
   });
 
-  it('GET /api/v1/notifications/history → 200 con token', async () => {
+  it('GET /api/v1/notifications/history → 200 con cookie', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/api/v1/notifications/history',
       headers: {
-        Authorization: 'Bearer dummy-token'
+        cookie: `session_token=${sessionToken}`
       }
     });
 
@@ -219,7 +225,7 @@ describe('Notifications Routes (contrato Fastify)', () => {
     expect(mockGetHistory).toHaveBeenCalledTimes(1);
   });
 
-  it('GET /api/v1/notifications/events → 401 sin token', async () => {
+  it('GET /api/v1/notifications/events → 401 sin cookie', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/api/v1/notifications/events'
@@ -227,15 +233,15 @@ describe('Notifications Routes (contrato Fastify)', () => {
 
     expect(res.statusCode).toBe(401);
     const body = JSON.parse(res.body);
-    expect(body).toEqual({ error: 'Falta token o formato inválido' });
+    expect(body).toEqual({ error: 'Missing or invalid auth token' });
   });
 
-  it('GET /api/v1/notifications/events → 200 con token y filtro userId', async () => {
+  it('GET /api/v1/notifications/events → 200 con cookie y filtro userId', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/api/v1/notifications/events?page=2&perPage=5&type=domain.suggestions.generated&userId=demo-user',
       headers: {
-        Authorization: 'Bearer dummy-token'
+        cookie: `session_token=${sessionToken}`
       }
     });
 
