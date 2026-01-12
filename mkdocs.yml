@@ -29,6 +29,7 @@ nav:
       - Scrum: scrum.md
   - API:
       - Reference: API_REFERENCE.md
+      - Events Contract: events_contract.md
   - Operations:
       - Local (Docker): operations/local.md
       - OAuth Google: operations/oauth-google.md
@@ -37,10 +38,25 @@ nav:
   - Database:
       - Migrations: migraciones.md
       - Seeders: seeders.guia.md
+  - Testing:
+      - Jest Guide: testing.md
   - Tutorials:
       - Quickstart: TUTORIALS/QUICKSTART.md
   - Guides:
       - Readme Guide: readme.guia.md
+      - Documentation Rules: documentation_rules.md
+      - Git Hygiene: git_hygiene.md
+      - Documentation Style Guide: dock-styles.md
+      - Project State Protocol: project_state_protocol_and_template.md
+      - Workflow: workflow.md
+  - ADR:
+      - ADR Index: adr/index.md
+      - ADR 000 Template: adr/000-template.md
+      - ADR 001 Gmail OAuth: adr/001-gmail-choice.md
+      - ADR 002 Backend Framework: adr/002-backend-framework.md
+      - ADR 003 Jest Adoption: adr/003-adoption-jest.md
+      - ADR 004 Suggestions Threshold: adr/004-suggestions-event-threshold.md
+      - ADR 005 Token Refresh Persistence: adr/005-token-refresh-persistence.md
 
 extra:
   social:
