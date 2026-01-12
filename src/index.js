@@ -8,6 +8,7 @@ import suggestionRoutes from './routes/suggestionRoutes.js';
 import notificationsRoutes from './routes/notificationsRoutes.js';
 import cors from '@fastify/cors';
 import eventBusPlugin from './plugins/eventBus.js';
+import cookie from '@fastify/cookie';
 
 // Carga dotenv antes que nada
 import 'dotenv/config';
@@ -47,6 +48,14 @@ await fastify.register(swaggerUI, {
 });
 
 // Registro de plugins y rutas (nota los imports dinámicos)
+const frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
+
+await fastify.register(cookie);
+await fastify.register(cors, {
+    origin: frontendOrigin,
+    credentials: true
+});
+
 await fastify.register(dbPlugin);
 await fastify.register(eventBusPlugin);
 await fastify.register(authRoutes);
@@ -69,11 +78,6 @@ fastify.get('/api/v1/health/db', async (request, reply) => {
     request.log.error(e);
     return reply.code(500).send({ db: 'error' });
   }
-});
-
-await fastify.register(cors, {
-    origin: 'http://localhost:5173', // Solo acepta peticiones desde el frontend
-    credentials: true
 });
 
 const start = async () => {

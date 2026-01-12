@@ -1,4 +1,5 @@
 import { google } from 'googleapis';
+import jwt from 'jsonwebtoken';
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -27,7 +28,7 @@ export async function googleAuthCallback(request, reply) {
   try {
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
-    console.log('TOKENS OBTENIDOS:', tokens);
+    request.log.info('Google OAuth tokens received');
 
     let email = null;
     if (tokens.id_token) {
@@ -59,13 +60,33 @@ export async function googleAuthCallback(request, reply) {
       expiry_date: tokens.expiry_date ? new Date(tokens.expiry_date) : null
     });
 
-    reply.type('text/html').send(`
-      <h2>Autenticación exitosa</h2>
-      <p>El token fue almacenado en la base de datos para <b>${email}</b>.</p>
-      <p>Ya puedes usar la API de Gmail de forma segura.</p>
-    `);
+    const jwtSecret = process.env.INTERNAL_JWT_SECRET;
+    if (!jwtSecret) {
+      request.log.error('INTERNAL_JWT_SECRET is not configured');
+      return reply.status(500).send('Server auth configuration error.');
+    }
+
+    const expiresInSeconds = Number(process.env.SESSION_JWT_TTL_SECONDS) || 3600;
+    const sessionToken = jwt.sign({ email }, jwtSecret, { expiresIn: expiresInSeconds });
+
+    const isProduction = process.env.NODE_ENV === 'production';
+    reply.setCookie('session_token', sessionToken, {
+      httpOnly: true,
+      sameSite: isProduction ? 'none' : 'lax',
+      secure: isProduction,
+      path: '/',
+      maxAge: expiresInSeconds
+    });
+
+    const frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
+    const redirectUrl = new URL('/auth/callback', frontendOrigin);
+    redirectUrl.searchParams.set('status', 'success');
+    return reply.redirect(redirectUrl.toString());
   } catch (err) {
     reply.log.error(err);
-    reply.status(500).send('Error autenticando con Google: ' + err.message);
+    const frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
+    const redirectUrl = new URL('/auth/callback', frontendOrigin);
+    redirectUrl.searchParams.set('error', 'oauth_failed');
+    return reply.redirect(redirectUrl.toString());
   }
 }

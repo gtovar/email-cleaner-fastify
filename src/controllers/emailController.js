@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { GmailService } from '../services/gmailService.js';
+import { getGoogleAccessToken } from '../services/tokenService.js';
 /**
  * Lista correos de Gmail aplicando filtros personalizados.
  */
@@ -7,11 +8,17 @@ export async function listEmails(req, reply) {
   const { unread, olderThan, category, minAttachmentSize, pageToken } = req.query;
   const user = req.user;
 
-  const oauth2Client = new google.auth.OAuth2();
-  oauth2Client.setCredentials({ access_token: user.googleAccessToken });
+  try {
+    const accessToken = await getGoogleAccessToken({
+      models: req.server.models,
+      email: user?.email,
+      logger: req.log
+    });
+    const oauth2Client = new google.auth.OAuth2();
+    oauth2Client.setCredentials({ access_token: accessToken });
 
-  const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
-  const gmailService = new GmailService(gmail);
+    const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+    const gmailService = new GmailService(gmail);
 
   let query = [];
   if (unread) query.push('is:unread');
@@ -19,7 +26,6 @@ export async function listEmails(req, reply) {
   if (category) query.push(`category:${category}`);
   if (minAttachmentSize) query.push(`larger:${minAttachmentSize}M`);
 
-  try {
     const { emails, nextPageToken, total } = await gmailService.listMessagesByQuery({
       query: query.join(' '),
       pageToken,
@@ -31,9 +37,8 @@ export async function listEmails(req, reply) {
       nextPageToken,
       total,
     });
-
   } catch (err) {
     req.log.error(err);
-    reply.code(500).send({ error: 'No se pudo obtener los correos.' });
+    reply.code(500).send({ error: 'Failed to fetch emails.' });
   }
 }

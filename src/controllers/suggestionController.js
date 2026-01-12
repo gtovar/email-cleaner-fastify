@@ -5,6 +5,7 @@ import { google } from 'googleapis';
 import { suggestActions } from '../services/suggestionService.js';
 import { buildNewSuggestionsEvent } from '../events/builders/newSuggestionsEvent.builder.js';
 import { DOMAIN_EVENTS } from '../events/eventBus.js';
+import { getGoogleAccessToken } from '../services/tokenService.js';
 
 /**
  * Controlador para Fastify: sugiere acciones automáticas para correos (sin ejecutarlas).
@@ -12,8 +13,13 @@ import { DOMAIN_EVENTS } from '../events/eventBus.js';
 export async function getSuggestedEmails(request, reply) {
     try {
         // 1. Autenticación: Prepara el cliente Gmail usando el token del usuario autenticado
+        const accessToken = await getGoogleAccessToken({
+            models: request.server.models,
+            email: request.user?.email,
+            logger: request.log
+        });
         const oauth2Client = new google.auth.OAuth2();
-        oauth2Client.setCredentials({ access_token: request.user.googleAccessToken });
+        oauth2Client.setCredentials({ access_token: accessToken });
 
         // 2. Instancia de Gmail API
         const gmailClient = google.gmail({ version: 'v1', auth: oauth2Client });
@@ -50,6 +56,6 @@ export async function getSuggestedEmails(request, reply) {
 
     } catch (err) {
         request.log.error(err, 'Error obteniendo sugerencias');
-        reply.status(500).send({ error: 'Error procesando sugerencias de correo' });
+        reply.status(500).send({ error: 'Failed to process email suggestions' });
     }
 }
