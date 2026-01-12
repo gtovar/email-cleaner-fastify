@@ -176,12 +176,12 @@ buildNewSuggestionsEvent({ userId, suggestions })
 
 Notes:
 
-* Some implementations may include additional fields per suggestion item (e.g., `id`). Such fields are OPTIONAL and should not be required by consumers.
+* Some implementations may include additional fields per suggestion item (e.g., `id`). Such fields are OPTIONAL and must not be required by consumers.
 
 ### Consumer expectations
 
-* Consumers should rely on `summary.totalSuggestions` for counts.
-* `suggestions` may be large; consumers should not assume it is persisted.
+* Consumers must rely on `summary.totalSuggestions` for counts.
+* `suggestions` can be large; consumers must not assume it is persisted.
 
 ---
 

@@ -21,6 +21,8 @@
 - Latest checkpoint: `PROJECT_STATE.md`
 - Backend tests: PASS (Jest, 12 suites / 41 tests)
 - Auth flow: Google OAuth sets httpOnly `session_token` cookie and validates JWT via `authMiddleware`
+- Gmail client persists refreshed tokens to the `Tokens` table
+- Swagger exposes `cookieAuth` and `bearerAuth` security schemes
 - Primary endpoints:
   - Gmail OAuth: `/auth/google`, `/auth/google/callback`
   - v1: `/api/v1/emails`, `/api/v1/suggestions`

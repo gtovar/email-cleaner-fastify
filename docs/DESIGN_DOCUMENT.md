@@ -1,10 +1,9 @@
-# 🧠 Design & Architecture Document  
+# Design & Architecture Document  
 ### Project: Email Cleaner & Smart Notifications  
-> “Designed to understand your inbox — and declutter your mind.”
 
 ---
 
-## 1. 🧭 System Vision and Context
+## 1. System Vision and Context
 
 ### 1.1 Problem
 Modern inboxes cause **information overload and cognitive fatigue**, forcing users to waste time filtering irrelevant messages instead of focusing on real work.
@@ -16,7 +15,7 @@ The system combines **Fastify (Node.js)** for high‑performance I/O, **FastAPI 
 
 ---
 
-## 2. 🧩 System Architecture
+## 2. System Architecture
 
 ### 2.1 Technology Stack
 
@@ -40,7 +39,7 @@ The system combines **Fastify (Node.js)** for high‑performance I/O, **FastAPI 
 
 ---
 
-## 3. ⚙️ Critical Data Flow — Email Classification
+## 3. Critical Data Flow — Email Classification
 
 **Objective:** Automatically process, classify, and label incoming emails.
 
@@ -56,7 +55,7 @@ The system combines **Fastify (Node.js)** for high‑performance I/O, **FastAPI 
 
 ---
 
-## 4. 🧠 Key Design Decisions
+## 4. Key Design Decisions
 
 ### 4.1 Why Fastify Instead of Express
 Fastify’s plugin system and performance allow cleaner modularization, lower latency, and simpler dependency injection.
@@ -69,7 +68,7 @@ n8n simplifies integration pipelines and event‑based notifications with no add
 
 ---
 
-## 5. 📂 Backend Directory Layout (Fastify)
+## 5. Backend Directory Layout (Fastify)
 
 ```
 src/
@@ -89,7 +88,7 @@ Benefit: scalable, testable, and easily extendable structure.
 
 ---
 
-## 6. 🔐 Security and Authentication
+## 6. Security and Authentication
 
 - OAuth2 with Gmail (read‑only scope).  
 - AES‑256 encryption for secrets.  
@@ -98,7 +97,7 @@ Benefit: scalable, testable, and easily extendable structure.
 
 ---
 
-## 7. 📈 Scalability and Performance
+## 7. Scalability and Performance
 
 - **Fastify:** efficient concurrency with minimal overhead.  
 - **Cloud Run autoscaling:** handles traffic bursts.  
@@ -107,7 +106,7 @@ Benefit: scalable, testable, and easily extendable structure.
 
 ---
 
-## 8. 🧪 Testing & CI/CD
+## 8. Testing & CI/CD
 
 - **Jest:** Node.js unit tests.  
 - **Pytest:** ML service testing.  
@@ -116,7 +115,7 @@ Benefit: scalable, testable, and easily extendable structure.
 
 ---
 
-## 9. 🚀 Deployment Environments
+## 9. Deployment Environments
 
 | Environment | Purpose      | Infrastructure                         |
 | ----------- | ------------ | -------------------------------------- |
@@ -126,7 +125,7 @@ Benefit: scalable, testable, and easily extendable structure.
 
 ---
 
-## 10. 📚 Related Documentation
+## 10. Related Documentation
 
 - `API_REFERENCE.md` — REST API reference  
 - `despliegue-cloudrun.md` — Cloud Run deployment guide  

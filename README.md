@@ -1,33 +1,32 @@
-📘 Full docs: https://gtovar.github.io/email-cleaner-fastify/
+Full documentation: https://gtovar.github.io/email-cleaner-fastify/
 
-# 🧩 Email Cleaner & Smart Notifications
+# Email Cleaner & Smart Notifications
 
 [![Docs](https://img.shields.io/badge/docs-MkDocs%20Material-brightgreen)](https://gtovar.github.io/email-cleaner-fastify/)
 [![Pages](https://github.com/gtovar/email-cleaner-fastify/actions/workflows/docs.yml/badge.svg)](../../actions/workflows/docs.yml)
 
-An intelligent system that classifies your emails, prioritizes what matters, and alerts you when action is needed.
+System that classifies emails, prioritizes what matters, and alerts when action is needed.
 Built with **Fastify (Node.js)** for backend logic, **FastAPI (Python)** for ML, and **n8n** for automation.
 
 ---
 
-## 🚀 Overview
+## Overview
 
-Managing dozens of emails daily can lead to decision fatigue and loss of focus.
-This system connects securely to Gmail, classifies messages with ML models, and filters what deserves your attention.
+This system connects securely to Gmail, classifies messages with ML models, and filters what requires attention.
 
 ---
 
-## 🧠 Core Features
+## Core Features
 
-- **Smart classification** — NLP-based categorization of incoming emails.
-- **Priority notifications** — Only alerts you for messages that matter.
-- **Seamless Gmail integration** — OAuth2-based secure connection.
+- **Classification** — NLP-based categorization of incoming emails.
+- **Priority notifications** — Alerts for messages that match configured criteria.
+- **Gmail integration** — OAuth2-based secure connection.
 - **Multi-service architecture** — Node.js backend + Python ML microservice.
-- **Automation-ready** — n8n workflows for Telegram or Slack notifications.
+- **Automation** — n8n workflows for Telegram or Slack notifications.
 
 ---
 
-## 🧱 Architecture Overview
+## Architecture Overview
 
 | Layer           | Technology         | Purpose                          |
 | --------------- | ------------------ | -------------------------------- |
@@ -39,7 +38,7 @@ This system connects securely to Gmail, classifies messages with ML models, and 
 
 ---
 
-## ⚙️ Setup Instructions
+## Setup Instructions
 
 > Requirements: Node.js ≥ 20, Python ≥ 3.10, Docker (optional).
 
@@ -107,7 +106,7 @@ curl -s http://localhost:3000/api/v1/health/db
 
 ---
 
-## 🧪 Run tests
+## Run tests
 
 This project uses Jest.
 
@@ -162,7 +161,7 @@ Gmail endpoints (`/api/v1/emails`, `/api/v1/suggestions`) require a valid sessio
 
 ---
 
-## 🧠 API reference
+## API reference
 
 The API documentation is generated from code and available at `/docs` when the server is running.
 
@@ -178,7 +177,7 @@ The API documentation is generated from code and available at `/docs` when the s
 
 ---
 
-## 🧪 Testing the ML pipeline (direct ML service)
+## Testing the ML pipeline (direct ML service)
 
 ```bash
 curl -X POST http://localhost:8000/v1/suggest \
@@ -215,7 +214,7 @@ curl -X POST http://localhost:5678/webhook/telegram-test
 
 ---
 
-## 📦 Related documentation
+## Related documentation
 
 | File | Description |
 | --- | --- |
@@ -226,11 +225,11 @@ curl -X POST http://localhost:5678/webhook/telegram-test
 | [migraciones.md](docs/migraciones.md) | Sequelize migration workflow |
 | [seeders.guia.md](docs/seeders.guia.md) | Seeders guide |
 
-📘 Full documentation: https://gtovar.github.io/email-cleaner-fastify/
+Full documentation: https://gtovar.github.io/email-cleaner-fastify/
 
 ---
 
-## 🧰 Tech Stack Summary
+## Tech Stack Summary
 
 - **Backend:** Node.js (Fastify), PostgreSQL
 - **ML Service:** Python (FastAPI, scikit-learn)
@@ -240,7 +239,7 @@ curl -X POST http://localhost:5678/webhook/telegram-test
 
 ---
 
-## 🧾 Maintainers
+## Maintainers
 
 Maintained by **Gilberto Tovar**
 - Email: contacto@gilbertotovar.com

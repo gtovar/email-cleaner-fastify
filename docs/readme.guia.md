@@ -1,4 +1,4 @@
-# 📘 Official README Writing Guide
+# Official README Writing Guide
 
 This guide defines the minimum structure and best practices for creating consistent `README.md` files across **Email Cleaner & Smart Notifications** and related projects.  
 Inspired by:
@@ -10,15 +10,15 @@ Inspired by:
 
 ---
 
-## 🎯 Purpose of a README
+## Purpose of a README
 
-1. **Onboarding in ≤ 2 minutes:** any developer should understand and run the project locally.  
+1. **Onboarding in ≤ 2 minutes:** any developer must understand and run the project locally.  
 2. **Single source of truth:** the README is the entry point; avoid duplicating critical info elsewhere.  
 3. **Implicit contract:** it defines expectations before writing code.  
 
 ---
 
-## 🧩 Required Structure
+## Required Structure
 
 | Section                          | Description                                    | Purpose                         |
 | -------------------------------- | ---------------------------------------------- | ------------------------------- |
@@ -35,7 +35,7 @@ Inspired by:
 
 ---
 
-## 🧱 Optional Sections
+## Optional Sections
 
 - System overview or architecture diagram  
 - Roadmap or backlog  
@@ -65,7 +65,7 @@ Inspired by:
 
 ---
 
-## 📋 Base Template
+## Base Template
 
 ```markdown
 # <Project Name>

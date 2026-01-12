@@ -1,7 +1,7 @@
 ## Sprint_Log.md — Backend Fastify
 
 (Email Cleaner & Smart Notifications — Backend)
-Last updated: 2026-01-11 17:44 CST
+Last updated: 2026-01-12 01:53 CST
 
 ---
 
@@ -67,3 +67,11 @@ Last updated: 2026-01-11 17:44 CST
 
 ### 2026-01-11 — OAuth session flow updated
 - Added httpOnly session cookie flow and JWT verification.
+
+### 2026-01-12 — Gmail token refresh persistence
+- Gmail client now uses refresh tokens and persists refreshed access tokens.
+- Swagger security reflects cookie auth + bearer auth options.
+
+### 2026-01-12 — Doc health fixes
+- Removed emojis from canonical docs and normalized tone where required.
+- Created ADR 005 for token refresh persistence.

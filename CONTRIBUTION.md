@@ -1,11 +1,11 @@
-# 🤝 Contribution Guide — Email Cleaner & Smart Notifications
+# Contribution Guide — Email Cleaner & Smart Notifications
 
-Thank you for contributing to this project 💌  
+Thank you for contributing to this project.
 This guide ensures consistency, code quality, and efficient collaboration.
 
 ---
 
-## 🧱 Project Structure
+## Project Structure
 
 * `src/` — Fastify backend source code  
 * `docs/` — Technical documentation and tutorials  
@@ -14,7 +14,7 @@ This guide ensures consistency, code quality, and efficient collaboration.
 
 ---
 
-## 🧩 Workflow
+## Workflow
 
 1. **Create a descriptive branch from `develop`**
    ```bash
@@ -40,7 +40,7 @@ This guide ensures consistency, code quality, and efficient collaboration.
 
 ---
 
-## 🧠 Code Conventions
+## Code Conventions
 
 - Use **English names** for functions and variables (`EmailService`, `RuleController`).  
 - Maintain consistent style via **Prettier + ESLint**.  
@@ -50,7 +50,7 @@ This guide ensures consistency, code quality, and efficient collaboration.
 
 ---
 
-## 🧪 Testing
+## Testing
 
 **Backend (Fastify):**
 ```bash
@@ -67,7 +67,7 @@ Every PR must include at least one relevant unit or integration test.
 
 ---
 
-## 🧰 Branching & Versioning Standards
+## Branching & Versioning Standards
 
 | Type          | Prefix      | Example                   |
 | ------------- | ----------- | ------------------------- |
@@ -86,7 +86,7 @@ Format: `MAJOR.MINOR.PATCH` → Example: `1.4.2`
 
 ---
 
-## 🧾 Commit Guidelines (Conventional Commits)
+## Commit Guidelines (Conventional Commits)
 
 ```bash
 <type>(<scope>): <short description>
@@ -100,7 +100,7 @@ feat(auth): implement Gmail refresh token logic
 
 ---
 
-## 🧱 Code Review Checklist
+## Code Review Checklist
 
 Before approving a PR:
 
@@ -111,7 +111,7 @@ Before approving a PR:
 
 ---
 
-## 🧾 Pull Request Checklist
+## Pull Request Checklist
 
 - [ ] Tests pass locally and in CI  
 - [ ] Lint runs cleanly (no warnings or errors)  
@@ -122,11 +122,11 @@ Before approving a PR:
 
 ---
 
-## 👥 Maintainer Contact
+## Maintainer Contact
 
 **Maintainer:** Gilberto Tovar  
-📧 contacto@gilbertotovar.com
-🌐 [www.gilbertotovar.com](https://www.gilbertotovar.com)
+Email: contacto@gilbertotovar.com
+Web: https://www.gilbertotovar.com
 
 ---
 

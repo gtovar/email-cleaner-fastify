@@ -21,6 +21,7 @@
 - [Workflow](docs/workflow.md)
 - [Git Hygiene](docs/git_hygiene.md)
 - [Documentation Rules](docs/documentation_rules.md)
+- [Project State Protocol](docs/project_state_protocol_and_template.md)
 - [Roadmap](docs/roadmap.md)
 - [Scrum](docs/scrum.md)
 

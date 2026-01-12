@@ -1,6 +1,6 @@
 # PROJECT_STATE.md
 
-Last updated: 2026-01-11 23:51 CST — Commit: pending
+Last updated: 2026-01-12 01:53 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
@@ -9,14 +9,14 @@ REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
 BRANCH: develop
 COMMIT: pending
 
-SNAPSHOT_DATE: 2026-01-11 23:51 CST (America/Monterrey)
+SNAPSHOT_DATE: 2026-01-12 01:53 CST (America/Monterrey)
 WORKING_TREE_STATUS: Dirty (modified files present)
 
 RUNTIME: Node.js (Fastify)
 DB: PostgreSQL via Sequelize
 TEST_STATUS: PASS (Jest)
 
-LAST_VERIFIED_TESTS_DATE: 2026-01-11 23:51 CST
+LAST_VERIFIED_TESTS_DATE: 2026-01-12 01:53 CST
 
 ---
 
@@ -28,6 +28,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-11 23:51 CST
 - `/api/v1/emails` returns raw Gmail emails without ML.
 - `/api/v1/suggestions` enriches emails with ML suggestions and publishes domain events when threshold is met.
 - `/api/v1/notifications/summary` aggregates `NotificationEvent` records by period.
+- Gmail OAuth client persists refreshed access tokens to the `Tokens` table.
 
 ---
 
@@ -41,7 +42,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-11 23:51 CST
   - `suggestionRoutes` → `/api/v1`
   - `notificationsRoutes` → `/api/v1/notifications`
 - CORS is configured for `FRONTEND_ORIGIN` with `credentials: true`.
-- Swagger is configured with a bearer scheme (documentation only).
+- Swagger exposes cookie auth and bearer auth schemes.
 
 ### 3.2 CQRS-lite / Commands / Domain Events
 
@@ -61,7 +62,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-11 23:51 CST
 ### 3.4 External Integrations
 
 - Gmail OAuth routes: `/auth/google`, `/auth/google/callback`.
-- Token lookup via `src/services/tokenService.js`.
+- Gmail OAuth clients are created via `src/services/googleAuthService.js`.
 - ML service integration via `src/services/suggestionService.js` and `src/services/mlClient.js`.
 - n8n webhook listener exists (safe no-op).
 
@@ -82,10 +83,10 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-11 23:51 CST
 - Re-validate `/api/v1/notifications/events` behavior.
 
 **Technical risks:**
-- Summary windowing uses `createdAt`; time zone alignment should be verified.
+- Summary windowing uses `createdAt`; time zone alignment is not verified.
 
 **Recent change:**
-- Suggestions event publish threshold enforced in controller (commit: pending).
+- No change in this snapshot (commit: pending).
 
 ### HU18 — Google OAuth session flow (backend)
 
@@ -103,7 +104,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-11 23:51 CST
 - Misconfigured `FRONTEND_ORIGIN` can break OAuth redirects and cookies.
 
 **Recent change:**
-- Session cookie issuance and JWT validation added (commit: pending).
+- Gmail OAuth client persists refreshed access tokens (commit: pending).
 
 ---
 
@@ -116,10 +117,10 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-11 23:51 CST
 
 ## 6. Next Immediate Action
 
-➡️ Commit doc alignment changes.
+➡️ Commit changes on `develop` (token refresh + Swagger auth + doc-health).
 
 ---
 
 ## 7. Version Log
 
-- 2026-01-11 23:51 CST — Doc alignment and tests verified (commit: pending)
+- 2026-01-12 01:53 CST — Token refresh persistence documented and doc-health fixes applied (commit: pending)

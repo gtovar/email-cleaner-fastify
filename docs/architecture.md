@@ -1,13 +1,13 @@
-# 🏗️ System Architecture Diagram
+# System Architecture Diagram
 
 This diagram represents the main data flow of the **Email Cleaner & Smart Notifications** system.
 
 ```mermaid
 flowchart LR
-    A["1️⃣ Start: Gmail API — OAuth2"] --> B["2️⃣ Pre-processing: Fastify Backend (Node.js)\nNormalize and create JSON payload"]
-    B --> C["3️⃣ Request: HTTP POST (JSON)"]
-    C --> D["4️⃣ Classification: FastAPI (Python ML)\nInference and tagging"]
-    D --> E["5️⃣ End: Persistence (PostgreSQL) + Notification (n8n / Telegram)\nSave results and trigger alert"]
+    A["Start: Gmail API — OAuth2"] --> B["Pre-processing: Fastify Backend (Node.js)\nNormalize and create JSON payload"]
+    B --> C["Request: HTTP POST (JSON)"]
+    C --> D["Classification: FastAPI (Python ML)\nInference and tagging"]
+    D --> E["End: Persistence (PostgreSQL) + Notification (n8n / Telegram)\nSave results and trigger alert"]
 
 ```
 
@@ -96,7 +96,7 @@ flowchart LR
 
 ---
 
-## 🔄 Stage Descriptions
+## Stage Descriptions
 
 ### 1️⃣ Start: Gmail API (OAuth2)
 - Fetches incoming emails securely using OAuth2 tokens.  
@@ -122,7 +122,7 @@ flowchart LR
 
 ---
 
-## ⚙️ Technical Notes
+## Technical Notes
 
 - **Communication:** RESTful HTTP between Node.js ↔ Python.  
 - **Security:** Internal JWT tokens between microservices.  

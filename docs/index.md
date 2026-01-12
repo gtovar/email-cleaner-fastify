@@ -1,6 +1,6 @@
 # Email Cleaner & Smart Notifications
 
-> **Smart AI-powered system to organize your Gmail inbox, declutter irrelevant emails, and notify you only when action is required.**
+> System that connects to Gmail, classifies emails via ML, and triggers notifications when action is required.
 
 ---
 
@@ -22,12 +22,12 @@ flowchart LR
 
 ---
 
-## Key Features
+## Features
 
-- **AI-based classification** — Detects type and intent of each email.
-- **Priority filtering** — Shows only messages that matter.
-- **Secure OAuth2 integration** — No stored passwords or IMAP usage.
-- **Automation ready** — Easily connect rules to n8n workflows.
+- **Classification** — Detects type and intent of each email.
+- **Priority filtering** — Shows messages that match configured criteria.
+- **OAuth2 integration** — No stored passwords or IMAP usage.
+- **Automation** — Connect rules to n8n workflows.
 - **Modular architecture** — Node.js <-> Python <-> Cloud Run.
 
 ---
@@ -107,6 +107,7 @@ curl -X POST http://localhost:8000/v1/suggest \
 | [Events Contract](./events_contract.md) | Event names, payloads, semantics and consumers |
 | [ADR Index](./adr) | Architecture decisions and tradeoffs |
 | [Documentation Rules](./documentation_rules.md) | Project-wide rules: canonical doc ownership, language/tone policy, and update protocols. |
+| [Project State Protocol](./project_state_protocol_and_template.md) | PROJECT_STATE template and update rules |
 | [Workflow](./workflow.md) | Development workflow |
 | [Git Hygiene](./git_hygiene.md) | Working tree protocol |
 | [Roadmap](./roadmap.md) | High-level roadmap placeholder |
