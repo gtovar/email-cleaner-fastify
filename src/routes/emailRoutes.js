@@ -28,7 +28,7 @@ export default async function (fastify, opts) {
       description: 'Lista correos con filtros personalizados',
       tags: ['official-v1','Emails'],
       summary: 'Listar correos de Gmail',
-      security: [{ bearerAuth: [] }],
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }],
       querystring: {
         type: 'object',
         properties: {

@@ -135,7 +135,7 @@ export default async function (fastify, opts) {
     schema: {
       tags: ['official-v1','Notificaciones'],
       summary: 'Obtener resumen de sugerencias a limpiar',
-      security: [{ bearerAuth: [] }],
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }],
       querystring: {
         type: 'object',
         properties: {
@@ -157,7 +157,7 @@ export default async function (fastify, opts) {
     schema: {
       tags: ['official-v1','Notificaciones'],
       summary: 'Confirmar acciones sugeridas',
-      security: [{ bearerAuth: [] }],
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }],
       body: { $ref: 'ConfirmActionsRequest#' },
       response: {
         200: { $ref: 'ConfirmActionsResponse#' },
@@ -173,7 +173,7 @@ export default async function (fastify, opts) {
     schema: {
       tags: ['official-v1','Notificaciones'],
       summary: 'Consultar historial de acciones',
-      security: [{ bearerAuth: [] }],
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }],
       querystring: {
         type: 'object',
         properties: {
@@ -194,7 +194,7 @@ export default async function (fastify, opts) {
     schema: {
       tags: ['official-v1','Notificaciones'],
       summary: 'Listar eventos de notificaciones (paginado)',
-      security: [{ bearerAuth: [] }],
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }],
       querystring: {
         type: 'object',
         properties: {

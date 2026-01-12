@@ -1,11 +1,10 @@
 // src/controllers/suggestionController.js
 
 import { GmailService } from '../services/gmailService.js';
-import { google } from 'googleapis';
 import { suggestActions } from '../services/suggestionService.js';
 import { buildNewSuggestionsEvent } from '../events/builders/newSuggestionsEvent.builder.js';
 import { DOMAIN_EVENTS } from '../events/eventBus.js';
-import { getGoogleAccessToken } from '../services/tokenService.js';
+import { getGmailClientForUser } from '../services/googleAuthService.js';
 
 /**
  * Controlador para Fastify: sugiere acciones automáticas para correos (sin ejecutarlas).
@@ -13,16 +12,10 @@ import { getGoogleAccessToken } from '../services/tokenService.js';
 export async function getSuggestedEmails(request, reply) {
     try {
         // 1. Autenticación: Prepara el cliente Gmail usando el token del usuario autenticado
-        const accessToken = await getGoogleAccessToken({
-            models: request.server.models,
-            email: request.user?.email,
-            logger: request.log
-        });
-        const oauth2Client = new google.auth.OAuth2();
-        oauth2Client.setCredentials({ access_token: accessToken });
-
-        // 2. Instancia de Gmail API
-        const gmailClient = google.gmail({ version: 'v1', auth: oauth2Client });
+        const gmailClient = await getGmailClientForUser(
+            request.server,
+            request.user?.email
+        );
         const gmailService = new GmailService(gmailClient);
 
         // 3. Llama al método del servicio para obtener correos (puedes ajustar filtros aquí)

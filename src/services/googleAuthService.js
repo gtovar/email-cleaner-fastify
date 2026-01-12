@@ -17,12 +17,16 @@ export function createOAuth2Client() {
  * Recibe un registro de la tabla Token y devuelve un cliente Gmail listo para usarse.
  * NO toca la base de datos, solo usa el objeto tokenRecord.
  */
-export function createGmailClientFromToken(tokenRecord) {
+export function createGmailClientFromToken(tokenRecord, { onTokens } = {}) {
   if (!tokenRecord) {
     throw new Error('tokenRecord es requerido para crear el cliente de Gmail');
   }
 
   const oauth2Client = createOAuth2Client();
+
+  if (typeof onTokens === 'function' && typeof oauth2Client.on === 'function') {
+    oauth2Client.on('tokens', onTokens);
+  }
 
   oauth2Client.setCredentials({
     access_token: tokenRecord.access_token,
@@ -62,6 +66,41 @@ export async function getGmailClientForUser(server, email) {
     throw new Error(`No hay token almacenado para el usuario ${email}`);
   }
 
-  return createGmailClientFromToken(tokenRecord);
-}
+  const logger = server.log;
 
+  const onTokens = async (tokens) => {
+    if (!tokens || typeof tokens !== 'object') {
+      return;
+    }
+
+    const updates = {};
+
+    if (tokens.access_token) {
+      updates.access_token = tokens.access_token;
+    }
+
+    if (tokens.refresh_token) {
+      updates.refresh_token = tokens.refresh_token;
+    }
+
+    if (tokens.expiry_date) {
+      updates.expiry_date = new Date(tokens.expiry_date);
+    }
+
+    if (!Object.keys(updates).length) {
+      return;
+    }
+
+    try {
+      if (typeof tokenRecord.update === 'function') {
+        await tokenRecord.update(updates);
+      } else if (typeof Token.update === 'function') {
+        await Token.update(updates, { where: { email } });
+      }
+    } catch (err) {
+      logger?.warn?.({ err, email }, 'Failed to persist refreshed Google tokens');
+    }
+  };
+
+  return createGmailClientFromToken(tokenRecord, { onTokens });
+}

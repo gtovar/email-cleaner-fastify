@@ -71,7 +71,7 @@ export default async function (fastify, opts) {
                     }
                 }
             },
-            security: [{ bearerAuth: [] }] // Si quieres requerir JWT
+            security: [{ cookieAuth: [] }, { bearerAuth: [] }]
         },
         handler: getSuggestedEmails
     });

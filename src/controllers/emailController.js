@@ -1,6 +1,5 @@
-import { google } from 'googleapis';
 import { GmailService } from '../services/gmailService.js';
-import { getGoogleAccessToken } from '../services/tokenService.js';
+import { getGmailClientForUser } from '../services/googleAuthService.js';
 /**
  * Lista correos de Gmail aplicando filtros personalizados.
  */
@@ -9,16 +8,8 @@ export async function listEmails(req, reply) {
   const user = req.user;
 
   try {
-    const accessToken = await getGoogleAccessToken({
-      models: req.server.models,
-      email: user?.email,
-      logger: req.log
-    });
-    const oauth2Client = new google.auth.OAuth2();
-    oauth2Client.setCredentials({ access_token: accessToken });
-
-    const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
-    const gmailService = new GmailService(gmail);
+    const gmailClient = await getGmailClientForUser(req.server, user?.email);
+    const gmailService = new GmailService(gmailClient);
 
   let query = [];
   if (unread) query.push('is:unread');

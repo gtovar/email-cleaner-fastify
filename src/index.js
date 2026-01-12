@@ -31,6 +31,11 @@ await fastify.register(swagger, {
     ],
     components: {
       securitySchemes: {
+        cookieAuth: {
+          type: 'apiKey',
+          in: 'cookie',
+          name: 'session_token'
+        },
         bearerAuth: {
           type: 'http',
           scheme: 'bearer',
@@ -38,7 +43,7 @@ await fastify.register(swagger, {
         }
       }
     },
-    security: [{ bearerAuth: [] }]
+    security: [{ cookieAuth: [] }, { bearerAuth: [] }]
   }
 });
 
