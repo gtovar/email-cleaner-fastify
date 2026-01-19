@@ -24,6 +24,6 @@ export default async function (request, reply) {
     request.user = { email: payload.email, id: payload.email };
   } catch (err) {
     request.log.warn({ err }, 'Invalid auth token');
-    reply.code(401).send({ error: 'Invalid or expired auth token' });
+    return reply.code(401).send({ error: 'Invalid or expired auth token' });
   }
 }

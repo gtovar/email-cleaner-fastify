@@ -1,5 +1,7 @@
 import { google } from 'googleapis';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import { encryptToken } from '../utils/tokenCrypto.js';
 
 const WEB_SCOPES = [
   'https://www.googleapis.com/auth/gmail.readonly',
@@ -20,12 +22,37 @@ const createWebClient = () =>
     process.env.GOOGLE_REDIRECT_URI
   );
 
-const createMobileClient = () =>
-  new google.auth.OAuth2(
-    process.env.GOOGLE_MOBILE_CLIENT_ID,
-    process.env.GOOGLE_MOBILE_CLIENT_SECRET,
-    process.env.GOOGLE_MOBILE_REDIRECT_URI
-  );
+const resolveMobileOAuthConfig = (redirectUri) => {
+  const iosRedirect = process.env.GOOGLE_MOBILE_REDIRECT_URI_IOS;
+  const androidRedirect = process.env.GOOGLE_MOBILE_REDIRECT_URI_ANDROID;
+  const legacyRedirect = process.env.GOOGLE_MOBILE_REDIRECT_URI;
+
+  if (iosRedirect && redirectUri === iosRedirect) {
+    return {
+      clientId: process.env.GOOGLE_MOBILE_CLIENT_ID_IOS,
+      clientSecret: process.env.GOOGLE_MOBILE_CLIENT_SECRET_IOS
+    };
+  }
+
+  if (androidRedirect && redirectUri === androidRedirect) {
+    return {
+      clientId: process.env.GOOGLE_MOBILE_CLIENT_ID_ANDROID,
+      clientSecret: process.env.GOOGLE_MOBILE_CLIENT_SECRET_ANDROID
+    };
+  }
+
+  if (legacyRedirect && redirectUri === legacyRedirect) {
+    return {
+      clientId: process.env.GOOGLE_MOBILE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_MOBILE_CLIENT_SECRET
+    };
+  }
+
+  return null;
+};
+
+const createMobileClient = (clientId, clientSecret, redirectUri) =>
+  new google.auth.OAuth2(clientId, clientSecret, redirectUri);
 
 const issueSessionToken = (email) => {
   const jwtSecret = process.env.INTERNAL_JWT_SECRET;
@@ -65,28 +92,42 @@ const resolveUserEmail = async (tokens, request) => {
 const persistTokens = async (TokenModel, email, tokens) => {
   const payload = {
     email,
-    access_token: tokens.access_token,
+    access_token: encryptToken(tokens.access_token),
     expiry_date: tokens.expiry_date ? new Date(tokens.expiry_date) : null
   };
   if (tokens.refresh_token) {
-    payload.refresh_token = tokens.refresh_token;
+    payload.refresh_token = encryptToken(tokens.refresh_token);
   }
   await TokenModel.upsert(payload);
 };
 
 export async function initiateGoogleAuth(request, reply) {
   const oauth2Client = createWebClient();
+  const state = crypto.randomBytes(16).toString('hex');
+  const isProduction = process.env.NODE_ENV === 'production';
+  reply.setCookie('oauth_state', state, {
+    httpOnly: true,
+    sameSite: isProduction ? 'none' : 'lax',
+    secure: isProduction,
+    path: '/',
+    maxAge: 10 * 60 // 10 minutes
+  });
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent',
     scope: WEB_SCOPES,
+    state,
   });
   reply.redirect(url);
 }
 
 export async function googleAuthCallback(request, reply) {
-  const { code } = request.query;
+  const { code, state } = request.query;
   if (!code) return reply.status(400).send('No code provided');
+  const storedState = request.cookies?.oauth_state;
+  if (!state || !storedState || state !== storedState) {
+    return reply.status(400).send('Invalid OAuth state');
+  }
 
   try {
     const oauth2Client = createWebClient();
@@ -111,6 +152,7 @@ export async function googleAuthCallback(request, reply) {
       path: '/',
       maxAge: expiresInSeconds
     });
+    reply.clearCookie('oauth_state', { path: '/' });
 
     const frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
     const redirectUrl = new URL('/auth/callback', frontendOrigin);
@@ -118,6 +160,7 @@ export async function googleAuthCallback(request, reply) {
     return reply.redirect(redirectUrl.toString());
   } catch (err) {
     reply.log.error(err);
+    reply.clearCookie('oauth_state', { path: '/' });
     const frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
     const redirectUrl = new URL('/auth/callback', frontendOrigin);
     redirectUrl.searchParams.set('error', 'oauth_failed');
@@ -131,17 +174,21 @@ export async function googleAuthMobileExchange(request, reply) {
     return reply.status(400).send('Missing code or code_verifier');
   }
 
-  const expectedRedirect = process.env.GOOGLE_MOBILE_REDIRECT_URI;
-  if (!expectedRedirect || redirect_uri !== expectedRedirect) {
+  const oauthConfig = resolveMobileOAuthConfig(redirect_uri);
+  if (!oauthConfig || !oauthConfig.clientId) {
     return reply.status(400).send('Invalid redirect_uri');
   }
 
   try {
-    const oauth2Client = createMobileClient();
+    const oauth2Client = createMobileClient(
+      oauthConfig.clientId,
+      oauthConfig.clientSecret,
+      redirect_uri
+    );
     const { tokens } = await oauth2Client.getToken({
       code,
       codeVerifier: code_verifier,
-      redirect_uri: expectedRedirect
+      redirect_uri
     });
     oauth2Client.setCredentials(tokens);
 
@@ -162,4 +209,20 @@ export async function googleAuthMobileExchange(request, reply) {
     request.log.error(err);
     return reply.status(500).send('oauth_exchange_failed');
   }
+}
+
+export async function getAuthMe(request, reply) {
+  const email = request.user?.email || null;
+  return reply.send({ authenticated: true, email });
+}
+
+export async function logout(request, reply) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  reply.clearCookie('session_token', {
+    httpOnly: true,
+    sameSite: isProduction ? 'none' : 'lax',
+    secure: isProduction,
+    path: '/',
+  });
+  return reply.send({ success: true });
 }

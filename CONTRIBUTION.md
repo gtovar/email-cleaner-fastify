@@ -37,6 +37,7 @@ This guide ensures consistency, code quality, and efficient collaboration.
    - Clearly describe what changed and why.  
    - Include screenshots or logs if applicable.  
    - Reference related issues.  
+   - Review the PR before merging into `develop`.  
 
 ---
 
@@ -77,7 +78,7 @@ Every PR must include at least one relevant unit or integration test.
 | Refactor      | `refactor/` | refactor/huNN-short-desc |
 | Maintenance   | `chore/`    | chore/update-dependencies  |
 
-Working branch: `develop` (feature branches start and merge here).  
+Base branch: `develop` (feature branches start here; no direct commits on `develop`).  
 Stable branch: `main` (updated from `develop` at releases/checkpoints).  
 Canonical HU naming: `type/huNN-short-desc` (lowercase `hu` id).
 

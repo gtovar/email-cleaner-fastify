@@ -1,4 +1,5 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { encryptToken } from '../src/utils/tokenCrypto.js';
 
 // Mocks para googleapis
 const mockSetCredentials = jest.fn();
@@ -117,5 +118,30 @@ describe('googleAuthService', () => {
       .rejects
       .toThrow('No hay token almacenado para el usuario missing@example.com');
   });
-});
 
+  it('createGmailClientFromToken falla si falta TOKEN_ENCRYPTION_KEY en tokens cifrados', () => {
+    process.env.TOKEN_ENCRYPTION_KEY = Buffer.alloc(32, 1).toString('base64');
+    const tokenRecord = {
+      access_token: encryptToken('access-123'),
+      refresh_token: encryptToken('refresh-456'),
+      expiry_date: new Date('2025-01-01T00:00:00Z')
+    };
+    delete process.env.TOKEN_ENCRYPTION_KEY;
+
+    expect(() => createGmailClientFromToken(tokenRecord))
+      .toThrow('TOKEN_ENCRYPTION_KEY is not configured');
+  });
+
+  it('createGmailClientFromToken falla si TOKEN_ENCRYPTION_KEY es invalida', () => {
+    process.env.TOKEN_ENCRYPTION_KEY = Buffer.alloc(32, 1).toString('base64');
+    const tokenRecord = {
+      access_token: encryptToken('access-123'),
+      refresh_token: encryptToken('refresh-456'),
+      expiry_date: new Date('2025-01-01T00:00:00Z')
+    };
+    process.env.TOKEN_ENCRYPTION_KEY = Buffer.alloc(16, 1).toString('base64');
+
+    expect(() => createGmailClientFromToken(tokenRecord))
+      .toThrow('TOKEN_ENCRYPTION_KEY must be 32 bytes (base64-encoded)');
+  });
+});

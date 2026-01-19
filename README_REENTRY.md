@@ -4,7 +4,7 @@
 
 ## 0) Re-entry checklist (strict order)
 
-1) Check branch + status (`type/huNN-short-desc`, base branch `develop`):
+1) Check branch + status (base branch `main`):
    - `git status -sb`
 2) Run tests (strong truth):
    - `npm test`
@@ -17,10 +17,11 @@
 
 ## 1) Current snapshot (minimum that matters)
 
-- Branch: `develop`
+- Branch: `main`
 - Latest checkpoint: `PROJECT_STATE.md`
-- Backend tests: PASS (Jest, 12 suites / 41 tests)
-- Auth flow: Google OAuth sets httpOnly `session_token` cookie and validates JWT via `authMiddleware`
+- Backend tests: PASS (Jest, 13 suites / 47 tests)
+- Auth flow: Google OAuth validates `state`, sets httpOnly `session_token` cookie, and validates JWT via `authMiddleware`
+- OAuth tokens are encrypted at rest (`TOKEN_ENCRYPTION_KEY`)
 - Gmail client persists refreshed tokens to the `Tokens` table
 - Swagger exposes `cookieAuth` and `bearerAuth` security schemes
 - Primary endpoints:

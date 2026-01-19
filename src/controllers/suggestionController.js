@@ -43,9 +43,7 @@ export async function getSuggestedEmails(request, reply) {
         }
 
         // 5. Responde con la estructura que espera Swagger
-        reply
-            .type('application/json')
-            .send(JSON.stringify({ emails: enrichedEmails }));
+        return reply.send({ emails: enrichedEmails });
 
     } catch (err) {
         request.log.error(err, 'Error obteniendo sugerencias');
