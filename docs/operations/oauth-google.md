@@ -23,6 +23,7 @@ GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
 GOOGLE_REDIRECT_URI=http://localhost:3000/auth/google/callback
 FRONTEND_ORIGIN=http://localhost:5173
+TOKEN_ENCRYPTION_KEY=<base64-32-bytes>
 ```
 
 ## 5) Validate the flow
@@ -31,4 +32,3 @@ FRONTEND_ORIGIN=http://localhost:5173
   - stores Google tokens,
   - issues a `session_token` cookie,
   - redirects to `${FRONTEND_ORIGIN}/auth/callback`.
-

@@ -51,8 +51,13 @@ cp .env.example .env
 | GOOGLE_CLIENT_SECRET | OAuth 2.0 Client Secret | Yes | supersecret |
 | GOOGLE_REDIRECT_URI | Redirect (OAuth) | Yes | http://localhost:3000/auth/google/callback |
 | INTERNAL_JWT_SECRET | Inter-service / security | No | xxxxx |
+| TOKEN_ENCRYPTION_KEY | Encrypt OAuth tokens at rest (base64 32 bytes) | Yes | base64-32-bytes |
 | ML_BASE_URL | ML microservice URL | Yes | http://localhost:8000 |
 | PORT | Backend port | Yes | 3000 |
+| PORT_HTTP | HTTP port | No | 3001 |
+| PORT_HTTPS | HTTPS port | No | 3000 |
+| TLS_CERT_PATH | TLS certificate path (HTTPS) | No | /path/to/cert.pem |
+| TLS_KEY_PATH | TLS key path (HTTPS) | No | /path/to/key.pem |
 | N8N_WEBHOOK_URL | Webhook for tests | No | http://localhost:5678/webhook/telegram-test |
 | TELEGRAM_BOT_TOKEN | Telegram | No | xxxxx |
 

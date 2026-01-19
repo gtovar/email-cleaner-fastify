@@ -75,3 +75,12 @@ Last updated: 2026-01-12 01:53 CST
 ### 2026-01-12 — Doc health fixes
 - Removed emojis from canonical docs and normalized tone where required.
 - Created ADR 005 for token refresh persistence.
+
+### 2026-01-18 — Security and auth hardening
+- Added OAuth `state` validation and tests.
+- Encrypted OAuth tokens at rest using `TOKEN_ENCRYPTION_KEY`.
+- Auth middleware now returns after invalid token responses.
+- Redacted `confirmActions` logs (no email IDs).
+- `/api/v1/suggestions` now uses `reply.send` serialization.
+- Added tests for encryption failure cases.
+- TLS keys moved out of repo; `.gitignore` updated for `*.pem`.
