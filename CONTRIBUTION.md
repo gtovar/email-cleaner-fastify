@@ -37,6 +37,7 @@ This guide ensures consistency, code quality, and efficient collaboration.
    - Clearly describe what changed and why.  
    - Include screenshots or logs if applicable.  
    - Reference related issues.  
+   - Review the PR before merging into `develop`.  
 
 ---
 

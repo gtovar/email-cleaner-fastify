@@ -13,7 +13,7 @@ This project uses:
 5. Develop + tests + documentation
 6. Open PR with DoR/DoD checklist
 7. CI: lint + test + build
-8. Merge → update `Sprint_Log.md` and `PROJECT_STATE.md`
+8. Review PR → merge → update `Sprint_Log.md` and `PROJECT_STATE.md`
 
 - Working branch: `develop`
 - Branch naming: `type/huNN-short-desc` (example: `feat/hu17-unify-suggestions-summary`)
