@@ -210,3 +210,19 @@ export async function googleAuthMobileExchange(request, reply) {
     return reply.status(500).send('oauth_exchange_failed');
   }
 }
+
+export async function getAuthMe(request, reply) {
+  const email = request.user?.email || null;
+  return reply.send({ authenticated: true, email });
+}
+
+export async function logout(request, reply) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  reply.clearCookie('session_token', {
+    httpOnly: true,
+    sameSite: isProduction ? 'none' : 'lax',
+    secure: isProduction,
+    path: '/',
+  });
+  return reply.send({ success: true });
+}

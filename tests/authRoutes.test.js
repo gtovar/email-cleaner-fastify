@@ -1,6 +1,7 @@
 import { describe, it, expect, jest, beforeEach, beforeAll, afterAll } from '@jest/globals';
 import Fastify from 'fastify';
 import cookie from '@fastify/cookie';
+import jwt from 'jsonwebtoken';
 
 const mockGenerateAuthUrl = jest.fn();
 const mockGetToken = jest.fn();
@@ -34,9 +35,10 @@ const extractCookieValue = (cookieHeader, name) => {
 
 describe('authRoutes OAuth state', () => {
   let app;
+  const jwtSecret = 'test-secret';
 
   beforeAll(async () => {
-    process.env.INTERNAL_JWT_SECRET = 'test-secret';
+    process.env.INTERNAL_JWT_SECRET = jwtSecret;
     process.env.TOKEN_ENCRYPTION_KEY = Buffer.alloc(32, 1).toString('base64');
     process.env.GOOGLE_CLIENT_ID = 'client';
     process.env.GOOGLE_CLIENT_SECRET = 'secret';
@@ -126,5 +128,47 @@ describe('authRoutes OAuth state', () => {
     expect(cookieHeader).toMatch(/session_token=/);
     expect(cookieHeader).toMatch(/oauth_state=/);
     expect(cookieHeader).toMatch(/Expires=Thu, 01 Jan 1970 00:00:00 GMT/);
+  });
+
+  it('returns authenticated user from /api/v1/auth/me', async () => {
+    const token = jwt.sign({ email: 'user@example.com' }, jwtSecret, { expiresIn: '1h' });
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/auth/me',
+      headers: {
+        cookie: `session_token=${token}`
+      }
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({ authenticated: true, email: 'user@example.com' });
+  });
+
+  it('rejects /api/v1/auth/me when no session token is present', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/auth/me'
+    });
+
+    expect(res.statusCode).toBe(401);
+  });
+
+  it('clears session cookie on /api/v1/auth/logout', async () => {
+    const token = jwt.sign({ email: 'user@example.com' }, jwtSecret, { expiresIn: '1h' });
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/logout',
+      headers: {
+        cookie: `session_token=${token}`
+      }
+    });
+
+    expect(res.statusCode).toBe(200);
+    const setCookie = res.headers['set-cookie'];
+    expect(setCookie).toBeDefined();
+    const cookieHeader = Array.isArray(setCookie) ? setCookie.join(';') : setCookie;
+    expect(cookieHeader).toMatch(/session_token=/);
+    expect(cookieHeader).toMatch(/Expires=Thu, 01 Jan 1970 00:00:00 GMT/);
+    expect(res.json()).toEqual({ success: true });
   });
 });
