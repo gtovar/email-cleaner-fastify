@@ -240,7 +240,7 @@ Full documentation: https://gtovar.github.io/email-cleaner-fastify/
 - **ML Service:** Python (FastAPI, scikit-learn)
 - **Infra:** Docker, Cloud Run, Secret Manager
 - **Notifications:** n8n + Telegram integration
-- **CI/CD:** GitHub Actions (build + deploy + lint)
+- **CI:** GitHub Actions (lint + test). Docs deploy via GitHub Pages.
 
 ---
 
