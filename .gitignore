@@ -9,6 +9,7 @@
 .vscode/
 .*.swp
 *.swp
+*.pem
 python.zip
 src.zip
 nodejs_src.zip

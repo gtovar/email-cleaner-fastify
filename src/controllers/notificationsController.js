@@ -26,7 +26,10 @@ export async function confirmActions(request, reply) {
     logger: request.server.logger ?? request.server.log,
   });
 
-    request.log.info({ body: request.body }, "confirm payload");
+  request.log.info(
+    { count: Array.isArray(emailIds) ? emailIds.length : 0, action },
+    'confirm payload'
+  );
 
   const result = await service.confirmActions({ emailIds, action, userId  });
 

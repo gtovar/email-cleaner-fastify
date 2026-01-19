@@ -1,34 +1,36 @@
 # PROJECT_STATE.md
 
-Last updated: 2026-01-12 01:53 CST — Commit: pending
+Last updated: 2026-01-18 02:35 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
-REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
-BRANCH: develop
+SNAPSHOT_DATE: 2026-01-18 02:35 CST
 COMMIT: pending
+ENVIRONMENT: local
 
-SNAPSHOT_DATE: 2026-01-12 01:53 CST (America/Monterrey)
+REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
+BRANCH: main
 WORKING_TREE_STATUS: Dirty (modified files present)
 
 RUNTIME: Node.js (Fastify)
 DB: PostgreSQL via Sequelize
 TEST_STATUS: PASS (Jest)
 
-LAST_VERIFIED_TESTS_DATE: 2026-01-12 01:53 CST
+LAST_VERIFIED_TESTS_DATE: 2026-01-18 02:35 CST
 
 ---
 
 ## 2. Executive Summary
 
 - Fastify API exposes OAuth routes and v1 endpoints for emails, suggestions, and notifications.
-- OAuth flow issues `session_token` cookie and redirects to `${FRONTEND_ORIGIN}/auth/callback`.
+- OAuth flow validates `state`, issues `session_token`, and redirects to `${FRONTEND_ORIGIN}/auth/callback`.
 - Auth middleware accepts session cookie or Bearer session JWT and sets `request.user`.
 - `/api/v1/emails` returns raw Gmail emails without ML.
 - `/api/v1/suggestions` enriches emails with ML suggestions and publishes domain events when threshold is met.
 - `/api/v1/notifications/summary` aggregates `NotificationEvent` records by period.
 - Gmail OAuth client persists refreshed access tokens to the `Tokens` table.
+- OAuth tokens are encrypted at rest using `TOKEN_ENCRYPTION_KEY`.
 
 ---
 
@@ -90,12 +92,13 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-12 01:53 CST
 
 ### HU18 — Google OAuth session flow (backend)
 
-**Status:** IN_PROGRESS
+**Status:** DONE
 
 **Evidence:**
 - Routes: `/auth/google`, `/auth/google/callback`
 - Middleware: `src/middlewares/authMiddleware.js`
 - Controllers: `src/controllers/authController.js`
+- Tests: `tests/authRoutes.test.js`
 
 **Open items:**
 - None.
@@ -104,7 +107,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-12 01:53 CST
 - Misconfigured `FRONTEND_ORIGIN` can break OAuth redirects and cookies.
 
 **Recent change:**
-- Gmail OAuth client persists refreshed access tokens (commit: pending).
+- OAuth state validation and token encryption added (commit: pending).
 
 ---
 
@@ -117,10 +120,10 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-12 01:53 CST
 
 ## 6. Next Immediate Action
 
-➡️ Commit changes on `develop` (token refresh + Swagger auth + doc-health).
+➡️ Commit changes on `main`.
 
 ---
 
-## 7. Version Log
+## Version log
 
-- 2026-01-12 01:53 CST — Token refresh persistence documented and doc-health fixes applied (commit: pending)
+- 2026-01-18 02:35 CST — OAuth state, token encryption, and logging hardening (commit: pending)
