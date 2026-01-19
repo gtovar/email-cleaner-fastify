@@ -1,5 +1,6 @@
 // src/services/googleAuthService.js
 import { google } from 'googleapis';
+import { decryptToken } from '../utils/tokenCrypto.js';
 
 /**
  * Crea un cliente OAuth2 de Google usando variables de entorno.
@@ -29,8 +30,8 @@ export function createGmailClientFromToken(tokenRecord, { onTokens } = {}) {
   }
 
   oauth2Client.setCredentials({
-    access_token: tokenRecord.access_token,
-    refresh_token: tokenRecord.refresh_token,
+    access_token: decryptToken(tokenRecord.access_token),
+    refresh_token: decryptToken(tokenRecord.refresh_token),
     // expiry_date en DB está como DATE; si existe, lo convertimos a timestamp en ms
     expiry_date: tokenRecord.expiry_date
       ? new Date(tokenRecord.expiry_date).getTime()
