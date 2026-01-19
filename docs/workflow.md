@@ -15,7 +15,7 @@ This project uses:
 7. CI: lint + test
 8. Review PR → merge → update `Sprint_Log.md` and `PROJECT_STATE.md`
 
-- Working branch: `develop`
+- Base branch: `develop` (feature branches start here; no direct commits on `develop`)
 - Branch naming: `type/huNN-short-desc` (example: `feat/hu17-unify-suggestions-summary`)
 - Flow: branch from `develop` → PR/merge back to `develop`; `main` updates only from `develop` at releases/checkpoints
 
