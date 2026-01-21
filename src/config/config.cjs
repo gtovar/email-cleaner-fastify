@@ -18,16 +18,29 @@ const parseDatabaseUrl = (url) => {
 };
 
 const fromUrl = process.env.DATABASE_URL ? parseDatabaseUrl(process.env.DATABASE_URL) : null;
+const requireSsl = process.env.DB_SSL === 'require';
 
 
 // Fallback por entorno si no hay DATABASE_URL
-const base = fromUrl || {
+const base = {
+    ...(fromUrl || {
     username: process.env.DB_USERNAME || 'postgres',
     password: process.env.DB_PASSWORD || null,
     database: process.env.DB_DATABASE || 'email_cleaner',
     host: process.env.DB_HOST || '127.0.0.1',
     port:     Number(process.env.DB_PORT || 5432),
     dialect:  'postgres'
+    }),
+    ...(requireSsl
+      ? {
+          dialectOptions: {
+            ssl: {
+              require: true,
+              rejectUnauthorized: false
+            }
+          }
+        }
+      : {})
 };
 
 module.exports = {

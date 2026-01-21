@@ -1,5 +1,4 @@
 import Fastify from 'fastify';
-import fs from 'fs';
 import dbPlugin from './plugins/sequelize.js';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
@@ -14,20 +13,8 @@ import cookie from '@fastify/cookie';
 // Carga dotenv antes que nada
 import 'dotenv/config';
 
-const resolveHttpsConfig = () => {
-  const keyPath = process.env.TLS_KEY_PATH;
-  const certPath = process.env.TLS_CERT_PATH;
-  if (!keyPath || !certPath) {
-    return null;
-  }
-  return {
-    key: fs.readFileSync(keyPath),
-    cert: fs.readFileSync(certPath)
-  };
-};
-
-const createServer = async ({ https } = {}) => {
-  const fastify = Fastify({ logger: true, https });
+const createServer = async () => {
+  const fastify = Fastify({ logger: true });
 
   await fastify.register(swagger, {
     openapi: {
@@ -97,21 +84,20 @@ const createServer = async ({ https } = {}) => {
 
 const start = async () => {
     try {
-        const portHttps = process.env.PORT_HTTPS ? Number(process.env.PORT_HTTPS) : 3000;
-        const portHttp = process.env.PORT_HTTP ? Number(process.env.PORT_HTTP) : 3001;
-        const httpsConfig = resolveHttpsConfig();
+        const isProduction = process.env.NODE_ENV === 'production';
+        if (isProduction) {
+          const port = Number(process.env.PORT) || 8080;
+          const server = await createServer();
+          await server.listen({ port, host: '0.0.0.0' });
+          console.log(`Servidor Fastify listo en puerto ${port} (Cloud Run)`);
+          return;
+        }
+
+        const portHttp = process.env.PORT_HTTP ? Number(process.env.PORT_HTTP) : 3000;
 
         const httpServer = await createServer();
         await httpServer.listen({ port: portHttp, host: '0.0.0.0' });
         console.log(`Servidor Fastify HTTP listo en http://localhost:${portHttp}`);
-
-        if (httpsConfig) {
-          const httpsServer = await createServer({ https: httpsConfig });
-          await httpsServer.listen({ port: portHttps, host: '0.0.0.0' });
-          console.log(`Servidor Fastify HTTPS listo en https://localhost:${portHttps}`);
-        } else {
-          console.warn('TLS no configurado; HTTPS deshabilitado.');
-        }
     } catch (err) {
         console.error(err);
         process.exit(1);

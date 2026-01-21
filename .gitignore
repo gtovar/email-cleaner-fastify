@@ -10,6 +10,7 @@
 .*.swp
 *.swp
 *.pem
+cloudrun.env.yaml
 python.zip
 src.zip
 nodejs_src.zip
