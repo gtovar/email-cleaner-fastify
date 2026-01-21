@@ -150,9 +150,6 @@ npm run coverage   # Coverage report in ./coverage
 | ML_BASE_URL | ML microservice URL | Yes | http://localhost:8000 |
 | PORT | Backend port | Yes | 3000 |
 | PORT_HTTP | HTTP port | No | 3001 |
-| PORT_HTTPS | HTTPS port | No | 3000 |
-| TLS_CERT_PATH | TLS certificate path (HTTPS) | No | /path/to/cert.pem |
-| TLS_KEY_PATH | TLS key path (HTTPS) | No | /path/to/key.pem |
 | N8N_WEBHOOK_URL | Webhook for tests | No | http://localhost:5678/webhook/telegram-test |
 | TELEGRAM_BOT_TOKEN | Telegram | No | xxxxx |
 

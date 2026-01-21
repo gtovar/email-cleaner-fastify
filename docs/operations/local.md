@@ -81,18 +81,6 @@ The backend encrypts OAuth tokens at rest. Set this in `.env`:
 TOKEN_ENCRYPTION_KEY=<base64-32-bytes>
 ```
 
-## TLS (optional)
-If you want HTTPS locally, set:
-```
-TLS_CERT_PATH=/path/to/cert.pem
-TLS_KEY_PATH=/path/to/key.pem
-PORT_HTTPS=3000
-PORT_HTTP=3001
-```
-If TLS paths are not set, the server runs HTTP only.
-
----
-
 ## Available services
 - Fastify: http://localhost:3000
 - FastAPI (ML): http://localhost:8000/docs
