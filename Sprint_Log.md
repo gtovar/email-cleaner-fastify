@@ -83,7 +83,6 @@ Last updated: 2026-01-12 01:53 CST
 - Redacted `confirmActions` logs (no email IDs).
 - `/api/v1/suggestions` now uses `reply.send` serialization.
 - Added tests for encryption failure cases.
-- TLS keys moved out of repo; `.gitignore` updated for `*.pem`.
 
 ### 2026-01-19 — CI added and lint fixed
 - Added GitHub Actions CI (lint + test) for PRs and `develop`.
