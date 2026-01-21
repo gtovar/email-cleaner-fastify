@@ -8,3 +8,4 @@ This page lists architecture decision records (ADRs) for the backend.
 - ADR 003: Jest adoption (`adr/003-adoption-jest.md`)
 - ADR 004: Suggestions threshold (`adr/004-suggestions-event-threshold.md`)
 - ADR 005: Token refresh persistence (`adr/005-token-refresh-persistence.md`)
+- ADR 006: CI/CD strategy (`adr/006-ci-cd-strategy.md`)

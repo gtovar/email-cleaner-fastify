@@ -4,7 +4,7 @@
 
 ## 0) Re-entry checklist (strict order)
 
-1) Check branch + status (base branch `main`):
+1) Check branch + status (prefer feature branch from `develop` per workflow):
    - `git status -sb`
 2) Run tests (strong truth):
    - `npm test`

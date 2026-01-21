@@ -12,7 +12,7 @@ This project uses:
 4. Start services (`make -C ops up`)
 5. Develop + tests + documentation
 6. Open PR with DoR/DoD checklist
-7. CI: lint + test
+7. CI: lint + test (verify GitHub Actions are green)
 8. Review PR → merge → update `Sprint_Log.md` and `PROJECT_STATE.md`
 
 - Base branch: `develop` (feature branches start here; no direct commits on `develop`)

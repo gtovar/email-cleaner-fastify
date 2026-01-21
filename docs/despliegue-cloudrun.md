@@ -1,153 +1,172 @@
-# Deployment Guide — Google Cloud Run
+# Deployment Guide — Google Cloud Run (Fastify Backend)
 
-This document describes how to package and deploy **Email Cleaner & Smart Notifications** to **Google Cloud Run**.
-
----
-
-## Objective
-
-- Ensure secure and reproducible deployments.
-- Minimize time-to-production through automated CI/CD.
-- Protect secrets and environment variables via **Secret Manager**.
+This document describes the **current production deployment** for the Fastify backend using **Cloud Run** and **Artifact Registry**.
 
 ---
 
 ## 1) Prerequisites
 
-| Resource | Version / Requirement | Notes |
+| Resource | Requirement | Notes |
 | --- | --- | --- |
-| **gcloud CLI** | ≥ 475 | Install via `brew install --cask google-cloud-sdk` |
-| **Google Cloud Project** | Billing + Cloud Run + Artifact Registry enabled | Use the same project as OAuth credentials |
-| **Docker** | ≥ 24 | For local builds |
-| **PostgreSQL** | Cloud SQL or external | Recommended: Cloud SQL with VPC-SC |
-| **.env.prod** | Encrypted variables | See section 4 |
+| **gcloud CLI** | Installed + authenticated | `gcloud auth login` |
+| **Project** | `ultra-acre-431617-p0` | Billing enabled |
+| **Region** | `us-central1` | Default used in this deployment |
+| **Artifact Registry** | `email-cleaner` | Docker repo in `us-central1` |
+| **PostgreSQL** | External (Heroku RDS) | Requires SSL |
 
 ---
 
-## 2) Directory structure
+## 2) Required environment variables
 
-```plaintext
-email-cleaner/
-├── Dockerfile
-├── cloudbuild.yaml        # optional CI/CD pipeline
-└── src/
-```
-
----
-
-## 3) Reference Dockerfile
-
-```dockerfile
-# Stage 1 — build
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --omit=dev
-COPY . .
-RUN npm run build
-
-# Stage 2 — runtime
-FROM node:18-alpine
-WORKDIR /app
-COPY --from=builder /app .
-ENV NODE_ENV=production
-EXPOSE 8080
-CMD ["node", "src/index.js"]
-```
-
----
-
-## 4) Environment variables (.env.prod)
-
-| Variable | Example / Notes |
+| Variable | Purpose |
 | --- | --- |
-| `PORT` | 8080 (injected by Cloud Run) |
-| `GOOGLE_CLIENT_ID` | Stored in Secret Manager |
-| `GOOGLE_CLIENT_SECRET` | Stored in Secret Manager |
-| `DB_HOST` | `/cloudsql/<CONN_NAME>` |
-| `DB_USERNAME` | DB user |
-| `DB_PASSWORD` | Stored in Secret Manager |
+| `NODE_ENV=production` | Production mode |
+| `DATABASE_URL` | Postgres connection string |
+| `TOKEN_ENCRYPTION_KEY` | Base64 32 bytes |
+| `INTERNAL_JWT_SECRET` | Session JWT secret |
+| `GOOGLE_CLIENT_ID` | OAuth client |
+| `GOOGLE_CLIENT_SECRET` | OAuth secret |
+| `GOOGLE_REDIRECT_URI` | `https://api.emailcleaner.gilbertotovar.com/auth/google/callback` |
+| `FRONTEND_ORIGIN` | `https://app.emailcleaner.gilbertotovar.com` |
 
-Use Secret Manager references at runtime via `--set-secrets`.
+Notes:
+- SSL is required for Postgres in production.
+- Secrets are **not** committed; use a local env file for deploy.
 
 ---
 
-## 5) Manual deployment
+## 3) Build and deploy (Cloud Build + Cloud Run)
+
+### 3.1 Build and push image
 
 ```bash
-gcloud init
-gcloud auth application-default login
-gcloud services enable run.googleapis.com artifactregistry.googleapis.com sqladmin.googleapis.com
-gcloud config set project email-cleaner-463600
-gcloud config set run/region us-central1
+cd email-cleaner-fastify
 
-gcloud builds submit --tag us-central1-docker.pkg.dev/email-cleaner-463600/email-cleaner/email-cleaner:$(git rev-parse --short HEAD)
+TAG=cr-$(git rev-parse --short HEAD)-$(date +%Y%m%d%H%M%S)
+IMAGE=us-central1-docker.pkg.dev/ultra-acre-431617-p0/email-cleaner/email-cleaner:$TAG
 
-gcloud run deploy email-cleaner \
-  --image us-central1-docker.pkg.dev/email-cleaner-463600/email-cleaner/email-cleaner:$(git rev-parse --short HEAD) \
-  --platform managed \
-  --allow-unauthenticated=false \
-  --add-cloudsql-instances email-cleaner-463600:us-central1:pg-instance \
-  --set-env-vars NODE_ENV=production \
-  --set-secrets GOOGLE_CLIENT_SECRET=projects/123/secrets/GOOGLE_CLIENT_SECRET:latest \
-  --memory 512Mi --cpu 1 --max-instances 3
+gcloud builds submit --tag "$IMAGE" .
 ```
 
----
+### 3.2 Deploy to Cloud Run
 
-## 6) CI/CD — cloudbuild.yaml
+Create a local env file (YAML map):
+`email-cleaner-fastify/cloudrun.env.yaml`
 
 ```yaml
-steps:
-  - id: Build & Push
-    name: gcr.io/cloud-builders/docker
-    args: ["build","-t","$LOCATION-docker.pkg.dev/$PROJECT_ID/email-cleaner/email-cleaner:$SHORT_SHA","."]
-  - id: Deploy
-    name: gcr.io/google.com/cloudsdktool/cloud-sdk
-    entrypoint: gcloud
-    args:
-      ["run","deploy","email-cleaner","--image","$LOCATION-docker.pkg.dev/$PROJECT_ID/email-cleaner/email-cleaner:$SHORT_SHA","--platform","managed","--region","$LOCATION","--quiet"]
-images:
-  - "$LOCATION-docker.pkg.dev/$PROJECT_ID/email-cleaner/email-cleaner:$SHORT_SHA"
+NODE_ENV: "production"
+DATABASE_URL: "postgres://..."
+TOKEN_ENCRYPTION_KEY: "base64-32-bytes"
+INTERNAL_JWT_SECRET: "..."
+GOOGLE_CLIENT_ID: "..."
+GOOGLE_CLIENT_SECRET: "..."
+GOOGLE_REDIRECT_URI: "https://api.emailcleaner.gilbertotovar.com/auth/google/callback"
+FRONTEND_ORIGIN: "https://app.emailcleaner.gilbertotovar.com"
 ```
 
----
-
-## 7) Observability
-
-- Logs: Cloud Logging (`service=email-cleaner`)
-- Metrics: Cloud Monitoring (alerts: CPU > 80%, latency p95)
-- Tracing: Cloud Trace for TTFB and request paths
-
----
-
-## 8) Quick rollback
+Deploy:
 
 ```bash
-gcloud run revisions list --service email-cleaner
-gcloud run services update-traffic email-cleaner --to-revisions REVISION@latest=0,REVISION@prev=100
+gcloud run deploy email-cleaner-api \
+  --image "$IMAGE" \
+  --region us-central1 \
+  --project ultra-acre-431617-p0 \
+  --env-vars-file /Users/gil/Documents/email-cleaner/email-cleaner-fastify/cloudrun.env.yaml
 ```
 
 ---
 
-## 9) Security best practices
+## 4) Database migrations (production)
 
-1. Use least-privilege service accounts.
-2. Store secrets only in Secret Manager.
-3. Enable VPC-SC for sensitive data.
-4. Use Cloud SQL IAM Auth instead of static passwords.
-5. Retain logs for at least 30 days.
+Postgres requires SSL. Run from local machine:
 
----
-
-## 10) Summary
-
-1. Multi-stage Dockerfile.
-2. `.env.prod` managed via Secret Manager.
-3. Enable required services and publish to Artifact Registry.
-4. Deploy via Cloud Build + Cloud Run.
-5. Monitor and rollback when needed.
+```bash
+DB_SSL=require DATABASE_URL="postgres://..." npm run db:migrate
+```
 
 ---
 
-**Last updated:** July 2025 — Architecture Team
+## 5) Domain mapping (API)
+
+Domain:
+`api.emailcleaner.gilbertotovar.com`
+
+Create mapping:
+
+```bash
+gcloud beta run domain-mappings create \
+  --service email-cleaner-api \
+  --domain api.emailcleaner.gilbertotovar.com \
+  --platform managed \
+  --project ultra-acre-431617-p0
+```
+
+DNS (GoDaddy):
+- Type: `CNAME`
+- Name: `api.emailcleaner`
+- Value: `ghs.googlehosted.com.`
+
+Verify:
+
+```bash
+gcloud beta run domain-mappings describe \
+  --domain api.emailcleaner.gilbertotovar.com \
+  --platform managed \
+  --project ultra-acre-431617-p0
+```
+
+---
+
+## 6) Public access (required for browser clients)
+
+```bash
+gcloud run services add-iam-policy-binding email-cleaner-api \
+  --region us-central1 \
+  --project ultra-acre-431617-p0 \
+  --member="allUsers" \
+  --role="roles/run.invoker"
+```
+
+---
+
+## 7) CI/CD automation (GitHub Actions)
+
+Workflow: `.github/workflows/deploy.yml`
+
+Required GitHub Secrets:
+- `GCP_WIF_PROVIDER`
+- `GCP_SERVICE_ACCOUNT`
+- `DATABASE_URL`
+- `TOKEN_ENCRYPTION_KEY`
+- `INTERNAL_JWT_SECRET`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+
+Notes:
+- Uses Workload Identity Federation (OIDC) for GCP auth (no keys).
+- Deploys on `main` and on manual trigger.
+
+---
+
+## 8) Verification
+
+```bash
+curl -sS -D - -o /dev/null https://api.emailcleaner.gilbertotovar.com/api/v1/health/db
+curl -sS -D - -o /dev/null https://api.emailcleaner.gilbertotovar.com/api/v1/auth/me
+```
+
+Expected:
+- `/health/db` -> 200
+- `/auth/me` -> 401 (no session)
+
+---
+
+## 9) Notes
+
+- Service name: `email-cleaner-api`
+- Project: `ultra-acre-431617-p0`
+- Region: `us-central1`
+
+---
+
+**Last updated:** January 2026
