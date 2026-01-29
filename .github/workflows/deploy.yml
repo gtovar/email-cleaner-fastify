@@ -38,7 +38,7 @@ jobs:
         run: |
           IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/email-cleaner:${{ github.sha }}"
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
-          gcloud builds submit --tag "$IMAGE" . --async
+          gcloud builds submit --tag "$IMAGE" .
 
       - name: Deploy to Cloud Run
         run: |
