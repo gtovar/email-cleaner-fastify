@@ -13,7 +13,7 @@ class Email(BaseModel):
     from_: str = Field(..., alias="from")
     date: str
     isRead: bool
-    category: str
+    category: str = "unknown"
     attachmentSizeMb: float
 
 from datetime import datetime, timezone
