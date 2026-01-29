@@ -19,7 +19,7 @@
 
 - Branch: `develop`
 - Latest checkpoint: `PROJECT_STATE.md`
-- Backend tests: last verified PASS (Jest, 13 suites / 47 tests) on 2026-01-18
+- Backend tests: last verified PASS (Jest, 13 suites / 50 tests) on 2026-01-29
 - Auth flow: Google OAuth validates `state`, sets httpOnly `session_token` cookie, and validates JWT via `authMiddleware`
 - OAuth tokens are encrypted at rest (`TOKEN_ENCRYPTION_KEY`)
 - Gmail client persists refreshed tokens to the `Tokens` table
