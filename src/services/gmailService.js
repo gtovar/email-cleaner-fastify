@@ -90,7 +90,7 @@ export class GmailService {
                 date: headers.date || '',
                 labels: msgData.data.labelIds || [],
                 isRead: !(msgData.data.labelIds?.includes('UNREAD')),
-                category: detectCategoryFromLabels(msgData.data.labelIds || []),
+                category: detectCategoryFromLabels(msgData.data.labelIds || []) || 'unknown',
                 attachmentSizeMb: msgData.data.sizeEstimate
                     ? msgData.data.sizeEstimate / (1024 * 1024)
                     : 0,
