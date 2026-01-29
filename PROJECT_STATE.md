@@ -1,16 +1,15 @@
 # PROJECT_STATE.md
-
-Last updated: 2026-01-18 02:35 CST — Commit: pending
+Last updated: 2026-01-29 00:00 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
-SNAPSHOT_DATE: 2026-01-18 02:35 CST
+SNAPSHOT_DATE: 2026-01-29 00:00 CST
 COMMIT: pending
 ENVIRONMENT: local
 
 REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
-BRANCH: main
+BRANCH: develop
 WORKING_TREE_STATUS: Dirty (modified files present)
 
 RUNTIME: Node.js (Fastify)
@@ -27,7 +26,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-18 02:35 CST
 - OAuth flow validates `state`, issues `session_token`, and redirects to `${FRONTEND_ORIGIN}/auth/callback`.
 - Auth middleware accepts session cookie or Bearer session JWT and sets `request.user`.
 - `/api/v1/emails` returns raw Gmail emails without ML.
-- `/api/v1/suggestions` enriches emails with ML suggestions and publishes domain events when threshold is met.
+- `/api/v1/suggestions` enriches emails with ML suggestions, includes `snippet`, and publishes domain events when threshold is met.
 - `/api/v1/notifications/summary` aggregates `NotificationEvent` records by period.
 - Gmail OAuth client persists refreshed access tokens to the `Tokens` table.
 - OAuth tokens are encrypted at rest using `TOKEN_ENCRYPTION_KEY`.
@@ -67,6 +66,8 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-18 02:35 CST
 - Gmail OAuth clients are created via `src/services/googleAuthService.js`.
 - ML service integration via `src/services/suggestionService.js` and `src/services/mlClient.js`.
 - n8n webhook listener exists (safe no-op).
+- Gmail metadata defaults `category` to `unknown` when no label match is found.
+- ML schema accepts missing `category` with default `unknown`.
 
 ---
 
@@ -88,7 +89,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-18 02:35 CST
 - Summary windowing uses `createdAt`; time zone alignment is not verified.
 
 **Recent change:**
-- No change in this snapshot (commit: pending).
+- ML schema defaulted `category` and suggestions schema includes `snippet` (commit: pending).
 
 ### HU18 — Google OAuth session flow (backend)
 
@@ -120,10 +121,11 @@ LAST_VERIFIED_TESTS_DATE: 2026-01-18 02:35 CST
 
 ## 6. Next Immediate Action
 
-➡️ Commit changes on `main`.
+➡️ Commit Fastify fixes on a feature branch from `develop`.
 
 ---
 
 ## Version log
 
 - 2026-01-18 02:35 CST — OAuth state, token encryption, and logging hardening (commit: pending)
+- 2026-01-29 00:00 CST — ML schema default category + suggestions schema includes snippet (commit: pending)
