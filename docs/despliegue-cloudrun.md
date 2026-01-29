@@ -145,6 +145,8 @@ Required GitHub Secrets:
 Notes:
 - Uses Workload Identity Federation (OIDC) for GCP auth (no keys).
 - Deploys on `main` and on manual trigger.
+- Cloud Build logs are sent to `gs://ultra-acre-431617-p0-cloudbuild-logs` to avoid log streaming failures.
+- The deploy service account requires `roles/logging.viewer` and write access to the log bucket.
 
 ---
 
