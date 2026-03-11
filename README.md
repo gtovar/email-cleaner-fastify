@@ -135,7 +135,7 @@ npm run coverage   # Coverage report in ./coverage
 
 | Variable | Description | Required | Example |
 |---|---|---:|---|
-| DATABASE_URL | PostgreSQL connection string | Yes | postgres://user:pass@localhost:5432/email_cleaner |
+| DATABASE_URL | PostgreSQL connection string | No* | postgres://user:pass@localhost:5432/email_cleaner |
 | DB_HOST | DB host | No* | 127.0.0.1 |
 | DB_PORT | DB port | No* | 5432 |
 | DB_USERNAME | DB user | No* | postgres |
@@ -249,4 +249,4 @@ Maintained by **Gilberto Tovar**
 
 ---
 
-**Last updated: January 2026
+**Last updated: March 2026

@@ -87,7 +87,77 @@ Notes:
 
 ---
 
-## 3. Suggestions API
+## 3. Inbox Actions API
+
+### 3.1 POST /api/v1/inbox/actions
+
+Executes direct user-initiated Inbox actions for one or more emails.
+
+#### Description
+
+* Separate from suggestion confirmation.
+* Intended for explicit Inbox operations initiated from the frontend Inbox surface.
+* Records action history with `details.source = "inbox"`.
+
+#### Request
+
+```http
+POST /api/v1/inbox/actions HTTP/1.1
+Cookie: session_token=<SESSION_TOKEN>
+Content-Type: application/json
+```
+
+#### Request Body
+
+```json
+{
+  "emailIds": ["18c8f6e...", "18c8f7a..."],
+  "action": "archive"
+}
+```
+
+* `emailIds` *(array of strings, required)* — Email IDs to process.
+* `action` *(string, required)* — One of: `archive`, `delete`, `mark_unread`.
+
+#### Response 200 (example)
+
+```json
+{
+  "success": true,
+  "processed": 2,
+  "emailIds": ["18c8f6e...", "18c8f7a..."],
+  "action": "archive",
+  "source": "inbox",
+  "data": [
+    {
+      "userId": "user-123",
+      "emailId": "18c8f6e...",
+      "action": "archive",
+      "timestamp": "2026-03-10T07:35:00.000Z",
+      "details": {
+        "source": "inbox",
+        "gmailResponse": {
+          "simulated": true,
+          "emailId": "18c8f6e...",
+          "action": "archive",
+          "source": "inbox"
+        },
+        "note": "Executed from inbox direct action flow"
+      }
+    }
+  ]
+}
+```
+
+#### Possible Status Codes
+
+* **200 OK** – Actions processed successfully.
+* **400 Bad Request** – Invalid payload.
+* **401 Unauthorized** – Missing or invalid token.
+
+---
+
+## 4. Suggestions API
 
 ### 3.1 GET /api/v1/suggestions
 
@@ -162,7 +232,7 @@ Example:
 
 ---
 
-## 4. Notifications API
+## 5. Notifications API
 
 The Notifications API exposes endpoints to:
 
@@ -178,7 +248,7 @@ All routes share:
 
 ---
 
-### 4.1 GET /api/v1/notifications/summary
+### 5.1 GET /api/v1/notifications/summary
 
 Returns an aggregate summary of suggested actions for a time window.
 
@@ -198,7 +268,8 @@ Cookie: session_token=<SESSION_TOKEN>
 #### Query Parameters
 
 * `period` *(optional, string)* — `daily` or `weekly`.
-  Used to filter the summary window (last 24 hours or last 7 days).
+  Used to filter the summary window (rolling last 24 hours or rolling last 7 days).
+  Windows are evaluated in UTC over persisted `NotificationEvent.createdAt` values and are inclusive on both boundaries.
   If omitted, the summary covers all time and `windowStart`/`windowEnd` are `null`.
 
 #### Response 200 (example)
@@ -232,13 +303,13 @@ Cookie: session_token=<SESSION_TOKEN>
 
 ---
 
-### 4.2 POST /api/v1/notifications/confirm
+### 5.2 POST /api/v1/notifications/confirm
 
 Confirms actions for one or more emails (e.g., accept or reject suggested actions).
 
 #### Description
 
-* Used by the UI when the user confirms or rejects suggested actions.
+* Used by the UI when the user confirms or rejects suggested actions from Suggestions.
 * Internally, the backend may:
 
   * Execute Gmail actions.
@@ -300,7 +371,7 @@ The schema guarantees:
 
 ---
 
-### 4.3 GET /api/v1/notifications/history
+### 5.3 GET /api/v1/notifications/history
 
 Returns the history of actions taken on emails for the authenticated user.
 
@@ -308,6 +379,7 @@ Returns the history of actions taken on emails for the authenticated user.
 
 * Used to display “what has been done” over time.
 * Returns a paginated list of action records.
+* History may now contain both suggestion-confirm actions and Inbox direct actions, distinguishable through `details.source`.
 
 #### Request
 
@@ -335,6 +407,7 @@ Cookie: session_token=<SESSION_TOKEN>
       "action": "accept",
       "timestamp": "2025-11-18T02:32:11.000Z",
       "details": {
+        "source": "suggestions",
         "gmailResponse": { "status": "OK" },
         "note": "Executed"
       }
@@ -350,7 +423,7 @@ Cookie: session_token=<SESSION_TOKEN>
 
 ---
 
-### 4.4 GET /api/v1/notifications/events
+### 5.4 GET /api/v1/notifications/events
 
 Lists notification events with pagination. Useful to consume a timeline of system/user events related to notifications.
 
@@ -371,7 +444,7 @@ Cookie: session_token=<SESSION_TOKEN>
 * `page` *(optional, integer, default: 1)* — Page number.
 * `perPage` *(optional, integer, default: 20)* — Items per page.
 * `type` *(optional, string)* — Filter by canonical domain event type string.
-* `userId` *(optional, string)* — Filter by user identifier.
+* `userId` *(optional, string)* — Filter by user identifier. When omitted, the endpoint falls back to the authenticated user from the session/JWT.
 
 **Canonical rule:** The `type` query parameter filters by the **canonical domain event type string** (e.g., `domain.suggestions.generated`, `domain.suggestions.confirmed`). Legacy labels such as `NEW_SUGGESTIONS` / `NEW_SUGGESTIONS_EVENT` are **not supported** in `src/**` or `tests/**` and may appear only in documentation under a **DEPRECATED** section for historical traceability.
 
@@ -404,9 +477,9 @@ Cookie: session_token=<SESSION_TOKEN>
 
 ---
 
-## 5. Health Check
+## 6. Health Check
 
-### 5.1 GET /api/v1/health
+### 6.1 GET /api/v1/health
 
 Simple health-check endpoint for monitoring and local diagnostics.
 
@@ -426,7 +499,7 @@ GET /api/v1/health HTTP/1.1
 
 ---
 
-## 6. Error Summary
+## 7. Error Summary
 
 | Status Code | Meaning                           | Typical Cause                           |
 | ----------- | --------------------------------- | --------------------------------------- |
@@ -441,7 +514,7 @@ GET /api/v1/health HTTP/1.1
 
 ---
 
-## 7. Developer Notes
+## 8. Developer Notes
 
 * Backend uses **ECMAScript Modules (ESM)**.
 * Gmail is accessed via internal services, not directly from the client.
@@ -457,9 +530,9 @@ ML_BASE_URL=http://localhost:8000
 
 ---
 
-## 8. Versioning & Updates
+## 9. Versioning & Updates
 
 * API version: **v1** (`/api/v1/...`).
-* Last update: 2025 
+* Last update: 2025
 
 ---

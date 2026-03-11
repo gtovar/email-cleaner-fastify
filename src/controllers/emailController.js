@@ -1,24 +1,20 @@
-import { GmailService } from '../services/gmailService.js';
-import { getGmailClientForUser } from '../services/googleAuthService.js';
+import { resolveInboxSource } from '../services/inboxSources/index.js';
 /**
- * Lista correos de Gmail aplicando filtros personalizados.
+ * Lista correos desde la fuente configurada para Inbox.
  */
 export async function listEmails(req, reply) {
   const { unread, olderThan, category, minAttachmentSize, pageToken } = req.query;
   const user = req.user;
 
   try {
-    const gmailClient = await getGmailClientForUser(req.server, user?.email);
-    const gmailService = new GmailService(gmailClient);
-
-  let query = [];
-  if (unread) query.push('is:unread');
-  if (olderThan) query.push(`older_than:${olderThan}d`);
-  if (category) query.push(`category:${category}`);
-  if (minAttachmentSize) query.push(`larger:${minAttachmentSize}M`);
-
-    const { emails, nextPageToken, total } = await gmailService.listMessagesByQuery({
-      query: query.join(' '),
+    const inboxSource = resolveInboxSource({ logger: req.log });
+    const { emails, nextPageToken, total } = await inboxSource.listEmails({
+      server: req.server,
+      email: user?.email,
+      unread,
+      olderThan,
+      category,
+      minAttachmentSize,
       pageToken,
       maxResults: 20,
     });
