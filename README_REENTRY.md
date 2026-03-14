@@ -19,8 +19,8 @@
 
 - Branch target: feature branches start from `develop`; avoid direct commits on `develop`
 - Source of truth for factual state: `PROJECT_STATE.md`
-- Backend tests last verified PASS on 2026-03-11
-- HU17, HU18, and HU19 are closed for the current local scope
+- Backend tests last verified PASS through the HU19 merge on 2026-03-14
+- HU17, HU18, and HU19 are closed on `develop` for the documented local/browser scope
 - Next action is no longer inside HU19; choose the next backend-facing slice before opening new implementation work
 - If the checkpoint feels stale, verify directly in `src/index.js`, `src/routes/*`, `src/services/*`, and `tests/*`
 
