@@ -145,3 +145,7 @@ Last updated: 2026-01-12 01:53 CST
 - Fixed the PR #27 P1 bug where `ActionHistory.bulkCreate` persistence errors rewrote already-computed Inbox item outcomes into blanket `system_error` failures.
 - `src/services/inboxActionsService.js` now preserves the computed `results`, `summary`, and `execution` values after post-action persistence failures, while logging the persistence problem server-side.
 - Updated ADR 008, `docs/API_REFERENCE.md`, and targeted Jest coverage in `tests/inboxActions.test.js`; `tests/inboxActions.test.js` and `tests/inboxActionsRoutes.test.js` both passed locally.
+
+### 2026-03-14 — HU19 backend merged to develop
+- Merged the HU19 backend branch into `develop` after the PR #27 P1 fix, the GitHub Actions Node 24-compatibility update, and the backend governance-doc alignment all cleared review and CI.
+- Backend user-story tracking now treats HU19 as closed on `develop` for the documented local/browser scope; the next backend step is no longer a HU19 branch response.

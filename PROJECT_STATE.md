@@ -1,10 +1,10 @@
 # PROJECT_STATE.md
-Last updated: 2026-03-13 23:42 CST — Commit: pending
+Last updated: 2026-03-14 02:05 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
-SNAPSHOT_DATE: 2026-03-13 23:42 CST
+SNAPSHOT_DATE: 2026-03-14 02:05 CST
 COMMIT: pending
 ENVIRONMENT: local
 
@@ -14,7 +14,7 @@ WORKING_TREE_STATUS: Dirty (modified files present)
 
 RUNTIME: Node.js (Fastify)
 DB: PostgreSQL via Sequelize
-TEST_STATUS: PASS (Jest targeted HU19 validation)
+TEST_STATUS: PASS (Jest targeted HU19 validation; merged to develop)
 
 LAST_VERIFIED_TESTS_DATE: 2026-03-13 23:42 CST
 
@@ -137,8 +137,9 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-13 23:42 CST
 - The React row-level Inbox UX now passes local Playwright validation against the fixture Inbox path and `POST /api/v1/inbox/actions`; bulk actions remain the only HU19 feature gap in app behavior (commit: pending).
 - Accepted ADR 008 to freeze bulk-result semantics, per-item response detail, and local reconciliation rules before implementation begins (commit: pending).
 - Updated `/api/v1/inbox/actions` to return ADR 008 semantics (`execution`, `summary`, `results`) and added targeted backend tests for full, partial, none, and systemic outcomes (commit: pending).
-- The full local browser suite now passes for row-level and bulk Inbox actions against the fixture Inbox environment, closing HU19 at the backend contract/integration level for local scope (commit: pending).
+- The full local browser suite now passes for row-level and bulk Inbox actions against the fixture Inbox environment, closing HU19 at the backend contract/integration level for the documented local/browser scope (commit: pending).
 - Preserved per-item outcomes when `ActionHistory.bulkCreate` fails after item execution, so post-action persistence errors no longer collapse successful destructive operations into blanket `system_error` results; targeted Jest validation passed for `tests/inboxActions.test.js` and `tests/inboxActionsRoutes.test.js` (commit: pending).
+- HU19 backend changes, ADR 007/008, CI workflow updates, and the backend governance docs are now merged into `develop` (commit: pending).
 
 ---
 
@@ -151,7 +152,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-13 23:42 CST
 
 ## 6. Next Immediate Action
 
-➡️ Checkpoint the HU19 PR #27 P1 fix for post-persistence per-item outcomes and prepare the branch response.
+➡️ Choose the next backend-facing slice after HU19 merge and refresh the checkpoint only when that scope is decided.
 
 ---
 
@@ -169,3 +170,4 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-13 23:42 CST
 - 2026-03-10 21:20 CST — Updated `/api/v1/inbox/actions` to return ADR 008 bulk semantics and added targeted backend contract tests for the new execution states (commit: pending)
 - 2026-03-11 00:39 CST — HU19 closed for local contract/browser scope after the full Playwright suite passed against the fixture Inbox environment (commit: pending)
 - 2026-03-13 23:42 CST — Fixed the PR #27 P1 outcome-loss bug so `bulkCreate` persistence errors no longer overwrite already-computed per-item Inbox results; targeted Jest validation passed for `tests/inboxActions.test.js` and `tests/inboxActionsRoutes.test.js` (commit: pending)
+- 2026-03-14 02:05 CST — Merged the HU19 backend branch into `develop`, including the P1 outcome-preservation fix, Node 24-compatible GitHub Actions refs, and the backend governance-doc alignment (commit: pending)
