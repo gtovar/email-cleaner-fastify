@@ -42,8 +42,6 @@ Any new canonical doc MUST be referenced in:
 - [ ] Paths/endpoints are exact
 - [ ] `docs/index.md` updated if a new doc exists
 - [ ] Doc Health checks pass (fences, canonical links)
-
-
 # Decision maker: create a new doc vs update an existing one
 
 Default rule:
@@ -51,7 +49,7 @@ Default rule:
 > **Update an existing document.**
 > **Create a new document only if it passes the gates below.**
 
-### Gate 0 — Evidence gate (mandatory)
+## Gate 0 — Evidence gate (mandatory)
 
 **Question:** Do we have primary evidence for what we are documenting?
 Primary evidence = diff, code, tests, snapshot, commit.
@@ -72,6 +70,9 @@ Ownership map:
 * **History / evolution** -> `SPRINT_LOG.md`
 * **Factual state** -> `PROJECT_STATE.md`
 
+ADR validity note:
+- Use `/ADR_POLICY.md` to decide whether the change is truly ADR-worthy, DDR-worthy, or still too tentative for any ADR.
+
 If an owner doc exists: **update it**.
 Creating a new doc at this point is only allowed if Gate 2 justifies a split.
 
@@ -79,23 +80,23 @@ Creating a new doc at this point is only allowed if Gate 2 justifies a split.
 
 Creating a new doc (or splitting) is allowed if **at least one** condition holds:
 
-**C2.1 — Different audience**
+#### C2.1 — Different audience
 
 * The content is for a different audience (e.g., operator vs contributor vs end user) and mixing it reduces clarity.
 
-**C2.2 — Different nature**
+#### C2.2 — Different nature
 
 * The owner doc is reference-only (e.g., API_REFERENCE) and you are trying to add tutorial or reasoning; that belongs in `TUTORIALS/` or `DESIGN_DOCUMENT`.
 
-**C2.3 — Size/complexity**
+#### C2.3 — Size/complexity
 
 * The new section would be > ~20–30% of the current doc **or** it introduces a complete subsystem (e.g., EventBus + listeners + EventStore + idempotency) that must be referenced repeatedly.
 
-**C2.4 — Reuse**
+#### C2.4 — Reuse
 
 * The same question appears >= 2 times and the absence of a doc causes drift (high cost of forgetting).
 
-**C2.5 — Stability**
+#### C2.5 — Stability
 
 * The content is likely to remain stable for >= 1 sprint (not in flux today).
 
@@ -148,9 +149,9 @@ Use a 0–10 score:
 
 Rule:
 
-* Score <= 4 -> Update existing doc
-* Score 5–6 -> Update existing + link + Sprint_Log note (if in transition)
-* Score >= 7 -> Create new doc (or split), with G3 anti-duplication
+- Score <= 4 -> Update existing doc
+- Score 5–6 -> Update existing + link + Sprint_Log note (if in transition)
+- Score >= 7 -> Create new doc (or split), with G3 anti-duplication
 
 ---
 
@@ -159,7 +160,7 @@ Rule:
 * Evidence: yes (code + tests + diff) -> G0 passes.
 * Owner doc exists: `docs/events_contract.md` -> G1: update there.
 * Split? usually no (unless adding tutorial/architecture depth) -> G2 no.
-* ADR? only if the decision “domain.* vs NEW_*” is declared canonical and stable -> then it is an ADR (tradeoff + direction).
+- ADR? only if the decision `domain.*` vs `NEW_*` is declared canonical and stable -> then it is an ADR (tradeoff + direction).
 
 Mechanical decision:
 Update `docs/events_contract.md`.

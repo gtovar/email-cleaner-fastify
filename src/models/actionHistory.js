@@ -10,7 +10,7 @@ export default (sequelize, DataTypes) => {
       allowNull: false
     },
     action: {
-      type: DataTypes.ENUM('accept', 'reject', 'delete', 'archive', 'move'),
+      type: DataTypes.ENUM('accept', 'reject', 'delete', 'archive', 'move', 'mark_unread'),
       allowNull: false
     },
     timestamp: {

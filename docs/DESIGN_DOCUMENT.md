@@ -1,5 +1,5 @@
 # Design & Architecture Document  
-### Project: Email Cleaner & Smart Notifications  
+## Project: Email Cleaner & Smart Notifications
 
 ---
 

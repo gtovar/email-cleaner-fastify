@@ -17,18 +17,12 @@
 
 ## 1) Current snapshot (minimum that matters)
 
-- Branch: `develop`
-- Latest checkpoint: `PROJECT_STATE.md`
-- Backend tests: last verified PASS (Jest, 13 suites / 50 tests) on 2026-01-29
-- Auth flow: Google OAuth validates `state`, sets httpOnly `session_token` cookie, and validates JWT via `authMiddleware`
-- OAuth tokens are encrypted at rest (`TOKEN_ENCRYPTION_KEY`)
-- Gmail client persists refreshed tokens to the `Tokens` table
-- Swagger exposes `cookieAuth` and `bearerAuth` security schemes
-- Primary endpoints:
-  - Gmail OAuth: `/auth/google`, `/auth/google/callback`
-  - v1: `/api/v1/emails`, `/api/v1/suggestions`
-  - Notifications: `/api/v1/notifications/summary|confirm|history|events`
-- Architecture: CQRS-lite + in-memory EventBus + `NotificationEvent` persistence
+- Branch target: feature branches start from `develop`; avoid direct commits on `develop`
+- Source of truth for factual state: `PROJECT_STATE.md`
+- Backend tests last verified PASS on 2026-03-11
+- HU17, HU18, and HU19 are closed for the current local scope
+- Next action is no longer inside HU19; choose the next backend-facing slice before opening new implementation work
+- If the checkpoint feels stale, verify directly in `src/index.js`, `src/routes/*`, `src/services/*`, and `tests/*`
 
 ---
 
@@ -47,6 +41,10 @@
 ### Tests
 - `npm test`
 - `npm run test:watch`
+- `npm test -- notificationEventsRoutes.integration.test.js`
+- `npm test -- getNotificationSummaryForUser.test.js`
+- `npm test -- inboxActions.test.js inboxActionsRoutes.test.js`
+- `npm test -- fixtureInboxSource.test.js emailsFixtureRoutes.integration.test.js`
 
 ### Dev server
 - `npm run dev`
@@ -55,9 +53,19 @@
 ### DB (Sequelize CLI)
 - `npm run db:migrate`
 
+### Local E2E helpers
+- `INBOX_SOURCE=fixture npm run dev`
+- `npm run session:e2e`
+
 ---
 
-## 4) Documentation rules (do not forget)
+## 4) Workflow checkpoint
+
+- Resume from `PROJECT_STATE.md`, not from this file
+- If the next slice changes contracts, migrations, auth/session, events, CI/CD, or setup behavior, load the owner docs and run the ADR/DDR gates before coding
+- If a coherent slice is already complete, switch into commit-readiness before expanding scope
+
+## 5) Documentation rules (do not forget)
 
 - `PROJECT_STATE.md`: only verified facts (code/tests). One next immediate action.
 - `README_REENTRY.md`: short, operational, no duplicates. Must enable fast re-entry.

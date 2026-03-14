@@ -79,7 +79,6 @@ sequenceDiagram
 - `NotificationEvent` answers: "Which domain events occurred and how do they travel through the pipeline?"
 - Both coexist by design: the UI needs a simple history; the system needs auditable events.
 
-
 ```mermaid
 flowchart LR
   UI[React UI] -->|POST /api/v1/notifications/confirm {emailIds, action}| MW[authMiddleware]

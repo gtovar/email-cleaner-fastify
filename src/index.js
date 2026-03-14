@@ -5,6 +5,7 @@ import swaggerUI from '@fastify/swagger-ui';
 import authRoutes from './routes/authRoutes.js';
 import emailRoutes from './routes/emailRoutes.js';
 import suggestionRoutes from './routes/suggestionRoutes.js';
+import inboxRoutes from './routes/inboxRoutes.js';
 import notificationsRoutes from './routes/notificationsRoutes.js';
 import cors from '@fastify/cors';
 import eventBusPlugin from './plugins/eventBus.js';
@@ -63,6 +64,7 @@ const createServer = async () => {
   await fastify.register(authRoutes);
   await fastify.register(emailRoutes, { prefix: "/api/v1" });
   await fastify.register(suggestionRoutes, { prefix: "/api/v1"});
+  await fastify.register(inboxRoutes, { prefix: '/api/v1/inbox' });
   await fastify.register(notificationsRoutes, { prefix: "/api/v1/notifications" });
 
   fastify.get('/', async (request, reply) => {
