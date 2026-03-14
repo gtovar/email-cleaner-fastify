@@ -111,6 +111,7 @@ curl -X POST http://localhost:8000/v1/suggest \
 | [Documentation Rules](./documentation_rules.md) | Project-wide rules: canonical doc ownership, language/tone policy, and update protocols. |
 | [README Guide](./readme.guia.md) | README structure and maintenance guidance for the repository. |
 | [Project State Protocol](./project_state_protocol_and_template.md) | PROJECT_STATE template and update rules |
+| [Project State Fill Guide](./project_state_fill_guide.md) | Shared workspace contract and repo-specific rules for filling `PROJECT_STATE.md`. |
 | [Workflow](./workflow.md) | Development workflow |
 | [Git Hygiene](./git_hygiene.md) | Working tree protocol |
 | [Documentation Styles](./dock-styles.md) | Visual and writing conventions for rendered technical documentation. |

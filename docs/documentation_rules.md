@@ -70,6 +70,9 @@ Ownership map:
 * **History / evolution** -> `SPRINT_LOG.md`
 * **Factual state** -> `PROJECT_STATE.md`
 
+ADR validity note:
+- Use `/ADR_POLICY.md` to decide whether the change is truly ADR-worthy, DDR-worthy, or still too tentative for any ADR.
+
 If an owner doc exists: **update it**.
 Creating a new doc at this point is only allowed if Gate 2 justifies a split.
 
