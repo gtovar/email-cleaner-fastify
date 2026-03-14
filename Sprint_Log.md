@@ -140,3 +140,8 @@ Last updated: 2026-01-12 01:53 CST
 ### 2026-03-11 — HU19 closed locally
 - The full Playwright Inbox suite passed locally against the fixture Inbox source for 3 row-level and 3 bulk scenarios.
 - Backend contract and frontend behavior now align for the complete local HU19 scope.
+
+### 2026-03-13 — HU19 P1 outcome-preservation fix
+- Fixed the PR #27 P1 bug where `ActionHistory.bulkCreate` persistence errors rewrote already-computed Inbox item outcomes into blanket `system_error` failures.
+- `src/services/inboxActionsService.js` now preserves the computed `results`, `summary`, and `execution` values after post-action persistence failures, while logging the persistence problem server-side.
+- Updated ADR 008, `docs/API_REFERENCE.md`, and targeted Jest coverage in `tests/inboxActions.test.js`; `tests/inboxActions.test.js` and `tests/inboxActionsRoutes.test.js` both passed locally.

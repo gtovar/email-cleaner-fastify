@@ -98,6 +98,7 @@ Executes direct user-initiated Inbox actions for one or more emails.
 * Separate from suggestion confirmation.
 * Intended for explicit Inbox operations initiated from the frontend Inbox surface.
 * Records action history with `details.source = "inbox"`.
+* Preserves per-item outcomes even if ActionHistory persistence fails after item execution completes.
 
 #### Request
 
@@ -124,30 +125,27 @@ Content-Type: application/json
 ```json
 {
   "success": true,
-  "processed": 2,
-  "emailIds": ["18c8f6e...", "18c8f7a..."],
+  "execution": "partial",
   "action": "archive",
   "source": "inbox",
-  "data": [
-    {
-      "userId": "user-123",
-      "emailId": "18c8f6e...",
-      "action": "archive",
-      "timestamp": "2026-03-10T07:35:00.000Z",
-      "details": {
-        "source": "inbox",
-        "gmailResponse": {
-          "simulated": true,
-          "emailId": "18c8f6e...",
-          "action": "archive",
-          "source": "inbox"
-        },
-        "note": "Executed from inbox direct action flow"
-      }
-    }
+  "summary": {
+    "total": 2,
+    "processed": 1,
+    "failed": 1
+  },
+  "results": [
+    { "emailId": "18c8f6e...", "status": "ok" },
+    { "emailId": "18c8f7a...", "status": "error", "reason": "not_found" }
   ]
 }
 ```
+
+Response rules:
+
+* `success` represents request-level execution, not “all items succeeded”.
+* `execution` is one of `full`, `partial`, or `none`.
+* `results` preserves one outcome per requested email ID.
+* If ActionHistory persistence fails after one or more items were already executed, the response still preserves the computed per-item outcomes instead of collapsing everything into `system_error`.
 
 #### Possible Status Codes
 

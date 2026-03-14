@@ -154,8 +154,16 @@ describe('inboxActionsService', () => {
     });
   });
 
-  test('returns success false when persistence fails systemically', async () => {
+  test('preserves per-item outcomes when persistence fails after execution', async () => {
     bulkCreate.mockRejectedValueOnce(new Error('db unavailable'));
+    executeInboxAction.mockImplementation(async (emailId, action) => {
+      if (emailId === 'email-2') {
+        const error = new Error('Missing email');
+        error.code = 'not_found';
+        throw error;
+      }
+      return { simulated: true, emailId, action };
+    });
 
     const result = await service.runActions({
       emailIds: ['email-1', 'email-2'],
@@ -164,18 +172,18 @@ describe('inboxActionsService', () => {
     });
 
     expect(result).toEqual({
-      success: false,
-      execution: 'none',
+      success: true,
+      execution: 'partial',
       action: 'archive',
       source: 'inbox',
       summary: {
         total: 2,
-        processed: 0,
-        failed: 2,
+        processed: 1,
+        failed: 1,
       },
       results: [
-        { emailId: 'email-1', status: 'error', reason: 'system_error' },
-        { emailId: 'email-2', status: 'error', reason: 'system_error' },
+        { emailId: 'email-1', status: 'ok' },
+        { emailId: 'email-2', status: 'error', reason: 'not_found' },
       ],
     });
   });

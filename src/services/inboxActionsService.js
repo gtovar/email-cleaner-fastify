@@ -32,57 +32,28 @@ export const inboxActionsService = ({ models, logger }) => ({
 
     const rows = [];
     const results = [];
-
-    try {
-      for (const emailId of emailIds) {
-        try {
-          const gmailResult = await executeInboxAction(emailId, action);
-          rows.push({
-            userId,
-            emailId,
-            action,
-            timestamp: new Date().toISOString(),
-            details: {
-              source: 'inbox',
-              gmailResponse: gmailResult,
-              note: 'Executed from inbox direct action flow',
-            },
-          });
-          results.push({ emailId, status: 'ok' });
-        } catch (error) {
-          results.push({
-            emailId,
-            status: 'error',
-            reason: normalizeItemFailureReason(error),
-          });
-        }
-      }
-
-      if (rows.length > 0) {
-        await models.ActionHistory.bulkCreate(rows);
-      }
-    } catch (error) {
-      logger?.error?.(
-        { userId, action, count: emailIds.length, source: 'inbox', err: error },
-        'Inbox bulk action failed before valid item processing completed'
-      );
-
-      return {
-        success: false,
-        execution: 'none',
-        action,
-        source: 'inbox',
-        summary: {
-          total: emailIds.length,
-          processed: 0,
-          failed: emailIds.length,
-        },
-        results: emailIds.map((emailId) => ({
+    for (const emailId of emailIds) {
+      try {
+        const gmailResult = await executeInboxAction(emailId, action);
+        rows.push({
+          userId,
+          emailId,
+          action,
+          timestamp: new Date().toISOString(),
+          details: {
+            source: 'inbox',
+            gmailResponse: gmailResult,
+            note: 'Executed from inbox direct action flow',
+          },
+        });
+        results.push({ emailId, status: 'ok' });
+      } catch (error) {
+        results.push({
           emailId,
           status: 'error',
-          reason: 'system_error',
-        })),
-      };
+          reason: normalizeItemFailureReason(error),
+        });
+      }
     }
 
     const summary = {
@@ -91,6 +62,17 @@ export const inboxActionsService = ({ models, logger }) => ({
       failed: results.filter((result) => result.status === 'error').length,
     };
     const execution = deriveExecution(summary);
+
+    if (rows.length > 0) {
+      try {
+        await models.ActionHistory.bulkCreate(rows);
+      } catch (error) {
+        logger?.error?.(
+          { userId, action, count: emailIds.length, source: 'inbox', execution, summary, err: error },
+          'Inbox action history persistence failed after item execution; preserving per-item outcomes'
+        );
+      }
+    }
 
     logger?.info?.(
       { userId, action, count: emailIds.length, source: 'inbox', execution, summary },

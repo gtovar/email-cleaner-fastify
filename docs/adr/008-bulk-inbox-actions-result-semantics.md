@@ -63,6 +63,8 @@ Response rules:
 - `summary.processed` equals the number of items with `status: ok`.
 - `summary.failed` equals the number of items with `status: error`.
 - `results` must preserve item-level status for every requested email ID.
+- Post-action persistence failures must not rewrite already-computed per-item outcomes into blanket `system_error` results.
+- If item execution already happened, the response must preserve the computed `results`, `summary`, and `execution` semantics even when ActionHistory persistence later fails.
 
 ### Frontend reconciliation rule
 
