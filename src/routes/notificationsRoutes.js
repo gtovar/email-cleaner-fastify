@@ -89,7 +89,7 @@ export default async function (fastify, opts) {
     properties: {
       userId: { type: 'string' },
       emailId: { type: 'string' },
-      action: { type: 'string', enum: ['accept', 'reject', 'delete', 'archive', 'move'] },
+      action: { type: 'string', enum: ['accept', 'reject', 'delete', 'archive', 'move', 'mark_unread'] },
       timestamp: { type: 'string', format: 'date-time' },
       details: { type: 'object' }
     }
@@ -112,7 +112,11 @@ export default async function (fastify, opts) {
     properties: {
       type: { type: 'string' },
       userId: { type: 'string' },
-      summary: { type: 'object' },
+      summary: {
+        type: 'object',
+        additionalProperties: true,
+        description: 'Persisted event summary payload; shape varies by canonical event type'
+      },
       createdAt: { type: 'string', format: 'date-time', description: 'timestamps: true ensures createdAt exists' },
       updatedAt: { type: 'string', format: 'date-time' }
     }

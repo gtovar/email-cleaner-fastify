@@ -1,0 +1,86 @@
+const FIXTURE_USER_EMAIL = 'e2e-user@example.com';
+
+const FIXTURE_EMAILS = [
+  {
+    id: 'email-hu19-archive',
+    subject: '[E2E-HU19] Archive Target',
+    from: 'E2E Sender <archive@example.com>',
+    date: '2026-03-10T08:00:00.000Z',
+    labels: ['INBOX', 'UNREAD'],
+    isRead: false,
+    category: 'primary',
+    attachmentSizeMb: 0,
+    snippet: 'Archive me from the Inbox row-level flow.',
+    hasAttachment: false,
+    size: 1024,
+  },
+  {
+    id: 'email-hu19-delete',
+    subject: '[E2E-HU19] Delete Target',
+    from: 'E2E Sender <delete@example.com>',
+    date: '2026-03-10T09:00:00.000Z',
+    labels: ['INBOX', 'UNREAD'],
+    isRead: false,
+    category: 'promotions',
+    attachmentSizeMb: 0,
+    snippet: 'Delete me from the Inbox row-level flow.',
+    hasAttachment: false,
+    size: 2048,
+  },
+  {
+    id: 'email-hu19-read',
+    subject: '[E2E-HU19] Mark Unread Target',
+    from: 'E2E Sender <read@example.com>',
+    date: '2026-03-10T10:00:00.000Z',
+    labels: ['INBOX'],
+    isRead: true,
+    category: 'updates',
+    attachmentSizeMb: 0,
+    snippet: 'Mark me as unread from the Inbox row-level flow.',
+    hasAttachment: false,
+    size: 3072,
+  },
+];
+
+const decodePageToken = (pageToken) => {
+  if (!pageToken) return 0;
+  const [, rawOffset] = String(pageToken).split(':');
+  const offset = Number(rawOffset);
+  return Number.isFinite(offset) && offset >= 0 ? offset : 0;
+};
+
+const encodePageToken = (offset) => `fixture:${offset}`;
+
+export const fixtureInboxSource = {
+  async listEmails({ email, unread, olderThan, category, minAttachmentSize, pageToken, maxResults }) {
+    if (email !== FIXTURE_USER_EMAIL) {
+      return {
+        emails: [],
+        nextPageToken: null,
+        total: 0,
+      };
+    }
+
+    const filtered = FIXTURE_EMAILS.filter((item) => {
+      if (unread && item.isRead) return false;
+      if (category && item.category !== category) return false;
+      if (minAttachmentSize && item.attachmentSizeMb < Number(minAttachmentSize)) return false;
+      // The HU19 browser flow does not depend on temporal filters, so fixture mode leaves olderThan inert.
+      void olderThan;
+      return true;
+    });
+
+    const offset = decodePageToken(pageToken);
+    const limit = Number.isFinite(Number(maxResults)) ? Number(maxResults) : 20;
+    const emails = filtered.slice(offset, offset + limit).map((item) => ({ ...item }));
+    const nextOffset = offset + limit;
+
+    return {
+      emails,
+      nextPageToken: nextOffset < filtered.length ? encodePageToken(nextOffset) : null,
+      total: filtered.length,
+    };
+  },
+};
+
+export const fixtureInboxUserEmail = FIXTURE_USER_EMAIL;

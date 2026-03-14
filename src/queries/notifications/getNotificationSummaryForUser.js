@@ -4,8 +4,7 @@ import { DOMAIN_EVENTS } from '../../events/eventBus.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-function buildPeriodWindow(period) {
-  const now = new Date();
+function buildPeriodWindow(period, now = new Date()) {
   if (period === 'daily') {
     return { period, start: new Date(now.getTime() - DAY_MS), end: now };
   }
@@ -35,10 +34,16 @@ function createEmptySummary({ period, start, end }) {
  * Fuente: NotificationEvent (summary agregado por eventos de dominio).
  *
  * Firma:
- *   getNotificationSummaryForUser({ models, userId, period })
+ *   getNotificationSummaryForUser({ models, userId, period, now })
+ *
+ * Temporal contract:
+ * - `daily` = rolling 24-hour UTC window ending at `now`
+ * - `weekly` = rolling 7-day UTC window ending at `now`
+ * - windows are inclusive on both boundaries because Sequelize uses `Op.between`
+ * - filtering is based on persisted `NotificationEvent.createdAt`, not domain `generatedAt`
  */
-export async function getNotificationSummaryForUser({ models, userId, period } = {}) {
-  const { period: normalizedPeriod, start, end } = buildPeriodWindow(period);
+export async function getNotificationSummaryForUser({ models, userId, period, now } = {}) {
+  const { period: normalizedPeriod, start, end } = buildPeriodWindow(period, now ? new Date(now) : new Date());
   const NotificationEvent = models?.NotificationEvent;
 
   if (!NotificationEvent?.findAll) {

@@ -98,6 +98,7 @@ Additional fields MAY exist depending on the event and builder.
 
 * Consumers SHOULD NOT assume that `createdAt/updatedAt` exist on the in-memory domain event.
 * Consumers MAY rely on `createdAt/updatedAt` in the **persisted** `NotificationEvent` records.
+* `/api/v1/notifications/summary` uses persisted `createdAt` for time windows, with rolling UTC windows (`daily` = last 24 hours, `weekly` = last 7 days) and inclusive boundaries.
 
 ---
 

@@ -87,3 +87,61 @@ Last updated: 2026-01-12 01:53 CST
 ### 2026-01-19 — CI added and lint fixed
 - Added GitHub Actions CI (lint + test) for PRs and `develop`.
 - Added eslint config so CI lint step runs.
+
+### 2026-03-09 — `/api/v1/notifications/events` revalidated
+- Added a real route/service integration test for `/api/v1/notifications/events` using auth, pagination, filters, and authenticated-user fallback when `userId` is omitted.
+- Fixed the route response schema so event `summary` payloads keep their real fields instead of being serialized as empty objects.
+- Confirmed the open HU17 risk is no longer the events feed contract itself; the remaining risk is timezone semantics for summary windowing based on persisted `createdAt`.
+- Removed dead `src/queries/notifications/getEventsQuery.js` to avoid a false implementation path for the events feed.
+
+### 2026-03-09 — HU17 closed
+- Defined the temporal contract for `/api/v1/notifications/summary`: `daily` = rolling last 24 hours UTC, `weekly` = rolling last 7 days UTC, both over persisted `NotificationEvent.createdAt`.
+- Added `tests/getNotificationSummaryForUser.test.js` to verify UTC window boundaries, inclusive behavior, and all-time fallback when `period` is omitted.
+- Updated API and event contract docs so the remaining ambiguity around summary time windows is gone.
+
+### 2026-03-10 — Backend checkpoint refreshed
+- Revalidated the full backend Jest suite at 15 suites / 55 tests.
+- Updated `PROJECT_STATE.md` and `README_REENTRY.md` so the next backend task is anchored to the current n8n no-op listener checkpoint.
+
+### 2026-03-10 — HU19 registered
+- Registered a backend feature candidate for Inbox direct and bulk actions after confirming the current mismatch between notifications route enum, service behavior, and API documentation.
+- Backend next step now points to defining the HU19 contract before implementation.
+
+### 2026-03-10 — ADR 007 proposed
+- Proposed a dedicated contract for Inbox direct actions instead of reusing `POST /api/v1/notifications/confirm`.
+- Backend next step now points to implementing the proposed Inbox-action flow after contract review.
+
+### 2026-03-10 — HU19 backend contract implemented
+- Added `POST /api/v1/inbox/actions` with a dedicated controller and service, separate from suggestion confirmation.
+- Added targeted tests for the Inbox-action service and route contract.
+- Accepted ADR 007 and added an ActionHistory enum migration for `mark_unread`.
+
+### 2026-03-10 — HU19 local Inbox seam added
+- `/api/v1/emails` now resolves its Inbox source through a provider seam instead of talking to Gmail directly inside the controller.
+- Added a deterministic fixture Inbox source for `e2e-user@example.com` so local/E2E runs can validate HU19 without Gmail or live OAuth.
+- Added a helper script to mint local `session_token` cookies for the same E2E user.
+
+### 2026-03-10 — HU19 row-level browser flow validated
+- The React row-level Inbox flow now passes local Playwright validation for `archive`, `delete`, and `mark_unread` against the fixture Inbox source and the dedicated `/api/v1/inbox/actions` contract.
+- Backend risk remains limited to stubbed Gmail side effects and the pending bulk-action slice.
+
+### 2026-03-10 — HU19 bulk semantics frozen
+- Added ADR 008 to define partial-success semantics, per-item result reporting, and local reconciliation rules for bulk Inbox actions.
+- Backend next step now points to implementing the bulk response contract before widening the browser suite.
+
+### 2026-03-10 — HU19 bulk backend contract updated
+- `/api/v1/inbox/actions` now returns ADR 008 fields for bulk execution: `execution`, `summary`, and `results`.
+- Added targeted backend tests for `full`, `partial`, `none`, and systemic outcomes.
+
+### 2026-03-11 — HU19 bulk frontend now consumes ADR 008
+- The React Inbox bulk slice now calls `/api/v1/inbox/actions` with multi-select actions and local reconciliation based on `results`.
+- The remaining HU19 gap is browser validation of the new bulk scenarios against the fixture Inbox environment.
+
+### 2026-03-11 — HU19 closed locally
+- The full Playwright Inbox suite passed locally against the fixture Inbox source for 3 row-level and 3 bulk scenarios.
+- Backend contract and frontend behavior now align for the complete local HU19 scope.
+
+### 2026-03-13 — HU19 P1 outcome-preservation fix
+- Fixed the PR #27 P1 bug where `ActionHistory.bulkCreate` persistence errors rewrote already-computed Inbox item outcomes into blanket `system_error` failures.
+- `src/services/inboxActionsService.js` now preserves the computed `results`, `summary`, and `execution` values after post-action persistence failures, while logging the persistence problem server-side.
+- Updated ADR 008, `docs/API_REFERENCE.md`, and targeted Jest coverage in `tests/inboxActions.test.js`; `tests/inboxActions.test.js` and `tests/inboxActionsRoutes.test.js` both passed locally.
