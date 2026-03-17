@@ -1,7 +1,7 @@
 ## Sprint_Log.md — Backend Fastify
 
 (Email Cleaner & Smart Notifications — Backend)
-Last updated: 2026-01-12 01:53 CST
+Last updated: 2026-03-17 00:25 CST
 
 ---
 
@@ -175,6 +175,10 @@ Last updated: 2026-01-12 01:53 CST
 - Added a targeted regression test for emails that combine strong negative cues with electricity-related sender/content signals.
 - Updated `src/services/receiptDetection/electricityReceiptClassifier.js` so mixed-signal cases fall back to `unknown` instead of over-classifying to `invoice_electricity`.
 - Verified the targeted Jest command `npm test -- electricityReceiptClassifier.test.js` passes locally with 10/10 tests.
+
+### 2026-03-17 — HU_01 integrated on develop
+- PR #32 was merged into `develop`, so the backend-only `rules_v1` electricity-receipt detector is no longer a pending feature branch checkpoint.
+- The backend checkpoint now treats HU_01 as integrated state, and the next documented backend step is freezing HU_02 as a scoped extraction spike before implementation.
 
 ### [2026-03-15] Session Close
 - **Done:** Hardened Sprint_Log multiline formatting

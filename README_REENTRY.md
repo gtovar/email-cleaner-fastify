@@ -21,8 +21,8 @@
 - Source of truth for factual state: `PROJECT_STATE.md`
 - Backend tests last verified PASS for the HU_01 `rules_v1` targeted slice on 2026-03-17 (`tests/electricityReceiptClassifier.test.js`, 10/10)
 - HU17, HU18, and HU19 are closed on `develop` for the documented local/browser scope
-- A new backend-only Fase 2 slice exists locally: `src/services/receiptDetection/electricityReceiptClassifier.js`
-- Next action: push the mixed-signal HU_01 fix and update the open PR for review against `develop`
+- HU_01 is already integrated on `develop` as a backend-only Fase 2 slice: `src/services/receiptDetection/electricityReceiptClassifier.js`
+- Next action: freeze HU_02 as a scoped extraction spike before opening implementation work
 - If the checkpoint feels stale, verify directly in `src/index.js`, `src/routes/*`, `src/services/*`, and `tests/*`
 
 ---
