@@ -93,6 +93,15 @@ export function classifyElectricityReceipt(input) {
     };
   }
 
+  if (strongNegativeSignals > 0 && (senderSignals > 0 || contentSignals > 0)) {
+    return {
+      type: ELECTRICITY_RECEIPT_TYPES.UNKNOWN,
+      confidence: ELECTRICITY_RECEIPT_CONFIDENCE.LOW,
+      method: ELECTRICITY_RECEIPT_METHOD,
+      reason: ELECTRICITY_RECEIPT_REASON.INSUFFICIENT_SIGNAL,
+    };
+  }
+
   if (senderSignals >= 1 && contentSignals >= 1) {
     return {
       type: ELECTRICITY_RECEIPT_TYPES.INVOICE,

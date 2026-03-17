@@ -128,6 +128,21 @@ describe('classifyElectricityReceipt', () => {
     expect(classifyElectricityReceipt(input)).toEqual(expected);
   });
 
+  it('returns unknown when strong negative and positive electricity signals are mixed', () => {
+    expect(
+      classifyElectricityReceipt({
+        subject: 'Promoción CFE: descuento en tu factura de luz',
+        sender: 'promo@cfe.mx',
+        body: 'Unsubscribe aquí. Consulta tu factura de luz y tu pago pendiente.',
+      })
+    ).toEqual({
+      type: ELECTRICITY_RECEIPT_TYPES.UNKNOWN,
+      confidence: ELECTRICITY_RECEIPT_CONFIDENCE.LOW,
+      method: ELECTRICITY_RECEIPT_METHOD,
+      reason: ELECTRICITY_RECEIPT_REASON.INSUFFICIENT_SIGNAL,
+    });
+  });
+
   it('throws when input is not an object', () => {
     expect(() => classifyElectricityReceipt(null)).toThrow(TypeError);
   });

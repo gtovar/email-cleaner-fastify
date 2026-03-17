@@ -1,10 +1,10 @@
 # PROJECT_STATE.md
-Last updated: 2026-03-16 23:27 CST — Commit: pending
+Last updated: 2026-03-17 00:07 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
-SNAPSHOT_DATE: 2026-03-16 23:27 CST
+SNAPSHOT_DATE: 2026-03-17 00:07 CST
 COMMIT: pending
 ENVIRONMENT: local
 
@@ -14,9 +14,9 @@ WORKING_TREE_STATUS: Dirty (modified files present)
 
 RUNTIME: Node.js (Fastify)
 DB: PostgreSQL via Sequelize
-TEST_STATUS: PASS (Jest targeted HU01 rules_v1 validation; 9/9 tests passing)
+TEST_STATUS: PASS (Jest targeted HU01 rules_v1 validation; 10/10 tests passing)
 
-LAST_VERIFIED_TESTS_DATE: 2026-03-16 23:27 CST
+LAST_VERIFIED_TESTS_DATE: 2026-03-17 00:07 CST
 
 ---
 
@@ -152,14 +152,16 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-16 23:27 CST
 - Contract: `{ subject, sender, body } -> { type, confidence, method, reason }`
 
 **Open items:**
-- Commit the current service + tests slice after the backend checkpoint docs are staged by governance.
+- Review and merge the open HU_01 branch PR after the mixed-signal false-positive fix.
 
 **Technical risks:**
 - The first ruleset is intentionally conservative and may need broader sender/content signals beyond initial `CFE`-leaning patterns.
 - Generic payment language can still create false positives if future rule expansion drops the current `unknown` fallback discipline.
+- Mixed sender/content evidence with stronger negative semantics now falls back to `unknown`, but future rule expansion still needs explicit precedence rules to avoid reintroducing over-classification.
 
 **Recent change:**
 - Added a backend-only `rules_v1` classifier for local electricity-receipt detection with an 8-case simulated dataset plus invalid-input coverage; targeted Jest validation passed with 9/9 tests (commit: pending).
+- Fixed the mixed-signal false-positive path so emails containing strong negative cues plus electricity cues no longer classify as `invoice_electricity`; targeted Jest validation now passes with 10/10 tests (commit: pending).
 
 ---
 
@@ -172,7 +174,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-16 23:27 CST
 
 ## 6. Next Immediate Action
 
-➡️ Commit the HU_01 `rules_v1` service + tests slice after staging the factual backend checkpoint docs required by governance
+➡️ Push the mixed-signal HU_01 fix and update the open PR for review against `develop`
 
 ---
 
@@ -192,3 +194,4 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-16 23:27 CST
 - 2026-03-13 23:42 CST — Fixed the PR #27 P1 outcome-loss bug so `bulkCreate` persistence errors no longer overwrite already-computed per-item Inbox results; targeted Jest validation passed for `tests/inboxActions.test.js` and `tests/inboxActionsRoutes.test.js` (commit: pending)
 - 2026-03-14 02:05 CST — Merged the HU19 backend branch into `develop`, including the P1 outcome-preservation fix, Node 24-compatible GitHub Actions refs, and the backend governance-doc alignment (commit: pending)
 - 2026-03-16 23:27 CST — Added the backend-only HU_01 `rules_v1` electricity-receipt classifier plus its targeted 8-case Jest dataset, and verified `tests/electricityReceiptClassifier.test.js` passes locally with 9/9 tests (commit: pending)
+- 2026-03-17 00:07 CST — Fixed the HU_01 mixed-signal false-positive path so strong negative cues plus electricity cues now fall back to `unknown`; `tests/electricityReceiptClassifier.test.js` passes locally with 10/10 tests (commit: pending)

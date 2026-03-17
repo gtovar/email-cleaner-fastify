@@ -171,6 +171,11 @@ Last updated: 2026-01-12 01:53 CST
 - Fixed two blocking rule issues during implementation: ambiguous emails no longer fall through to `not_invoice`, and work-email negatives now return `medium` confidence instead of `high`.
 - Verified the targeted Jest command `npm test -- electricityReceiptClassifier.test.js` passes locally with 9/9 tests.
 
+### 2026-03-17 — HU_01 mixed-signal false-positive fix
+- Added a targeted regression test for emails that combine strong negative cues with electricity-related sender/content signals.
+- Updated `src/services/receiptDetection/electricityReceiptClassifier.js` so mixed-signal cases fall back to `unknown` instead of over-classifying to `invoice_electricity`.
+- Verified the targeted Jest command `npm test -- electricityReceiptClassifier.test.js` passes locally with 10/10 tests.
+
 ### [2026-03-15] Session Close
 - **Done:** Hardened Sprint_Log multiline formatting
 - **Done:** Improved repo scope fallback to a single dirty repo
