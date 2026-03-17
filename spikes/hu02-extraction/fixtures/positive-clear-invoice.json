@@ -1,0 +1,12 @@
+{
+  "id": "positive-clear-invoice",
+  "label": "positive",
+  "subject": "Recibo de luz CFE - fecha límite de pago 25 marzo 2026",
+  "body": "Estimado cliente. Total a pagar: $1,248.50. Fecha límite de pago: 25/03/2026. Servicio de energía eléctrica.",
+  "html": null,
+  "expected": {
+    "amount": "1248.50",
+    "due_date": "2026-03-25"
+  },
+  "notes": "Caso positivo claro con monto y fecha en formato directo."
+}

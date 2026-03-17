@@ -1,0 +1,12 @@
+{
+  "id": "ambiguous-services-statement",
+  "label": "ambiguous",
+  "subject": "Estado de cuenta de servicios",
+  "body": "Ya puedes consultar tu estado de cuenta del periodo actual. Revisa consumos, movimientos y opciones de pago en línea.",
+  "html": null,
+  "expected": {
+    "amount": null,
+    "due_date": null
+  },
+  "notes": "Contenido administrativo genérico, sin estructura suficiente para extraer amount y due_date con seguridad."
+}

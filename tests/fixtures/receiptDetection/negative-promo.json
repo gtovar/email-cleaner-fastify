@@ -1,0 +1,12 @@
+{
+  "id": "negative-promo",
+  "label": "negative",
+  "subject": "Aprovecha descuentos exclusivos este fin de semana",
+  "body": "Promoción válida por tiempo limitado. Obtén beneficios y descuentos especiales en productos seleccionados.",
+  "html": null,
+  "expected": {
+    "amount": null,
+    "due_date": null
+  },
+  "notes": "Caso negativo claro, sin contexto de factura."
+}

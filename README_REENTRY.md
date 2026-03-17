@@ -22,7 +22,8 @@
 - Backend tests last verified PASS for the HU_01 `rules_v1` targeted slice on 2026-03-17 (`tests/electricityReceiptClassifier.test.js`, 10/10)
 - HU17, HU18, and HU19 are closed on `develop` for the documented local/browser scope
 - HU_01 is already integrated on `develop` as a backend-only Fase 2 slice: `src/services/receiptDetection/electricityReceiptClassifier.js`
-- Next action: freeze HU_02 as a scoped extraction spike before opening implementation work
+- HU_02 now has a dedicated route + service: `POST /api/v1/receipt-detection/extract` backed by `src/services/receiptDetection/receiptDetectionService.js`, `tests/fixtures/receiptDetection/`, and the Node-first extractor (`electricityInvoiceExtractor.js`). The contract returns `{ amount, due_date }` with `null` fallback for ambiguous, negative, and empty inputs; structurally invalid payloads return 400.
+- Next action: wire this route into the HU_02 UI/workflow only after the production path is validated; leave the spike artifacts in `spikes/hu02-extraction/` for reference.
 - If the checkpoint feels stale, verify directly in `src/index.js`, `src/routes/*`, `src/services/*`, and `tests/*`
 
 ---
