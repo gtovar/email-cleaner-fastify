@@ -1,7 +1,7 @@
 ## Sprint_Log.md — Backend Fastify
 
 (Email Cleaner & Smart Notifications — Backend)
-Last updated: 2026-03-17 00:25 CST
+Last updated: 2026-03-17 03:55 CST
 
 ---
 
@@ -187,3 +187,7 @@ Last updated: 2026-03-17 00:25 CST
 - **Learned:** Multiline log input must be normalized before append
 - **Status:** PAUSADA
 - **Next:** Review hardening output and decide whether repo_scope needs explicit override support
+### 2026-03-17 — HU_02 receipt-detection route landed
+- Added POST `/api/v1/receipt-detection/extract` with a thin controller/service wiring that uses `src/services/receiptDetection/electricityInvoiceExtractor.js` and returns `{ amount, due_date }` with `null` fallback for ambiguous/negative/empty inputs.
+- Added `tests/receiptDetectionRoutes.test.js` pointing at `tests/fixtures/receiptDetection/` to cover positive/ambiguous/negative/empty behaviors plus the invalid payload 400 case.
+- Route now lives independently of `spikes/hu02-extraction/`, which is kept as historical reference only.
