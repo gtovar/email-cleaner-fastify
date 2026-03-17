@@ -1,22 +1,22 @@
 # PROJECT_STATE.md
-Last updated: 2026-03-17 00:25 CST — Commit: pending
+Last updated: 2026-03-17 03:30 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
-SNAPSHOT_DATE: 2026-03-17 00:25 CST
+SNAPSHOT_DATE: 2026-03-17 03:30 CST
 COMMIT: pending
 ENVIRONMENT: local
 
 REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
-BRANCH: docs/phase2-hu01-close-hu02-spike-freeze
+BRANCH: feature/hu02-node-extraction
 WORKING_TREE_STATUS: Dirty (modified files present)
 
 RUNTIME: Node.js (Fastify)
 DB: PostgreSQL via Sequelize
 TEST_STATUS: PASS (Jest targeted HU01 rules_v1 validation; 10/10 tests passing)
 
-LAST_VERIFIED_TESTS_DATE: 2026-03-17 00:25 CST
+LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 
 ---
 
@@ -31,6 +31,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 00:25 CST
 - Gmail OAuth client persists refreshed access tokens to the `Tokens` table.
 - OAuth tokens are encrypted at rest using `TOKEN_ENCRYPTION_KEY`.
 - A local rule-based electricity-receipt classifier now exists as an internal backend service using only `subject`, `sender`, and `body`, with deterministic `invoice_electricity | not_invoice | unknown` output.
+- A Node-first invoice-extraction service now lives in `src/services/receiptDetection/electricityInvoiceExtractor.js` with fixtures-driven regression coverage to keep the `amount | due_date` contract and `null` fallback explicit before wiring the production slice.
 
 ---
 
@@ -162,6 +163,25 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 00:25 CST
 **Recent change:**
 - Added a backend-only `rules_v1` classifier for local electricity-receipt detection with an 8-case simulated dataset plus invalid-input coverage, then fixed the mixed-signal false-positive path so emails containing strong negative cues plus electricity cues now fall back to `unknown`; targeted Jest validation passes with 10/10 tests, and the full HU_01 slice is merged into `develop` via PR #32 (commit: pending).
 
+### HU_02 (Fase 2) — Local Node-first amount & due_date extraction
+
+**Status:** IN PROGRESS (production slice in `feature/hu02-node-extraction`)
+
+**Evidence:**
+- Service: `src/services/receiptDetection/electricityInvoiceExtractor.js`
+- Tests: `tests/electricityInvoiceExtractor.test.js` over the six spike fixtures
+- Spike artifacts: `spikes/hu02-extraction/` README, fixtures, runner, and result
+
+**Open items:**
+- Harden backend wiring for the extractor with targeted tests and service documentation
+- Keep fallback/backoff explicit if heuristics fail to find both fields
+
+**Technical risks:**
+- Heuristic parsing may need refinement as additional invoice variants arrive; keep the contract scoped and fall back to `null` when confidence is insufficient.
+
+**Recent change:**
+- Added the Node-first extractor service, fixture dataset, and regression test suite so the production slice can start from `feature/hu02-node-extraction` (commit: pending)
+
 ---
 
 ## 5. Current Technical Risks
@@ -173,7 +193,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 00:25 CST
 
 ## 6. Next Immediate Action
 
-➡️ Freeze HU_02 as a scoped extraction spike before opening implementation work
+➡️ Implement the Node-first HU_02 extraction service from `feature/hu02-node-extraction` with the locked contract/fallback before expanding to additional formats
 
 ---
 
@@ -195,3 +215,4 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 00:25 CST
 - 2026-03-16 23:27 CST — Added the backend-only HU_01 `rules_v1` electricity-receipt classifier plus its targeted 8-case Jest dataset, and verified `tests/electricityReceiptClassifier.test.js` passes locally with 9/9 tests (commit: pending)
 - 2026-03-17 00:07 CST — Fixed the HU_01 mixed-signal false-positive path so strong negative cues plus electricity cues now fall back to `unknown`; `tests/electricityReceiptClassifier.test.js` passes locally with 10/10 tests (commit: pending)
 - 2026-03-17 00:25 CST — HU_01 is now treated as integrated state on `develop` after PR #32 merged the backend-only detector and its follow-up false-positive fix; the next backend step is defining HU_02 as a scoped extraction spike before implementation (commit: pending)
+- 2026-03-17 03:30 CST — Node-first HU_02 extraction service + fixture suite landed, triggering `feature/hu02-node-extraction` for the production slice while the spike artifacts remain in `spikes/hu02-extraction/` (commit: pending)
