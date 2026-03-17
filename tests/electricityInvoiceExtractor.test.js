@@ -31,7 +31,8 @@ describe('electricityInvoiceExtractor', () => {
   });
 
   it('passes the base spike fixtures', () => {
-    expect(fixtures.length).toBe(6);
+    const labels = Array.from(new Set(fixtures.map((fixture) => fixture.label)));
+    expect(labels).toEqual(expect.arrayContaining(['positive', 'ambiguous', 'negative', 'empty']));
 
     for (const fixture of fixtures) {
       const actual = extractInvoiceFields({

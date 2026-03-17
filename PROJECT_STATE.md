@@ -1,10 +1,10 @@
 # PROJECT_STATE.md
-Last updated: 2026-03-17 03:30 CST — Commit: pending
+Last updated: 2026-03-17 03:45 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
-SNAPSHOT_DATE: 2026-03-17 03:30 CST
+SNAPSHOT_DATE: 2026-03-17 03:45 CST
 COMMIT: pending
 ENVIRONMENT: local
 
@@ -31,6 +31,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 - Gmail OAuth client persists refreshed access tokens to the `Tokens` table.
 - OAuth tokens are encrypted at rest using `TOKEN_ENCRYPTION_KEY`.
 - A local rule-based electricity-receipt classifier now exists as an internal backend service using only `subject`, `sender`, and `body`, with deterministic `invoice_electricity | not_invoice | unknown` output.
+- A Node-first extractor service now powers `HU_02` with the six spike fixtures plus an empty/malformed case run through `tests/electricityInvoiceExtractor.test.js`, keeping `amount`/`due_date` and the `null` fallback explicit before wiring the production slice.
 - A Node-first invoice-extraction service now lives in `src/services/receiptDetection/electricityInvoiceExtractor.js` with fixtures-driven regression coverage to keep the `amount | due_date` contract and `null` fallback explicit before wiring the production slice.
 
 ---
@@ -169,7 +170,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 
 **Evidence:**
 - Service: `src/services/receiptDetection/electricityInvoiceExtractor.js`
-- Tests: `tests/electricityInvoiceExtractor.test.js` over the six spike fixtures
+- Tests: `tests/electricityInvoiceExtractor.test.js` verifying the six spike fixtures plus the empty/malformed fixture for fallback coverage
 - Spike artifacts: `spikes/hu02-extraction/` README, fixtures, runner, and result
 
 **Open items:**
@@ -193,7 +194,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 
 ## 6. Next Immediate Action
 
-➡️ Implement the Node-first HU_02 extraction service from `feature/hu02-node-extraction` with the locked contract/fallback before expanding to additional formats
+➡️ Wire the Node-first extractor into HU_02 while keeping the locked contract/fallback and the regression suite over the spike fixtures plus the empty input in place
 
 ---
 
@@ -216,3 +217,4 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 - 2026-03-17 00:07 CST — Fixed the HU_01 mixed-signal false-positive path so strong negative cues plus electricity cues now fall back to `unknown`; `tests/electricityReceiptClassifier.test.js` passes locally with 10/10 tests (commit: pending)
 - 2026-03-17 00:25 CST — HU_01 is now treated as integrated state on `develop` after PR #32 merged the backend-only detector and its follow-up false-positive fix; the next backend step is defining HU_02 as a scoped extraction spike before implementation (commit: pending)
 - 2026-03-17 03:30 CST — Node-first HU_02 extraction service + fixture suite landed, triggering `feature/hu02-node-extraction` for the production slice while the spike artifacts remain in `spikes/hu02-extraction/` (commit: pending)
+- 2026-03-17 03:45 CST — Added `empty-malformed` fixture and regression test coverage so the Node-first extractor proves positive/ambiguous/negative/empty guardrails before wiring production contracts (commit: pending)

@@ -1,0 +1,12 @@
+{
+  "id": "empty-malformed",
+  "label": "empty",
+  "subject": "",
+  "body": "",
+  "html": null,
+  "expected": {
+    "amount": null,
+    "due_date": null
+  },
+  "notes": "Empty body/subject ensures fallback for malformed inputs."
+}
