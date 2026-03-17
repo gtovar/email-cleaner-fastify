@@ -1,0 +1,12 @@
+{
+  "id": "positive-payment-reminder",
+  "label": "positive",
+  "subject": "Recordatorio de pago de luz",
+  "body": "Le recordamos que su saldo pendiente es de $560.25. La fecha límite de pago es 15 abril 2026.",
+  "html": null,
+  "expected": {
+    "amount": "560.25",
+    "due_date": "2026-04-15"
+  },
+  "notes": "Caso positivo de recordatorio de pago con wording más narrativo."
+}
