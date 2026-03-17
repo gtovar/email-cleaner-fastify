@@ -170,7 +170,8 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 
 **Evidence:**
 - Service: `src/services/receiptDetection/electricityInvoiceExtractor.js`
-- Tests: `tests/electricityInvoiceExtractor.test.js` over the production fixtures in `tests/fixtures/receiptDetection/`, verifying the six spike cases plus the empty/malformed guardrail
+- Route/service: `src/routes/receiptDetectionRoutes.js`, `src/controllers/receiptDetectionController.js`, `src/services/receiptDetection/receiptDetectionService.js`
+- Integration test: `tests/receiptDetectionRoutes.test.js` (positive/ambiguous/negative/empty + 400 validation)
 - Spike artifacts: `spikes/hu02-extraction/` README, fixtures, runner, and result
 
 **Open items:**
@@ -194,7 +195,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 
 ## 6. Next Immediate Action
 
-➡️ Wire the Node-first extractor into HU_02 while keeping the locked contract/fallback and the regression suite over the spike fixtures plus the empty input in place
+➡️ Update `README_REENTRY.md` and `Sprint_Log.md` to announce the new HU_02 receipt-detection route after the production wiring landed
 
 ---
 
@@ -218,3 +219,4 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 - 2026-03-17 00:25 CST — HU_01 is now treated as integrated state on `develop` after PR #32 merged the backend-only detector and its follow-up false-positive fix; the next backend step is defining HU_02 as a scoped extraction spike before implementation (commit: pending)
 - 2026-03-17 03:30 CST — Node-first HU_02 extraction service + fixture suite landed, triggering `feature/hu02-node-extraction` for the production slice while the spike artifacts remain in `spikes/hu02-extraction/` (commit: pending)
 - 2026-03-17 03:45 CST — Added `empty-malformed` fixture and regression test coverage so the Node-first extractor proves positive/ambiguous/negative/empty guardrails before wiring production contracts (commit: pending)
+- 2026-03-17 03:55 CST — Added POST `/api/v1/receipt-detection/extract`, the thin controller/service wiring, and integration test coverage hitting the production fixtures (commit: pending)

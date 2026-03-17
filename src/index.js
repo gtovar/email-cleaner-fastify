@@ -7,6 +7,7 @@ import emailRoutes from './routes/emailRoutes.js';
 import suggestionRoutes from './routes/suggestionRoutes.js';
 import inboxRoutes from './routes/inboxRoutes.js';
 import notificationsRoutes from './routes/notificationsRoutes.js';
+import receiptDetectionRoutes from './routes/receiptDetectionRoutes.js';
 import cors from '@fastify/cors';
 import eventBusPlugin from './plugins/eventBus.js';
 import cookie from '@fastify/cookie';
@@ -66,6 +67,7 @@ const createServer = async () => {
   await fastify.register(suggestionRoutes, { prefix: "/api/v1"});
   await fastify.register(inboxRoutes, { prefix: '/api/v1/inbox' });
   await fastify.register(notificationsRoutes, { prefix: "/api/v1/notifications" });
+  await fastify.register(receiptDetectionRoutes, { prefix: '/api/v1' });
 
   fastify.get('/', async (request, reply) => {
     return { message: '¡Email Cleaner Fastify corriendo OK con arquitectura modular!' };
@@ -105,6 +107,8 @@ const start = async () => {
         process.exit(1);
     }
 };
+
+export { createServer };
 
 
 
