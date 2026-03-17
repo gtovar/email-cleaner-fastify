@@ -149,3 +149,37 @@ Last updated: 2026-01-12 01:53 CST
 ### 2026-03-14 — HU19 backend merged to develop
 - Merged the HU19 backend branch into `develop` after the PR #27 P1 fix, the GitHub Actions Node 24-compatibility update, and the backend governance-doc alignment all cleared review and CI.
 - Backend user-story tracking now treats HU19 as closed on `develop` for the documented local/browser scope; the next backend step is no longer a HU19 branch response.
+
+### [2026-03-15] Session Close
+- **Done:** - Implemented transactional close-session apply order
+- Verified active repo scope before write
+- **Learned:** Transactional close-session can prepare anchored doc updates before applying them in ordered writes
+- **Status:** PAUSADA
+- **Next:** Review transactional close-session output and decide whether to expand anchor coverage
+
+### [2026-03-15] Session Close
+- **Done:** Hardened Sprint_Log multiline formatting
+- **Done:** Improved repo scope fallback to a single dirty repo
+- **Learned:** Scope resolution should prefer concrete dirty repo evidence
+- **Learned:** Multiline log input must be normalized before append
+- **Status:** PAUSADA
+- **Next:** Review hardening output and decide whether repo_scope needs explicit override support
+
+### 2026-03-16 — HU_01 rules_v1 slice implemented
+- Added `src/services/receiptDetection/electricityReceiptClassifier.js` as a backend-only local classifier for electricity-bill detection using `subject`, `sender`, and `body`.
+- Added `tests/electricityReceiptClassifier.test.js` with the agreed 8-case simulated dataset plus invalid-input coverage.
+- Fixed two blocking rule issues during implementation: ambiguous emails no longer fall through to `not_invoice`, and work-email negatives now return `medium` confidence instead of `high`.
+- Verified the targeted Jest command `npm test -- electricityReceiptClassifier.test.js` passes locally with 9/9 tests.
+
+### 2026-03-17 — HU_01 mixed-signal false-positive fix
+- Added a targeted regression test for emails that combine strong negative cues with electricity-related sender/content signals.
+- Updated `src/services/receiptDetection/electricityReceiptClassifier.js` so mixed-signal cases fall back to `unknown` instead of over-classifying to `invoice_electricity`.
+- Verified the targeted Jest command `npm test -- electricityReceiptClassifier.test.js` passes locally with 10/10 tests.
+
+### [2026-03-15] Session Close
+- **Done:** Hardened Sprint_Log multiline formatting
+- **Done:** Improved repo scope fallback to a single dirty repo
+- **Learned:** Scope resolution should prefer concrete dirty repo evidence
+- **Learned:** Multiline log input must be normalized before append
+- **Status:** PAUSADA
+- **Next:** Review hardening output and decide whether repo_scope needs explicit override support

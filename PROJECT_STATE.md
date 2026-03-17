@@ -1,22 +1,22 @@
 # PROJECT_STATE.md
-Last updated: 2026-03-14 02:05 CST — Commit: pending
+Last updated: 2026-03-17 00:07 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
-SNAPSHOT_DATE: 2026-03-14 02:05 CST
+SNAPSHOT_DATE: 2026-03-17 00:07 CST
 COMMIT: pending
 ENVIRONMENT: local
 
 REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
-BRANCH: feat/hu19-backend-and-fixtures
+BRANCH: feat/hu01-electricity-receipt-rules-v1
 WORKING_TREE_STATUS: Dirty (modified files present)
 
 RUNTIME: Node.js (Fastify)
 DB: PostgreSQL via Sequelize
-TEST_STATUS: PASS (Jest targeted HU19 validation; merged to develop)
+TEST_STATUS: PASS (Jest targeted HU01 rules_v1 validation; 10/10 tests passing)
 
-LAST_VERIFIED_TESTS_DATE: 2026-03-13 23:42 CST
+LAST_VERIFIED_TESTS_DATE: 2026-03-17 00:07 CST
 
 ---
 
@@ -30,6 +30,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-13 23:42 CST
 - `/api/v1/notifications/summary` aggregates `NotificationEvent` records by period.
 - Gmail OAuth client persists refreshed access tokens to the `Tokens` table.
 - OAuth tokens are encrypted at rest using `TOKEN_ENCRYPTION_KEY`.
+- A local rule-based electricity-receipt classifier now exists as an internal backend service using only `subject`, `sender`, and `body`, with deterministic `invoice_electricity | not_invoice | unknown` output.
 
 ---
 
@@ -141,6 +142,27 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-13 23:42 CST
 - Preserved per-item outcomes when `ActionHistory.bulkCreate` fails after item execution, so post-action persistence errors no longer collapse successful destructive operations into blanket `system_error` results; targeted Jest validation passed for `tests/inboxActions.test.js` and `tests/inboxActionsRoutes.test.js` (commit: pending).
 - HU19 backend changes, ADR 007/008, CI workflow updates, and the backend governance docs are now merged into `develop` (commit: pending).
 
+### HU_01 (Fase 2) — Initial local electricity bill detection (backend-only rules_v1)
+
+**Status:** IN PROGRESS
+
+**Evidence:**
+- Service: `src/services/receiptDetection/electricityReceiptClassifier.js`
+- Tests: `tests/electricityReceiptClassifier.test.js`
+- Contract: `{ subject, sender, body } -> { type, confidence, method, reason }`
+
+**Open items:**
+- Review and merge the open HU_01 branch PR after the mixed-signal false-positive fix.
+
+**Technical risks:**
+- The first ruleset is intentionally conservative and may need broader sender/content signals beyond initial `CFE`-leaning patterns.
+- Generic payment language can still create false positives if future rule expansion drops the current `unknown` fallback discipline.
+- Mixed sender/content evidence with stronger negative semantics now falls back to `unknown`, but future rule expansion still needs explicit precedence rules to avoid reintroducing over-classification.
+
+**Recent change:**
+- Added a backend-only `rules_v1` classifier for local electricity-receipt detection with an 8-case simulated dataset plus invalid-input coverage; targeted Jest validation passed with 9/9 tests (commit: pending).
+- Fixed the mixed-signal false-positive path so emails containing strong negative cues plus electricity cues no longer classify as `invoice_electricity`; targeted Jest validation now passes with 10/10 tests (commit: pending).
+
 ---
 
 ## 5. Current Technical Risks
@@ -152,7 +174,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-13 23:42 CST
 
 ## 6. Next Immediate Action
 
-➡️ Choose the next backend-facing slice after HU19 merge and refresh the checkpoint only when that scope is decided.
+➡️ Push the mixed-signal HU_01 fix and update the open PR for review against `develop`
 
 ---
 
@@ -171,3 +193,5 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-13 23:42 CST
 - 2026-03-11 00:39 CST — HU19 closed for local contract/browser scope after the full Playwright suite passed against the fixture Inbox environment (commit: pending)
 - 2026-03-13 23:42 CST — Fixed the PR #27 P1 outcome-loss bug so `bulkCreate` persistence errors no longer overwrite already-computed per-item Inbox results; targeted Jest validation passed for `tests/inboxActions.test.js` and `tests/inboxActionsRoutes.test.js` (commit: pending)
 - 2026-03-14 02:05 CST — Merged the HU19 backend branch into `develop`, including the P1 outcome-preservation fix, Node 24-compatible GitHub Actions refs, and the backend governance-doc alignment (commit: pending)
+- 2026-03-16 23:27 CST — Added the backend-only HU_01 `rules_v1` electricity-receipt classifier plus its targeted 8-case Jest dataset, and verified `tests/electricityReceiptClassifier.test.js` passes locally with 9/9 tests (commit: pending)
+- 2026-03-17 00:07 CST — Fixed the HU_01 mixed-signal false-positive path so strong negative cues plus electricity cues now fall back to `unknown`; `tests/electricityReceiptClassifier.test.js` passes locally with 10/10 tests (commit: pending)

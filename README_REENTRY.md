@@ -19,9 +19,10 @@
 
 - Branch target: feature branches start from `develop`; avoid direct commits on `develop`
 - Source of truth for factual state: `PROJECT_STATE.md`
-- Backend tests last verified PASS through the HU19 merge on 2026-03-14
+- Backend tests last verified PASS for the HU_01 `rules_v1` targeted slice on 2026-03-17 (`tests/electricityReceiptClassifier.test.js`, 10/10)
 - HU17, HU18, and HU19 are closed on `develop` for the documented local/browser scope
-- Next action is no longer inside HU19; choose the next backend-facing slice before opening new implementation work
+- A new backend-only Fase 2 slice exists locally: `src/services/receiptDetection/electricityReceiptClassifier.js`
+- Next action: push the mixed-signal HU_01 fix and update the open PR for review against `develop`
 - If the checkpoint feels stale, verify directly in `src/index.js`, `src/routes/*`, `src/services/*`, and `tests/*`
 
 ---
@@ -45,6 +46,7 @@
 - `npm test -- getNotificationSummaryForUser.test.js`
 - `npm test -- inboxActions.test.js inboxActionsRoutes.test.js`
 - `npm test -- fixtureInboxSource.test.js emailsFixtureRoutes.integration.test.js`
+- `npm test -- electricityReceiptClassifier.test.js`
 
 ### Dev server
 - `npm run dev`
