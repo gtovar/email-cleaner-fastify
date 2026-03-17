@@ -170,7 +170,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 
 **Evidence:**
 - Service: `src/services/receiptDetection/electricityInvoiceExtractor.js`
-- Tests: `tests/electricityInvoiceExtractor.test.js` verifying the six spike fixtures plus the empty/malformed fixture for fallback coverage
+- Tests: `tests/electricityInvoiceExtractor.test.js` over the production fixtures in `tests/fixtures/receiptDetection/`, verifying the six spike cases plus the empty/malformed guardrail
 - Spike artifacts: `spikes/hu02-extraction/` README, fixtures, runner, and result
 
 **Open items:**

@@ -5,7 +5,7 @@ import { extractInvoiceFields } from '../src/services/receiptDetection/electrici
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const FIXTURES_DIR = path.resolve(__dirname, '../spikes/hu02-extraction/fixtures');
+const FIXTURES_DIR = path.resolve(__dirname, './fixtures/receiptDetection');
 
 async function loadFixtures() {
   const entries = await readdir(FIXTURES_DIR);

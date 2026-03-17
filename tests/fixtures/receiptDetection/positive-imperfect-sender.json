@@ -1,0 +1,12 @@
+{
+  "id": "positive-imperfect-sender",
+  "label": "positive",
+  "subject": "Tu recibo de energía ya está disponible",
+  "body": "Consulta tu recibo. Importe total: $987.00 MXN. Pagar antes del 02-04-2026 para evitar recargos.",
+  "html": null,
+  "expected": {
+    "amount": "987.00",
+    "due_date": "2026-04-02"
+  },
+  "notes": "Caso positivo donde el remitente ideal no importa; el contenido trae las señales fuertes."
+}

@@ -1,0 +1,12 @@
+{
+  "id": "ambiguous-payment",
+  "label": "ambiguous",
+  "subject": "Recuerda realizar tu pago",
+  "body": "Tu pago está pendiente. Ingresa a tu portal para consultar el detalle y evitar suspensión del servicio.",
+  "html": null,
+  "expected": {
+    "amount": null,
+    "due_date": null
+  },
+  "notes": "Correo relacionado con pago, pero sin monto ni fecha extraíbles."
+}
