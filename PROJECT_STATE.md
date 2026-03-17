@@ -1,22 +1,22 @@
 # PROJECT_STATE.md
-Last updated: 2026-03-17 00:07 CST — Commit: pending
+Last updated: 2026-03-17 00:25 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
-SNAPSHOT_DATE: 2026-03-17 00:07 CST
+SNAPSHOT_DATE: 2026-03-17 00:25 CST
 COMMIT: pending
 ENVIRONMENT: local
 
 REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
-BRANCH: feat/hu01-electricity-receipt-rules-v1
+BRANCH: docs/phase2-hu01-close-hu02-spike-freeze
 WORKING_TREE_STATUS: Dirty (modified files present)
 
 RUNTIME: Node.js (Fastify)
 DB: PostgreSQL via Sequelize
 TEST_STATUS: PASS (Jest targeted HU01 rules_v1 validation; 10/10 tests passing)
 
-LAST_VERIFIED_TESTS_DATE: 2026-03-17 00:07 CST
+LAST_VERIFIED_TESTS_DATE: 2026-03-17 00:25 CST
 
 ---
 
@@ -144,7 +144,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 00:07 CST
 
 ### HU_01 (Fase 2) — Initial local electricity bill detection (backend-only rules_v1)
 
-**Status:** IN PROGRESS
+**Status:** DONE
 
 **Evidence:**
 - Service: `src/services/receiptDetection/electricityReceiptClassifier.js`
@@ -152,7 +152,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 00:07 CST
 - Contract: `{ subject, sender, body } -> { type, confidence, method, reason }`
 
 **Open items:**
-- Review and merge the open HU_01 branch PR after the mixed-signal false-positive fix.
+- None.
 
 **Technical risks:**
 - The first ruleset is intentionally conservative and may need broader sender/content signals beyond initial `CFE`-leaning patterns.
@@ -160,8 +160,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 00:07 CST
 - Mixed sender/content evidence with stronger negative semantics now falls back to `unknown`, but future rule expansion still needs explicit precedence rules to avoid reintroducing over-classification.
 
 **Recent change:**
-- Added a backend-only `rules_v1` classifier for local electricity-receipt detection with an 8-case simulated dataset plus invalid-input coverage; targeted Jest validation passed with 9/9 tests (commit: pending).
-- Fixed the mixed-signal false-positive path so emails containing strong negative cues plus electricity cues no longer classify as `invoice_electricity`; targeted Jest validation now passes with 10/10 tests (commit: pending).
+- Added a backend-only `rules_v1` classifier for local electricity-receipt detection with an 8-case simulated dataset plus invalid-input coverage, then fixed the mixed-signal false-positive path so emails containing strong negative cues plus electricity cues now fall back to `unknown`; targeted Jest validation passes with 10/10 tests, and the full HU_01 slice is merged into `develop` via PR #32 (commit: pending).
 
 ---
 
@@ -174,7 +173,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 00:07 CST
 
 ## 6. Next Immediate Action
 
-➡️ Push the mixed-signal HU_01 fix and update the open PR for review against `develop`
+➡️ Freeze HU_02 as a scoped extraction spike before opening implementation work
 
 ---
 
@@ -195,3 +194,4 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 00:07 CST
 - 2026-03-14 02:05 CST — Merged the HU19 backend branch into `develop`, including the P1 outcome-preservation fix, Node 24-compatible GitHub Actions refs, and the backend governance-doc alignment (commit: pending)
 - 2026-03-16 23:27 CST — Added the backend-only HU_01 `rules_v1` electricity-receipt classifier plus its targeted 8-case Jest dataset, and verified `tests/electricityReceiptClassifier.test.js` passes locally with 9/9 tests (commit: pending)
 - 2026-03-17 00:07 CST — Fixed the HU_01 mixed-signal false-positive path so strong negative cues plus electricity cues now fall back to `unknown`; `tests/electricityReceiptClassifier.test.js` passes locally with 10/10 tests (commit: pending)
+- 2026-03-17 00:25 CST — HU_01 is now treated as integrated state on `develop` after PR #32 merged the backend-only detector and its follow-up false-positive fix; the next backend step is defining HU_02 as a scoped extraction spike before implementation (commit: pending)
