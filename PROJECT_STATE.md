@@ -1,5 +1,5 @@
 # PROJECT_STATE.md
-Last updated: 2026-03-17 03:45 CST — Commit: pending
+Last updated: 2026-03-17 19:55 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
@@ -32,6 +32,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 - OAuth tokens are encrypted at rest using `TOKEN_ENCRYPTION_KEY`.
 - A local rule-based electricity-receipt classifier now exists as an internal backend service using only `subject`, `sender`, and `body`, with deterministic `invoice_electricity | not_invoice | unknown` output.
 - A Node-first extractor service now powers `HU_02` with the six spike fixtures plus an empty/malformed case run through `tests/electricityInvoiceExtractor.test.js`, keeping `amount`/`due_date` and the `null` fallback explicit before wiring the production slice.
+- HU_03 now exposes `POST /api/v1/notifications/receipt-whatsapp` via `notificationDeliveryRoutes`, `notificationDeliveryController`, `receiptNotificationService`, and the deterministic `twilioAdapter`; the route only sends WhatsApp reminders when `{ amount, due_date }` are present and logs every delivery through `notificationDeliveryLogService`.
 - A Node-first invoice-extraction service now lives in `src/services/receiptDetection/electricityInvoiceExtractor.js` with fixtures-driven regression coverage to keep the `amount | due_date` contract and `null` fallback explicit before wiring the production slice.
 
 ---
@@ -166,7 +167,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 
 ### HU_02 (Fase 2) — Local Node-first amount & due_date extraction
 
-**Status:** IN PROGRESS (production slice in `feature/hu02-node-extraction`)
+**Status:** DONE (production slice merged into `develop`, route registered)
 
 **Evidence:**
 - Service: `src/services/receiptDetection/electricityInvoiceExtractor.js`
@@ -175,14 +176,34 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 - Spike artifacts: `spikes/hu02-extraction/` README, fixtures, runner, and result
 
 **Open items:**
-- Harden backend wiring for the extractor with targeted tests and service documentation
-- Keep fallback/backoff explicit if heuristics fail to find both fields
+- None tracked; the route is live and registered.
 
 **Technical risks:**
 - Heuristic parsing may need refinement as additional invoice variants arrive; keep the contract scoped and fall back to `null` when confidence is insufficient.
 
 **Recent change:**
 - Added the Node-first extractor service, fixture dataset, and regression test suite so the production slice can start from `feature/hu02-node-extraction` (commit: pending)
+
+### HU_03 — WhatsApp notification delivery
+
+**Status:** DONE (route registered; documenting/PR work underway)
+
+**Evidence:**
+- Route: `src/routes/notificationDeliveryRoutes.js`
+- Controller/service: `src/controllers/notificationDeliveryController.js`, `src/services/notifications/receiptNotificationService.js`
+- Twilio adapter/log: `src/services/notifications/twilioAdapter.js`, `src/services/notifications/notificationDeliveryLogService.js`
+- Tests: `tests/notificationDeliveryRoutes.test.js`, `tests/receiptNotificationService.test.js`, `tests/twilioAdapter.test.js`
+- Fixtures: `tests/fixtures/notifications/` (positive/ambiguous/negative/provider-failure cases)
+
+**Open items:**
+- UI/workflow integration and broader notification wiring remain for a follow-up branch once the backend PR lands.
+
+**Technical risks:**
+- Deliveries depend on valid `{ amount, due_date }`; the controller/service skip and log this case, keeping fallback behavior deterministic.
+
+**Recent change:**
+- Documented the WhatsApp delivery contract in `docs/API_REFERENCE.md`, covering the route, service, adapter, log, and regression tests (success, skip, provider failure).
+- Added the WhatsApp delivery route, service, Twilio adapter, and fixture-driven regression tests; the route now lives at `POST /api/v1/notifications/receipt-whatsapp` and reuses `receiptNotificationService`.
 
 ---
 
@@ -195,7 +216,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 
 ## 6. Next Immediate Action
 
-➡️ Update `README_REENTRY.md` and `Sprint_Log.md` to announce the new HU_02 receipt-detection route after the production wiring landed
+➡️ Open the HU_03 backend PR (including the documented contract) and keep UI/workflow integration plus broader notification wiring in a separate follow-up branch after merge
 
 ---
 
@@ -218,5 +239,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 - 2026-03-17 00:07 CST — Fixed the HU_01 mixed-signal false-positive path so strong negative cues plus electricity cues now fall back to `unknown`; `tests/electricityReceiptClassifier.test.js` passes locally with 10/10 tests (commit: pending)
 - 2026-03-17 00:25 CST — HU_01 is now treated as integrated state on `develop` after PR #32 merged the backend-only detector and its follow-up false-positive fix; the next backend step is defining HU_02 as a scoped extraction spike before implementation (commit: pending)
 - 2026-03-17 03:30 CST — Node-first HU_02 extraction service + fixture suite landed, triggering `feature/hu02-node-extraction` for the production slice while the spike artifacts remain in `spikes/hu02-extraction/` (commit: pending)
+- 2026-03-17 04:15 CST — HU_03 WhatsApp delivery route, controller, receiptNotificationService, Twilio adapter, and regression tests landed; route now exposes `POST /api/v1/notifications/receipt-whatsapp` and logs deliveries via `notificationDeliveryLogService` (commit: pending)
 - 2026-03-17 03:45 CST — Added `empty-malformed` fixture and regression test coverage so the Node-first extractor proves positive/ambiguous/negative/empty guardrails before wiring production contracts (commit: pending)
 - 2026-03-17 03:55 CST — Added POST `/api/v1/receipt-detection/extract`, the thin controller/service wiring, and integration test coverage hitting the production fixtures (commit: pending)
+- 2026-03-17 19:55 CST — Documented the HU_03 WhatsApp delivery API contract in `docs/API_REFERENCE.md` and captured the regression tests for success, skipped, and provider-failure outcomes before preparing the backend PR (commit: pending)
