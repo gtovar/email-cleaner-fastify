@@ -23,7 +23,7 @@
 - HU17, HU18, and HU19 are closed on `develop` for the documented local/browser scope
 - HU_01 is already integrated on `develop` as a backend-only Fase 2 slice: `src/services/receiptDetection/electricityReceiptClassifier.js`
 - HU_02 now has a dedicated route + service: `POST /api/v1/receipt-detection/extract` backed by `src/services/receiptDetection/receiptDetectionService.js`, `tests/fixtures/receiptDetection/`, and the Node-first extractor (`electricityInvoiceExtractor.js`). The contract returns `{ amount, due_date }` with `null` fallback for ambiguous, negative, and empty inputs; structurally invalid payloads return 400.
-- Next action: open the HU_03 backend PR (including the documented contract) and keep UI/workflow integration plus broader notification wiring in a separate follow-up branch after merge.
+- Next action: protect the `POST /api/v1/notifications/receipt-whatsapp` route with `authMiddleware`, then open the follow-up fix PR before shifting back to UI/workflow integration.
 - If the checkpoint feels stale, verify directly in `src/index.js`, `src/routes/*`, `src/services/*`, and `tests/*`
 
 ---

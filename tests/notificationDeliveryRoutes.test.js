@@ -7,6 +7,11 @@ import { fileURLToPath } from 'node:url';
 jest.unstable_mockModule('../src/services/notifications/receiptNotificationService.js', () => ({
   notifyReceipt: jest.fn(),
 }));
+jest.unstable_mockModule('../src/middlewares/authMiddleware.js', () => ({
+  default: jest.fn(async (request) => {
+    request.user = { id: 'test-user', email: 'test@example.com' };
+  })
+}));
 
 const { default: notificationDeliveryRoutes } = await import('../src/routes/notificationDeliveryRoutes.js');
 const { notifyReceipt } = await import('../src/services/notifications/receiptNotificationService.js');
