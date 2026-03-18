@@ -1,5 +1,5 @@
 # PROJECT_STATE.md
-Last updated: 2026-03-17 03:45 CST — Commit: pending
+Last updated: 2026-03-17 19:55 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
@@ -196,13 +196,14 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 - Fixtures: `tests/fixtures/notifications/` (positive/ambiguous/negative/provider-failure cases)
 
 **Open items:**
-- Finish documenting the backend slice and open the PR before extending into UI/workflow wiring.
+- UI/workflow integration and broader notification wiring remain for a follow-up branch once the backend PR lands.
 
 **Technical risks:**
 - Deliveries depend on valid `{ amount, due_date }`; the controller/service skip and log this case, keeping fallback behavior deterministic.
 
 **Recent change:**
-- Added the WhatsApp delivery route, service, Twilio adapter, and fixture-driven regression tests; the route now lives at `POST /api/v1/notifications/receipt-whatsapp` and reuses `receiptNotificationService` instead of re-running HU_02 extraction.
+- Documented the WhatsApp delivery contract in `docs/API_REFERENCE.md`, covering the route, service, adapter, log, and regression tests (success, skip, provider failure).
+- Added the WhatsApp delivery route, service, Twilio adapter, and fixture-driven regression tests; the route now lives at `POST /api/v1/notifications/receipt-whatsapp` and reuses `receiptNotificationService`.
 
 ---
 
@@ -215,7 +216,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 
 ## 6. Next Immediate Action
 
-➡️ Finish documenting the HU_03 backend slice and open the PR; keep UI/workflow integration and broader notification wiring in a separate follow-up branch after merge
+➡️ Open the HU_03 backend PR (including the documented contract) and keep UI/workflow integration plus broader notification wiring in a separate follow-up branch after merge
 
 ---
 
@@ -241,3 +242,4 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 - 2026-03-17 04:15 CST — HU_03 WhatsApp delivery route, controller, receiptNotificationService, Twilio adapter, and regression tests landed; route now exposes `POST /api/v1/notifications/receipt-whatsapp` and logs deliveries via `notificationDeliveryLogService` (commit: pending)
 - 2026-03-17 03:45 CST — Added `empty-malformed` fixture and regression test coverage so the Node-first extractor proves positive/ambiguous/negative/empty guardrails before wiring production contracts (commit: pending)
 - 2026-03-17 03:55 CST — Added POST `/api/v1/receipt-detection/extract`, the thin controller/service wiring, and integration test coverage hitting the production fixtures (commit: pending)
+- 2026-03-17 19:55 CST — Documented the HU_03 WhatsApp delivery API contract in `docs/API_REFERENCE.md` and captured the regression tests for success, skipped, and provider-failure outcomes before preparing the backend PR (commit: pending)

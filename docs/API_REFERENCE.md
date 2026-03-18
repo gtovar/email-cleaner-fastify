@@ -475,6 +475,90 @@ Cookie: session_token=<SESSION_TOKEN>
 
 ---
 
+### 5.5 POST /api/v1/notifications/receipt-whatsapp
+
+Sends a WhatsApp reminder for a detected invoice when `{ emailId, sender, subject, amount, due_date, phone }` are provided. The controller simply forwards the validated payload to `src/services/notifications/receiptNotificationService.js`, which assembles the reminder text, calls the sandboxed Twilio adapter in `src/services/notifications/twilioAdapter.js`, and logs every attempt via `src/services/notifications/notificationDeliveryLogService.js`.
+
+#### Description
+
+* Designed for HU_03 workflows that already extracted amount and due date; the service skips delivery when either field is `null` and records `status: 'skipped'` with `reason: 'missing_extracted_fields'`.
+* If the `phone` payload is empty or whitespace, the service skips again with `status: 'skipped'` and `reason: 'missing_recipient'`.
+* When fields are valid, the service trims `sender`/`subject`, formats `Recordatorio: ...`, calls the Twilio adapter, logs a `sent` record with `providerMessageId` and `channel: 'whatsapp'`, and returns the adapter’s stable response. Provider failures are rescued, logged as `status: 'failed'` with `reason: 'provider_error'`, and surfaced as `{ sent: false, reason: 'provider_error' }`.
+
+#### Request
+
+```http
+POST /api/v1/notifications/receipt-whatsapp HTTP/1.1
+Cookie: session_token=<SESSION_TOKEN>
+Content-Type: application/json
+```
+
+#### Request Body
+
+```json
+{
+  "emailId": "string",
+  "sender": "string",
+  "subject": "string",
+  "amount": "string",      // null allowed but triggers skipped delivery
+  "due_date": "string",   // null allowed but triggers skipped delivery
+  "phone": "string"
+}
+```
+
+* `emailId` *(required)* — Used for audit logs (`notificationDeliveryLogService.logDelivery`).
+* `sender` / `subject` *(required strings)* — Trimmed values; defaults to `Remitente desconocido` / `recibo detectado` when blank to keep the message human readable.
+* `amount` / `due_date` *(required but nullable)* — Extraction output from HU_03; `null` values immediately return `missing_extracted_fields` and log a `skipped` entry.
+* `phone` *(required string)* — WhatsApp recipient; trimmed and validated. Blank values stop the workflow with `reason: 'missing_recipient'`.
+
+#### Response 200 (success example)
+
+```json
+{
+  "sent": true,
+  "provider": "twilio",
+  "status": "sent",
+  "providerMessageId": "twilio-sandbox-message-id"
+}
+```
+
+#### Response 200 (skip/failure examples)
+
+```json
+{
+  "sent": false,
+  "reason": "missing_extracted_fields"
+}
+```
+
+```json
+{
+  "sent": false,
+  "reason": "missing_recipient"
+}
+```
+
+```json
+{
+  "sent": false,
+  "reason": "provider_error"
+}
+```
+
+> Every request is mirrored in the delivery log (`notificationDeliveryLogService.logDelivery`), which stores `emailId`, `channel`, `status`, optional `reason`, `providerMessageId`, and a `summary` of `sender`, `amount`, and `due_date`. Use `notificationDeliveryLogService.getDeliveries()` in tests to inspect the entries.
+
+#### Possible Status Codes
+
+* **200 OK** – Delivery request accepted; inspect `sent`/`reason` for success, skipped delivery, or provider failure.
+* **400 Bad Request** – Ajv schema validation failed (`BODY_SCHEMA` enforces the exact structure and disallows extra properties).
+* **401 Unauthorized** – Missing or invalid `session_token` cookie.
+
+#### Tests
+
+* `tests/notificationDeliveryRoutes.test.js` exercises success, missing extraction fields, provider failure, and the route-level 400 for invalid payloads using fixtures under `tests/fixtures/notifications/`.
+* `tests/receiptNotificationService.test.js` asserts the service logs `skipped`, `sent`, and `failed` outcomes, and it propagates the stubbed Twilio response when everything is valid.
+* `tests/twilioAdapter.test.js` keeps the adapter deterministic, verifies it rejects empty recipients/bodies, and confirms the stable `{ provider, status, providerMessageId }` payload.
+
 ## 6. Health Check
 
 ### 6.1 GET /api/v1/health
