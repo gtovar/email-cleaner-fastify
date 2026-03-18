@@ -191,3 +191,9 @@ Last updated: 2026-03-17 03:55 CST
 - Added POST `/api/v1/receipt-detection/extract` with a thin controller/service wiring that uses `src/services/receiptDetection/electricityInvoiceExtractor.js` and returns `{ amount, due_date }` with `null` fallback for ambiguous/negative/empty inputs.
 - Added `tests/receiptDetectionRoutes.test.js` pointing at `tests/fixtures/receiptDetection/` to cover positive/ambiguous/negative/empty behaviors plus the invalid payload 400 case.
 - Route now lives independently of `spikes/hu02-extraction/`, which is kept as historical reference only.
+
+### 2026-03-17 — HU_03 WhatsApp delivery backend slice closed
+- Added `src/routes/notificationDeliveryRoutes.js`, `src/controllers/notificationDeliveryController.js`, `src/services/notifications/receiptNotificationService.js`, and `src/services/notifications/twilioAdapter.js` to deliver `{ amount, due_date }` safely over WhatsApp when the extractor returns both fields.
+- Logged send attempts via `src/services/notifications/notificationDeliveryLogService.js` and kept Twilio interactions deterministic while requiring valid `phone` payloads.
+- Added fixtures under `tests/fixtures/notifications/` and targeted tests covering adapter validation, service skips/errors, and the route contract (`tests/notificationDeliveryRoutes.test.js`) so the real route and adapter now have production-grade regression coverage.
+- Route is exposed at `POST /api/v1/notifications/receipt-whatsapp`, reusing `receiptNotificationService` rather than re-running HU_02 extraction, and keeps `spikes/hu02-extraction/` as historical context only.
