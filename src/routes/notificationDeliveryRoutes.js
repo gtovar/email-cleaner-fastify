@@ -1,4 +1,5 @@
 import { sendReceiptNotification } from '../controllers/notificationDeliveryController.js';
+import authMiddleware from '../middlewares/authMiddleware.js';
 
 const BODY_SCHEMA = {
   type: 'object',
@@ -15,5 +16,12 @@ const BODY_SCHEMA = {
 };
 
 export default async function notificationDeliveryRoutes(fastify) {
-  fastify.post('/notifications/receipt-whatsapp', { schema: { body: BODY_SCHEMA } }, sendReceiptNotification);
+  fastify.post(
+    '/notifications/receipt-whatsapp',
+    {
+      preHandler: [authMiddleware],
+      schema: { body: BODY_SCHEMA }
+    },
+    sendReceiptNotification
+  );
 }

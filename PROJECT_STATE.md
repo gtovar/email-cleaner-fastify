@@ -1,5 +1,5 @@
 # PROJECT_STATE.md
-Last updated: 2026-03-17 19:55 CST — Commit: pending
+Last updated: 2026-03-17 20:12 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
@@ -204,6 +204,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 **Recent change:**
 - Documented the WhatsApp delivery contract in `docs/API_REFERENCE.md`, covering the route, service, adapter, log, and regression tests (success, skip, provider failure).
 - Added the WhatsApp delivery route, service, Twilio adapter, and fixture-driven regression tests; the route now lives at `POST /api/v1/notifications/receipt-whatsapp` and reuses `receiptNotificationService`.
+- Added `authMiddleware` protection to the WhatsApp route to enforce the documented `session_token`/Bearer requirement before delivering messages.
 
 ---
 
@@ -216,7 +217,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 
 ## 6. Next Immediate Action
 
-➡️ Open the HU_03 backend PR (including the documented contract) and keep UI/workflow integration plus broader notification wiring in a separate follow-up branch after merge
+➡️ Protect the `POST /api/v1/notifications/receipt-whatsapp` route with `authMiddleware`, open the follow-up fix PR, and then resume the UI/workflow integration work in the next branch
 
 ---
 
@@ -243,3 +244,4 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 - 2026-03-17 03:45 CST — Added `empty-malformed` fixture and regression test coverage so the Node-first extractor proves positive/ambiguous/negative/empty guardrails before wiring production contracts (commit: pending)
 - 2026-03-17 03:55 CST — Added POST `/api/v1/receipt-detection/extract`, the thin controller/service wiring, and integration test coverage hitting the production fixtures (commit: pending)
 - 2026-03-17 19:55 CST — Documented the HU_03 WhatsApp delivery API contract in `docs/API_REFERENCE.md` and captured the regression tests for success, skipped, and provider-failure outcomes before preparing the backend PR (commit: pending)
+- 2026-03-17 20:12 CST — Protected `POST /api/v1/notifications/receipt-whatsapp` with `authMiddleware` to align the guardrail with the documented `session_token` requirement (commit: pending)

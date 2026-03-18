@@ -482,6 +482,7 @@ Sends a WhatsApp reminder for a detected invoice when `{ emailId, sender, subjec
 #### Description
 
 * Designed for HU_03 workflows that already extracted amount and due date; the service skips delivery when either field is `null` and records `status: 'skipped'` with `reason: 'missing_extracted_fields'`.
+* Protected by `authMiddleware`, so a valid `session_token` cookie or `Bearer` JWT is required before the helper runs.
 * If the `phone` payload is empty or whitespace, the service skips again with `status: 'skipped'` and `reason: 'missing_recipient'`.
 * When fields are valid, the service trims `sender`/`subject`, formats `Recordatorio: ...`, calls the Twilio adapter, logs a `sent` record with `providerMessageId` and `channel: 'whatsapp'`, and returns the adapter’s stable response. Provider failures are rescued, logged as `status: 'failed'` with `reason: 'provider_error'`, and surfaced as `{ sent: false, reason: 'provider_error' }`.
 
