@@ -33,9 +33,26 @@ const mockListEmails = jest.fn(async (req, reply) => {
   });
 });
 
+const mockGetEmailContent = jest.fn(async (req, reply) => {
+  expect(req.user).toMatchObject({ email: 'user@example.com' });
+
+  if (req.params.id === 'missing-email') {
+    return reply.code(404).send({ error: 'Email content not found' });
+  }
+
+  return reply.send({
+    id: req.params.id,
+    subject: 'Factura CFE',
+    from: 'notificaciones@cfe.mx',
+    body: 'Total a pagar: $350.50. Fecha limite de pago: 2026-03-25.',
+    html: null,
+  });
+});
+
 // 2) Mockeamos el módulo del controlador ANTES de importar las rutas
 jest.unstable_mockModule('../src/controllers/emailController.js', () => ({
-  listEmails: mockListEmails
+  listEmails: mockListEmails,
+  getEmailContent: mockGetEmailContent
 }));
 
 // 3) Importamos las rutas ya con el controlador mockeado
@@ -100,5 +117,48 @@ describe('Emails Routes (contrato Fastify /api/v1/emails)', () => {
 
     // Verificamos que Fastify realmente haya llamado al controlador mockeado
     expect(mockListEmails).toHaveBeenCalledTimes(1);
+  });
+
+  it('GET /api/v1/emails/:id/content → 401 si no se envía cookie', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/emails/test-mail-1/content'
+    });
+
+    expect(res.statusCode).toBe(401);
+    expect(JSON.parse(res.body)).toEqual({ error: 'Missing or invalid auth token' });
+  });
+
+  it('GET /api/v1/emails/:id/content → 200 con cookie y contrato normalizado', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/emails/test-mail-1/content',
+      headers: {
+        cookie: `session_token=${sessionToken}`
+      }
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(JSON.parse(res.body)).toEqual({
+      id: 'test-mail-1',
+      subject: 'Factura CFE',
+      from: 'notificaciones@cfe.mx',
+      body: 'Total a pagar: $350.50. Fecha limite de pago: 2026-03-25.',
+      html: null
+    });
+    expect(mockGetEmailContent).toHaveBeenCalledTimes(1);
+  });
+
+  it('GET /api/v1/emails/:id/content → 404 cuando el email no existe', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/emails/missing-email/content',
+      headers: {
+        cookie: `session_token=${sessionToken}`
+      }
+    });
+
+    expect(res.statusCode).toBe(404);
+    expect(JSON.parse(res.body)).toEqual({ error: 'Email content not found' });
   });
 });

@@ -21,4 +21,10 @@ export const gmailInboxSource = {
       maxResults,
     });
   },
+  async getEmailContent({ server, email, emailId }) {
+    const gmailClient = await getGmailClientForUser(server, email);
+    const gmailService = new GmailService(gmailClient);
+
+    return gmailService.getMessageContent({ messageId: emailId });
+  },
 };

@@ -197,3 +197,8 @@ Last updated: 2026-03-17 03:55 CST
 - Logged send attempts via `src/services/notifications/notificationDeliveryLogService.js` and kept Twilio interactions deterministic while requiring valid `phone` payloads.
 - Added fixtures under `tests/fixtures/notifications/` and targeted tests covering adapter validation, service skips/errors, and the route contract (`tests/notificationDeliveryRoutes.test.js`) so the real route and adapter now have production-grade regression coverage.
 - Route is exposed at `POST /api/v1/notifications/receipt-whatsapp`, reusing `receiptNotificationService` rather than re-running HU_02 extraction, and keeps `spikes/hu02-extraction/` as historical context only.
+
+### 2026-03-19 — HU_05 backend prerequisite landed
+- Added ADR 009 and authenticated `GET /api/v1/emails/:id/content` so the frontend can fetch normalized full email content by `emailId` without changing `GET /api/v1/emails`, receipt extraction, or WhatsApp delivery.
+- Extended `src/services/gmailService.js`, `src/services/inboxSources/gmailInboxSource.js`, and `src/services/inboxSources/fixtureInboxSource.js` with minimal full-content retrieval support.
+- Verified the slice with targeted Jest coverage in `tests/emailsRoutes.test.js`, `tests/emailsFixtureRoutes.integration.test.js`, and `tests/gmailService.test.js`.

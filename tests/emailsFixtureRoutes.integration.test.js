@@ -62,4 +62,40 @@ describe('Emails route with fixture inbox source', () => {
       total: 0,
     });
   });
+
+  it('returns deterministic full content for a known fixture email id', async () => {
+    const sessionToken = jwt.sign({ email: 'e2e-user@example.com' }, jwtSecret, { expiresIn: 3600 });
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/emails/email-hu19-archive/content',
+      headers: {
+        cookie: `session_token=${sessionToken}`,
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(JSON.parse(res.body)).toEqual({
+      id: 'email-hu19-archive',
+      subject: '[E2E-HU19] Archive Target',
+      from: 'E2E Sender <archive@example.com>',
+      body: 'Archive me from the Inbox row-level flow. Total a pagar: $350.50. Fecha limite de pago: 2026-03-25.',
+      html: null,
+    });
+  });
+
+  it('returns 404 for an unknown fixture email id', async () => {
+    const sessionToken = jwt.sign({ email: 'e2e-user@example.com' }, jwtSecret, { expiresIn: 3600 });
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/emails/unknown-email/content',
+      headers: {
+        cookie: `session_token=${sessionToken}`,
+      },
+    });
+
+    expect(res.statusCode).toBe(404);
+    expect(JSON.parse(res.body)).toEqual({ error: 'Email content not found' });
+  });
 });
