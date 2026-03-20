@@ -1,5 +1,5 @@
 // src/routes/emailRoutes.js
-import { listEmails } from '../controllers/emailController.js';
+import { getEmailContent, listEmails } from '../controllers/emailController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
 
 export default async function (fastify, opts) {
@@ -19,6 +19,19 @@ export default async function (fastify, opts) {
       snippet: { type: 'string' },
       hasAttachment: { type: 'boolean' },
       size: { type: 'integer' }
+    }
+  });
+
+  fastify.addSchema({
+    $id: 'EmailContent',
+    type: 'object',
+    required: ['id', 'subject', 'from', 'body', 'html'],
+    properties: {
+      id: { type: 'string' },
+      subject: { type: 'string' },
+      from: { type: 'string' },
+      body: { type: 'string', minLength: 1 },
+      html: { type: ['string', 'null'] }
     }
   });
 
@@ -58,4 +71,30 @@ export default async function (fastify, opts) {
       }
     }
   }, listEmails);
+
+  fastify.get('/emails/:id/content', {
+    preHandler: [authMiddleware],
+    schema: {
+      description: 'Fetch normalized full content for one email',
+      tags: ['official-v1', 'Emails'],
+      summary: 'Get email content by id',
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }],
+      params: {
+        type: 'object',
+        required: ['id'],
+        properties: {
+          id: { type: 'string' }
+        }
+      },
+      response: {
+        200: {
+          description: 'Normalized email content',
+          $ref: 'EmailContent#'
+        },
+        401: { description: 'No autorizado' },
+        404: { description: 'Email content not found' },
+        500: { description: 'Error interno' }
+      }
+    }
+  }, getEmailContent);
 }

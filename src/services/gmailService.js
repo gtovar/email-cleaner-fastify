@@ -45,6 +45,24 @@ export class GmailService {
         };
     }
 
+    async getMessageContent({ messageId }) {
+        try {
+            const res = await this.gmail.users.messages.get({
+                userId: 'me',
+                id: messageId,
+                format: 'full',
+            });
+
+            return normalizeMessageContent(res.data);
+        } catch (err) {
+            if (err?.code === 404 || err?.status === 404) {
+                return null;
+            }
+
+            throw err;
+        }
+    }
+
     _buildQuery({ filter, dateBefore, combine }) {
         let queries = [];
         const combined = combine || [];
@@ -104,3 +122,56 @@ export class GmailService {
 
 
 }
+
+const decodeBase64Url = (value = '') => Buffer.from(String(value).replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8');
+
+const collectParts = (payload, mimeType) => {
+    if (!payload) return [];
+
+    const matches = [];
+    if (payload.mimeType === mimeType && payload.body?.data) {
+        matches.push(decodeBase64Url(payload.body.data));
+    }
+
+    for (const part of payload.parts || []) {
+        matches.push(...collectParts(part, mimeType));
+    }
+
+    return matches;
+};
+
+const normalizeWhitespace = (value = '') => String(value)
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .replace(/[ \t]*\n[ \t]*/g, '\n')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
+const normalizeMessageContent = (message = {}) => {
+    const payload = message.payload || {};
+    const headers = (payload.headers || []).reduce((acc, header) => {
+        acc[String(header.name || '').toLowerCase()] = header.value || '';
+        return acc;
+    }, {});
+
+    const plainTextParts = collectParts(payload, 'text/plain');
+    const htmlParts = collectParts(payload, 'text/html');
+    const fallbackBody = payload.body?.data ? decodeBase64Url(payload.body.data) : '';
+    const normalizedBody = normalizeWhitespace(plainTextParts.join('\n\n') || fallbackBody);
+    const normalizedHtml = normalizeWhitespace(htmlParts.join('\n\n'));
+
+    if (!normalizedBody) {
+        const error = new Error('email_content_normalization_failed');
+        error.code = 'EMAIL_CONTENT_NORMALIZATION_FAILED';
+        throw error;
+    }
+
+    return {
+        id: message.id || '',
+        subject: headers.subject || '',
+        from: headers.from || '',
+        body: normalizedBody,
+        html: normalizedHtml || null,
+    };
+};

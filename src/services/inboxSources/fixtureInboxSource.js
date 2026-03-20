@@ -42,6 +42,30 @@ const FIXTURE_EMAILS = [
   },
 ];
 
+const FIXTURE_EMAIL_CONTENT = {
+  'email-hu19-archive': {
+    id: 'email-hu19-archive',
+    subject: '[E2E-HU19] Archive Target',
+    from: 'E2E Sender <archive@example.com>',
+    body: 'Archive me from the Inbox row-level flow. Total a pagar: $350.50. Fecha limite de pago: 2026-03-25.',
+    html: null,
+  },
+  'email-hu19-delete': {
+    id: 'email-hu19-delete',
+    subject: '[E2E-HU19] Delete Target',
+    from: 'E2E Sender <delete@example.com>',
+    body: 'Delete me from the Inbox row-level flow. Total a pagar: $900.00. Fecha limite de pago: 2026-03-28.',
+    html: null,
+  },
+  'email-hu19-read': {
+    id: 'email-hu19-read',
+    subject: '[E2E-HU19] Mark Unread Target',
+    from: 'E2E Sender <read@example.com>',
+    body: 'Mark me as unread from the Inbox row-level flow. Total a pagar: $120.75. Fecha limite de pago: 2026-03-30.',
+    html: null,
+  },
+};
+
 const decodePageToken = (pageToken) => {
   if (!pageToken) return 0;
   const [, rawOffset] = String(pageToken).split(':');
@@ -80,6 +104,14 @@ export const fixtureInboxSource = {
       nextPageToken: nextOffset < filtered.length ? encodePageToken(nextOffset) : null,
       total: filtered.length,
     };
+  },
+  async getEmailContent({ email, emailId }) {
+    if (email !== FIXTURE_USER_EMAIL) {
+      return null;
+    }
+
+    const content = FIXTURE_EMAIL_CONTENT[emailId];
+    return content ? { ...content } : null;
   },
 };
 

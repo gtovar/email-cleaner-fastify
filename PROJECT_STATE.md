@@ -1,22 +1,22 @@
 # PROJECT_STATE.md
-Last updated: 2026-03-17 20:12 CST — Commit: pending
+Last updated: 2026-03-19 18:17 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
-SNAPSHOT_DATE: 2026-03-17 03:45 CST
+SNAPSHOT_DATE: 2026-03-19 18:17 CST
 COMMIT: pending
 ENVIRONMENT: local
 
 REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
-BRANCH: feature/hu02-node-extraction
+BRANCH: feat/hu05-email-content-route
 WORKING_TREE_STATUS: Dirty (modified files present)
 
 RUNTIME: Node.js (Fastify)
 DB: PostgreSQL via Sequelize
-TEST_STATUS: PASS (Jest targeted HU01 rules_v1 validation; 10/10 tests passing)
+TEST_STATUS: PASS (Jest targeted content-route validation; emailsRoutes + emailsFixtureRoutes.integration + gmailService all passing)
 
-LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
+LAST_VERIFIED_TESTS_DATE: 2026-03-19 18:17 CST
 
 ---
 
@@ -26,9 +26,11 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 - OAuth flow validates `state`, issues `session_token`, and redirects to `${FRONTEND_ORIGIN}/auth/callback`.
 - Auth middleware accepts session cookie or Bearer session JWT and sets `request.user`.
 - `/api/v1/emails` now resolves its Inbox source via `INBOX_SOURCE` and can use Gmail or a deterministic local fixture without changing the HTTP contract.
+- `/api/v1/emails/:id/content` now exposes authenticated normalized full email content by `emailId`, keeping `GET /api/v1/emails` unchanged.
 - `/api/v1/suggestions` enriches emails with ML suggestions, includes `snippet`, and publishes domain events when threshold is met.
 - `/api/v1/notifications/summary` aggregates `NotificationEvent` records by period.
 - Gmail OAuth client persists refreshed access tokens to the `Tokens` table.
+- ADR 009 records the additive email-content route decision and the extension of the inbox source boundary for single-message content retrieval.
 - OAuth tokens are encrypted at rest using `TOKEN_ENCRYPTION_KEY`.
 - A local rule-based electricity-receipt classifier now exists as an internal backend service using only `subject`, `sender`, and `body`, with deterministic `invoice_electricity | not_invoice | unknown` output.
 - A Node-first extractor service now powers `HU_02` with the six spike fixtures plus an empty/malformed case run through `tests/electricityInvoiceExtractor.test.js`, keeping `amount`/`due_date` and the `null` fallback explicit before wiring the production slice.
@@ -69,6 +71,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 
 - Gmail OAuth routes: `/auth/google`, `/auth/google/callback`.
 - Gmail OAuth clients are created via `src/services/googleAuthService.js`.
+- Email content retrieval now supports both Gmail and fixture inbox sources through `src/services/inboxSources/gmailInboxSource.js`, `src/services/inboxSources/fixtureInboxSource.js`, and `src/services/gmailService.js`.
 - ML service integration via `src/services/suggestionService.js` and `src/services/mlClient.js`.
 - n8n webhook listener exists (safe no-op).
 - Gmail metadata defaults `category` to `unknown` when no label match is found.
@@ -206,6 +209,26 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 - Added the WhatsApp delivery route, service, Twilio adapter, and fixture-driven regression tests; the route now lives at `POST /api/v1/notifications/receipt-whatsapp` and reuses `receiptNotificationService`.
 - Added `authMiddleware` protection to the WhatsApp route to enforce the documented `session_token`/Bearer requirement before delivering messages.
 
+### HU_05 prerequisite — Authenticated email content retrieval by `emailId`
+
+**Status:** DONE
+
+**Evidence:**
+- ADR: `docs/adr/009-email-content-route-for-receipt-extraction.md`
+- Route: `src/routes/emailRoutes.js`
+- Controller: `src/controllers/emailController.js`
+- Sources/services: `src/services/gmailService.js`, `src/services/inboxSources/gmailInboxSource.js`, `src/services/inboxSources/fixtureInboxSource.js`
+- Tests: `tests/emailsRoutes.test.js`, `tests/emailsFixtureRoutes.integration.test.js`, `tests/gmailService.test.js`
+
+**Open items:**
+- None for this backend prerequisite slice.
+
+**Technical risks:**
+- MIME/body normalization remains intentionally minimal and may need future refinement if Gmail payload variants expand.
+
+**Recent change:**
+- Added authenticated `GET /api/v1/emails/:id/content` so the frontend can retrieve normalized `{ id, subject, from, body, html }` data without changing `GET /api/v1/emails`, receipt extraction, or WhatsApp delivery (commit: pending).
+
 ---
 
 ## 5. Current Technical Risks
@@ -217,7 +240,7 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 
 ## 6. Next Immediate Action
 
-➡️ Protect the `POST /api/v1/notifications/receipt-whatsapp` route with `authMiddleware`, open the follow-up fix PR, and then resume the UI/workflow integration work in the next branch
+➡️ Open the follow-up frontend/backend integration work that consumes `GET /api/v1/emails/:id/content` before starting `HU_05` UI implementation
 
 ---
 
@@ -245,3 +268,4 @@ LAST_VERIFIED_TESTS_DATE: 2026-03-17 03:30 CST
 - 2026-03-17 03:55 CST — Added POST `/api/v1/receipt-detection/extract`, the thin controller/service wiring, and integration test coverage hitting the production fixtures (commit: pending)
 - 2026-03-17 19:55 CST — Documented the HU_03 WhatsApp delivery API contract in `docs/API_REFERENCE.md` and captured the regression tests for success, skipped, and provider-failure outcomes before preparing the backend PR (commit: pending)
 - 2026-03-17 20:12 CST — Protected `POST /api/v1/notifications/receipt-whatsapp` with `authMiddleware` to align the guardrail with the documented `session_token` requirement (commit: pending)
+- 2026-03-19 18:17 CST — Added ADR 009 plus authenticated `GET /api/v1/emails/:id/content`, extending Gmail and fixture inbox sources with normalized full-content retrieval by `emailId`; targeted Jest validation passed for `tests/emailsRoutes.test.js`, `tests/emailsFixtureRoutes.integration.test.js`, and `tests/gmailService.test.js` (commit: pending)

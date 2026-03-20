@@ -19,11 +19,12 @@
 
 - Branch target: feature branches start from `develop`; avoid direct commits on `develop`
 - Source of truth for factual state: `PROJECT_STATE.md`
-- Backend tests last verified PASS for the HU_01 `rules_v1` targeted slice on 2026-03-17 (`tests/electricityReceiptClassifier.test.js`, 10/10)
+- Backend tests last verified PASS for the authenticated email-content route slice on 2026-03-19 (`tests/emailsRoutes.test.js`, `tests/emailsFixtureRoutes.integration.test.js`, `tests/gmailService.test.js`)
 - HU17, HU18, and HU19 are closed on `develop` for the documented local/browser scope
 - HU_01 is already integrated on `develop` as a backend-only Fase 2 slice: `src/services/receiptDetection/electricityReceiptClassifier.js`
 - HU_02 now has a dedicated route + service: `POST /api/v1/receipt-detection/extract` backed by `src/services/receiptDetection/receiptDetectionService.js`, `tests/fixtures/receiptDetection/`, and the Node-first extractor (`electricityInvoiceExtractor.js`). The contract returns `{ amount, due_date }` with `null` fallback for ambiguous, negative, and empty inputs; structurally invalid payloads return 400.
-- Next action: protect the `POST /api/v1/notifications/receipt-whatsapp` route with `authMiddleware`, then open the follow-up fix PR before shifting back to UI/workflow integration.
+- The backend now exposes `GET /api/v1/emails/:id/content` for authenticated normalized full-content retrieval by `emailId`, with Gmail and fixture source support and ADR 009 documenting the boundary.
+- Next action: open the follow-up integration work that consumes `GET /api/v1/emails/:id/content` before starting `HU_05` React implementation.
 - If the checkpoint feels stale, verify directly in `src/index.js`, `src/routes/*`, `src/services/*`, and `tests/*`
 
 ---

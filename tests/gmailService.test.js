@@ -103,4 +103,79 @@ describe('GmailService', () => {
       }
     ]);
   });
+
+  it('returns normalized full message content', async () => {
+    getMock.mockResolvedValue({
+      data: {
+        id: 'abc123',
+        payload: {
+          headers: [
+            { name: 'Subject', value: 'Factura CFE' },
+            { name: 'From', value: 'notificaciones@cfe.mx' }
+          ],
+          parts: [
+            {
+              mimeType: 'text/plain',
+              body: {
+                data: Buffer.from(' Total a pagar: $350.50 \n\n Fecha limite de pago: 2026-03-25 ').toString('base64url')
+              }
+            },
+            {
+              mimeType: 'text/html',
+              body: {
+                data: Buffer.from('<p>Total a pagar: <strong>$350.50</strong></p>').toString('base64url')
+              }
+            }
+          ]
+        }
+      }
+    });
+
+    const result = await service.getMessageContent({ messageId: 'abc123' });
+
+    expect(getMock).toHaveBeenCalledWith({
+      userId: 'me',
+      id: 'abc123',
+      format: 'full'
+    });
+    expect(result).toEqual({
+      id: 'abc123',
+      subject: 'Factura CFE',
+      from: 'notificaciones@cfe.mx',
+      body: 'Total a pagar: $350.50\n\nFecha limite de pago: 2026-03-25',
+      html: '<p>Total a pagar: <strong>$350.50</strong></p>'
+    });
+  });
+
+  it('returns null when Gmail reports 404 for the message id', async () => {
+    const notFoundError = new Error('not found');
+    notFoundError.code = 404;
+    getMock.mockRejectedValue(notFoundError);
+
+    await expect(service.getMessageContent({ messageId: 'missing-id' })).resolves.toBeNull();
+  });
+
+  it('throws EMAIL_CONTENT_NORMALIZATION_FAILED when the normalized body is empty', async () => {
+    getMock.mockResolvedValue({
+      data: {
+        id: 'abc123',
+        payload: {
+          headers: [],
+          parts: [
+            {
+              mimeType: 'text/html',
+              body: {
+                data: Buffer.from('<p>Only html</p>').toString('base64url')
+              }
+            }
+          ]
+        }
+      }
+    });
+
+    await expect(service.getMessageContent({ messageId: 'abc123' })).rejects.toMatchObject({
+      code: 'EMAIL_CONTENT_NORMALIZATION_FAILED',
+      message: 'email_content_normalization_failed'
+    });
+  });
 });

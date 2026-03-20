@@ -11,3 +11,4 @@ This page lists architecture decision records (ADRs) for the backend.
 - ADR 006: CI/CD strategy (`adr/006-ci-cd-strategy.md`)
 - ADR 007: Inbox direct actions contract (`adr/007-inbox-direct-actions-contract.md`)
 - ADR 008: Bulk Inbox Actions Result Semantics (`adr/008-bulk-inbox-actions-result-semantics.md`)
+- ADR 009: Email content route for receipt extraction (`adr/009-email-content-route-for-receipt-extraction.md`)
