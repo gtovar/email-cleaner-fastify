@@ -25,7 +25,9 @@
 - HU_02 now has a dedicated route + service: `POST /api/v1/receipt-detection/extract` backed by `src/services/receiptDetection/receiptDetectionService.js`, `tests/fixtures/receiptDetection/`, and the Node-first extractor (`electricityInvoiceExtractor.js`). The contract returns `{ amount, due_date }` with `null` fallback for ambiguous, negative, and empty inputs; structurally invalid payloads return 400.
 - The backend now exposes `GET /api/v1/emails/:id/content` for authenticated normalized full-content retrieval by `emailId`, with Gmail and fixture source support and ADR 009 documenting the boundary.
 - `GET /api/v1/emails/:id/content` is already consumed by the merged `HU_05` React slice on `develop`.
-- Next action: select the next story on top of the merged backend/frontend baseline; do not reopen the completed `HU_05` prerequisite or UI slice.
+- The fixture inbox now contains the original HU19 action rows plus dedicated HU06 receipt-review rows with extractor-ready bodies for local browser validation.
+- The HU06 provider-error browser case is still a frontend-controlled override on `POST /api/v1/notifications/receipt-whatsapp`; backend fixture support only covers the deterministic happy-path content route.
+- Next action: checkpoint the minimal HU06 fixture support and then return the backend repo to the merged baseline.
 - If the checkpoint feels stale, verify directly in `src/index.js`, `src/routes/*`, `src/services/*`, and `tests/*`
 
 ---

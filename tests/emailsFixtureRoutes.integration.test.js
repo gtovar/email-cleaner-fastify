@@ -22,7 +22,7 @@ describe('Emails route with fixture inbox source', () => {
     await app.close();
   });
 
-  it('returns the deterministic HU19 fixture inbox for the fixture user', async () => {
+  it('returns the deterministic HU19 and HU06 fixture inbox for the fixture user', async () => {
     const sessionToken = jwt.sign({ email: 'e2e-user@example.com' }, jwtSecret, { expiresIn: 3600 });
 
     const res = await app.inject({
@@ -35,12 +35,14 @@ describe('Emails route with fixture inbox source', () => {
 
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.body);
-    expect(body.total).toBe(3);
+    expect(body.total).toBe(5);
     expect(body.nextPageToken).toBeNull();
     expect(body.emails.map((item) => item.id)).toEqual([
       'email-hu19-archive',
       'email-hu19-delete',
       'email-hu19-read',
+      'email-hu06-success',
+      'email-hu06-provider-error',
     ]);
   });
 
@@ -79,7 +81,28 @@ describe('Emails route with fixture inbox source', () => {
       id: 'email-hu19-archive',
       subject: '[E2E-HU19] Archive Target',
       from: 'E2E Sender <archive@example.com>',
-      body: 'Archive me from the Inbox row-level flow. Total a pagar: $350.50. Fecha limite de pago: 2026-03-25.',
+      body: 'Archive me from the Inbox row-level flow. Recibo de luz CFE. Total a pagar: $350.50. Fecha limite de pago: 25/03/2026.',
+      html: null,
+    });
+  });
+
+  it('returns deterministic full content for the HU06 provider-error fixture email id', async () => {
+    const sessionToken = jwt.sign({ email: 'e2e-user@example.com' }, jwtSecret, { expiresIn: 3600 });
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/emails/email-hu06-provider-error/content',
+      headers: {
+        cookie: `session_token=${sessionToken}`,
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(JSON.parse(res.body)).toEqual({
+      id: 'email-hu06-provider-error',
+      subject: '[E2E-HU06] Receipt Provider Error Target',
+      from: 'Utility Billing <receipt-provider-error@example.com>',
+      body: 'Recibo de luz CFE. Total a pagar: $900.00. Fecha limite de pago: 28/03/2026.',
       html: null,
     });
   });
