@@ -202,3 +202,7 @@ Last updated: 2026-03-17 03:55 CST
 - Added ADR 009 and authenticated `GET /api/v1/emails/:id/content` so the frontend can fetch normalized full email content by `emailId` without changing `GET /api/v1/emails`, receipt extraction, or WhatsApp delivery.
 - Extended `src/services/gmailService.js`, `src/services/inboxSources/gmailInboxSource.js`, and `src/services/inboxSources/fixtureInboxSource.js` with minimal full-content retrieval support.
 - Verified the slice with targeted Jest coverage in `tests/emailsRoutes.test.js`, `tests/emailsFixtureRoutes.integration.test.js`, and `tests/gmailService.test.js`.
+
+### 2026-03-22 — HU06 local fixture support for browser validation
+- Updated `src/services/inboxSources/fixtureInboxSource.js` so the deterministic E2E emails now contain extractor-ready receipt bodies with amount and delimited due-date values.
+- Revalidated the fixture content contract with `tests/emailsFixtureRoutes.integration.test.js`, keeping the backend HTTP surface unchanged while enabling the local browser receipt-review flow.

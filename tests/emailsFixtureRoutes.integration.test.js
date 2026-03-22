@@ -79,7 +79,7 @@ describe('Emails route with fixture inbox source', () => {
       id: 'email-hu19-archive',
       subject: '[E2E-HU19] Archive Target',
       from: 'E2E Sender <archive@example.com>',
-      body: 'Archive me from the Inbox row-level flow. Total a pagar: $350.50. Fecha limite de pago: 2026-03-25.',
+      body: 'Archive me from the Inbox row-level flow. Recibo de luz CFE. Total a pagar: $350.50. Fecha limite de pago: 25/03/2026.',
       html: null,
     });
   });
