@@ -36,8 +36,9 @@ Notes:
 - Gmail OAuth client persists refreshed access tokens to the `Tokens` table.
 - ADR 009 records the additive email-content route decision and the extension of the inbox source boundary for single-message content retrieval.
 - OAuth tokens are encrypted at rest using `TOKEN_ENCRYPTION_KEY`.
-- Commit hooks are now versioned in `.husky/`, with `commit-msg` validating Conventional Commit syntax via `commitlint` and `pre-commit` preserving both the README timestamp update and the workspace cognitive gate.
+- Commit hooks are now versioned in `.husky/`, with `commit-msg` validating Conventional Commit syntax via `commitlint` and `pre-commit` preserving both the README timestamp update and the repo-local governance checks under `scripts/git-hooks/`.
 - GitHub Actions `ci.yml` now validates PR commit messages with `commitlint` before the main lint/test job runs.
+- The Husky `prepare` step now uses a guarded repo-local installer, so production-style installs that omit devDependencies skip hook installation cleanly instead of failing.
 - A local rule-based electricity-receipt classifier now exists as an internal backend service using only `subject`, `sender`, and `body`, with deterministic `invoice_electricity | not_invoice | unknown` output.
 - A Node-first extractor service now powers `HU_02` with the six spike fixtures plus an empty/malformed case run through `tests/electricityInvoiceExtractor.test.js`, keeping `amount`/`due_date` and the `null` fallback explicit before wiring the production slice.
 - HU_03 now exposes `POST /api/v1/notifications/receipt-whatsapp` via `notificationDeliveryRoutes`, `notificationDeliveryController`, `receiptNotificationService`, and the deterministic `twilioAdapter`; the route only sends WhatsApp reminders when `{ amount, due_date }` are present and logs every delivery through `notificationDeliveryLogService`.
