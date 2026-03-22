@@ -37,6 +37,7 @@ Notes:
 - ADR 009 records the additive email-content route decision and the extension of the inbox source boundary for single-message content retrieval.
 - OAuth tokens are encrypted at rest using `TOKEN_ENCRYPTION_KEY`.
 - Commit hooks are now versioned in `.husky/`, with `commit-msg` validating Conventional Commit syntax via `commitlint` and `pre-commit` preserving both the README timestamp update and the workspace cognitive gate.
+- GitHub Actions `ci.yml` now validates PR commit messages with `commitlint` before the main lint/test job runs.
 - A local rule-based electricity-receipt classifier now exists as an internal backend service using only `subject`, `sender`, and `body`, with deterministic `invoice_electricity | not_invoice | unknown` output.
 - A Node-first extractor service now powers `HU_02` with the six spike fixtures plus an empty/malformed case run through `tests/electricityInvoiceExtractor.test.js`, keeping `amount`/`due_date` and the `null` fallback explicit before wiring the production slice.
 - HU_03 now exposes `POST /api/v1/notifications/receipt-whatsapp` via `notificationDeliveryRoutes`, `notificationDeliveryController`, `receiptNotificationService`, and the deterministic `twilioAdapter`; the route only sends WhatsApp reminders when `{ amount, due_date }` are present and logs every delivery through `notificationDeliveryLogService`.
@@ -280,3 +281,4 @@ Notes:
 - 2026-03-22 02:06 CST — Updated the fixture inbox content so the local browser receipt-review flow can extract amount and due date on deterministic E2E emails; `npm test -- emailsFixtureRoutes.integration.test.js` passed locally (commit: pending)
 - 2026-03-22 03:05 CST — Split HU06 onto dedicated fixture emails and extended `tests/emailsFixtureRoutes.integration.test.js` so the browser error-path fixture dependency is explicitly covered without reusing HU19 rows (commit: pending)
 - 2026-03-22 12:19 CST — Added versioned Husky hooks plus `commitlint`; `pre-commit` now preserves the README timestamp behavior and the workspace cognitive gate, while `commit-msg` blocks invalid Conventional Commit syntax (commit: pending)
+- 2026-03-22 12:19 CST — Extended `ci.yml` so pull requests now validate commit messages with `commitlint` in GitHub Actions in addition to the local Husky hook (commit: pending)

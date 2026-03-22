@@ -214,3 +214,6 @@ Last updated: 2026-03-17 03:55 CST
 ### 2026-03-22 — Husky and commitlint hooks added
 - Added versioned `.husky/pre-commit` and `.husky/commit-msg` hooks plus `.commitlintrc.cjs`.
 - Preserved the existing README timestamp update in `pre-commit` and confirmed that invalid Conventional Commit messages are blocked while the cognitive gate still runs.
+
+### 2026-03-22 — CI commitlint check added
+- Extended `.github/workflows/ci.yml` so pull requests now validate commit messages with `commitlint` in GitHub Actions.

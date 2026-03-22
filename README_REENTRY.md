@@ -28,6 +28,7 @@
 - The fixture inbox now contains the original HU19 action rows plus dedicated HU06 receipt-review rows with extractor-ready bodies for local browser validation.
 - The HU06 provider-error browser case is still a frontend-controlled override on `POST /api/v1/notifications/receipt-whatsapp`; backend fixture support only covers the deterministic happy-path content route.
 - Commit hooks are now versioned in `.husky/`: `pre-commit` preserves the README timestamp update and calls the workspace cognitive gate, while `commit-msg` validates Conventional Commit syntax with `commitlint`.
+- `.github/workflows/ci.yml` now validates PR commit messages with `commitlint` remotely before the main lint/test job runs.
 - Next action: checkpoint the Husky + commitlint hook migration on `chore/husky-commit-hooks`.
 - If the checkpoint feels stale, verify directly in `src/index.js`, `src/routes/*`, `src/services/*`, and `tests/*`
 
