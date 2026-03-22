@@ -15,7 +15,8 @@
         "session:e2e": "node scripts/generate_e2e_session_token.mjs --cookie",
         "test": "NODE_OPTIONS=--experimental-vm-modules jest",
         "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
-        "coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage"
+        "coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+        "prepare": "husky"
     },
     "keywords": [],
     "author": "",
@@ -38,7 +39,10 @@
         "sequelize-cli": "^6.6.3"
     },
     "devDependencies": {
+        "@commitlint/cli": "^20.5.0",
+        "@commitlint/config-conventional": "^20.5.0",
         "eslint": "^9.39.2",
+        "husky": "^9.1.7",
         "jest": "^29.7.0",
         "markdownlint-cli2": "^0.21.0",
         "pino-pretty": "^11.3.0"

@@ -210,3 +210,7 @@ Last updated: 2026-03-17 03:55 CST
 ### 2026-03-22 — HU06 fixture dataset decoupled from HU19
 - Added dedicated HU06 receipt-review emails to `src/services/inboxSources/fixtureInboxSource.js` so browser validation no longer depends on HU19 row IDs or content.
 - Extended `tests/emailsFixtureRoutes.integration.test.js` to assert the HU06 provider-error content route explicitly.
+
+### 2026-03-22 — Husky and commitlint hooks added
+- Added versioned `.husky/pre-commit` and `.husky/commit-msg` hooks plus `.commitlintrc.cjs`.
+- Preserved the existing README timestamp update in `pre-commit` and confirmed that invalid Conventional Commit messages are blocked while the cognitive gate still runs.

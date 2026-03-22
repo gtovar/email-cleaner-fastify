@@ -1,20 +1,20 @@
 # PROJECT_STATE.md
-Last updated: 2026-03-22 02:28 CST — Commit: pending
+Last updated: 2026-03-22 12:19 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
-SNAPSHOT_DATE: 2026-03-22 02:28 CST
+SNAPSHOT_DATE: 2026-03-22 12:19 CST
 COMMIT: pending
 ENVIRONMENT: local
 
 REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
-BRANCH: feat/hu06-receipt-review-browser-validation
-WORKING_TREE_STATUS: Dirty (HU06 local browser-validation fixture support in progress)
+BRANCH: chore/husky-commit-hooks
+WORKING_TREE_STATUS: Dirty (Husky + commitlint hook migration in progress)
 
 RUNTIME: Node.js (Fastify)
 DB: PostgreSQL via Sequelize
-TEST_STATUS: PASS (Jest `tests/emailsFixtureRoutes.integration.test.js`)
+TEST_STATUS: PASS (manual Husky validation via `.husky/_/commit-msg` and `.husky/_/pre-commit`)
 
 LAST_VERIFIED_TESTS_DATE: 2026-03-19 18:17 CST
 
@@ -36,6 +36,7 @@ Notes:
 - Gmail OAuth client persists refreshed access tokens to the `Tokens` table.
 - ADR 009 records the additive email-content route decision and the extension of the inbox source boundary for single-message content retrieval.
 - OAuth tokens are encrypted at rest using `TOKEN_ENCRYPTION_KEY`.
+- Commit hooks are now versioned in `.husky/`, with `commit-msg` validating Conventional Commit syntax via `commitlint` and `pre-commit` preserving both the README timestamp update and the workspace cognitive gate.
 - A local rule-based electricity-receipt classifier now exists as an internal backend service using only `subject`, `sender`, and `body`, with deterministic `invoice_electricity | not_invoice | unknown` output.
 - A Node-first extractor service now powers `HU_02` with the six spike fixtures plus an empty/malformed case run through `tests/electricityInvoiceExtractor.test.js`, keeping `amount`/`due_date` and the `null` fallback explicit before wiring the production slice.
 - HU_03 now exposes `POST /api/v1/notifications/receipt-whatsapp` via `notificationDeliveryRoutes`, `notificationDeliveryController`, `receiptNotificationService`, and the deterministic `twilioAdapter`; the route only sends WhatsApp reminders when `{ amount, due_date }` are present and logs every delivery through `notificationDeliveryLogService`.
@@ -246,7 +247,7 @@ Notes:
 
 ## 6. Next Immediate Action
 
-➡️ Checkpoint the minimal fixture support for HU06 on `feat/hu06-receipt-review-browser-validation` and then return the backend repo to the merged baseline.
+➡️ Checkpoint the Husky + commitlint hook migration on `chore/husky-commit-hooks`.
 
 ---
 
@@ -278,3 +279,4 @@ Notes:
 - 2026-03-21 22:50 CST — Realigned the backend checkpoint to the verified post-HU_05 merged baseline on `develop`; the next action is story selection, not reopening `GET /api/v1/emails/:id/content` integration work (commit: pending)
 - 2026-03-22 02:06 CST — Updated the fixture inbox content so the local browser receipt-review flow can extract amount and due date on deterministic E2E emails; `npm test -- emailsFixtureRoutes.integration.test.js` passed locally (commit: pending)
 - 2026-03-22 03:05 CST — Split HU06 onto dedicated fixture emails and extended `tests/emailsFixtureRoutes.integration.test.js` so the browser error-path fixture dependency is explicitly covered without reusing HU19 rows (commit: pending)
+- 2026-03-22 12:19 CST — Added versioned Husky hooks plus `commitlint`; `pre-commit` now preserves the README timestamp behavior and the workspace cognitive gate, while `commit-msg` blocks invalid Conventional Commit syntax (commit: pending)
