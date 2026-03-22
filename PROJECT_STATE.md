@@ -1,10 +1,10 @@
 # PROJECT_STATE.md
-Last updated: 2026-03-22 02:06 CST — Commit: pending
+Last updated: 2026-03-22 02:28 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
-SNAPSHOT_DATE: 2026-03-22 02:06 CST
+SNAPSHOT_DATE: 2026-03-22 02:28 CST
 COMMIT: pending
 ENVIRONMENT: local
 
@@ -30,7 +30,7 @@ Notes:
 - Auth middleware accepts session cookie or Bearer session JWT and sets `request.user`.
 - `/api/v1/emails` now resolves its Inbox source via `INBOX_SOURCE` and can use Gmail or a deterministic local fixture without changing the HTTP contract.
 - `/api/v1/emails/:id/content` now exposes authenticated normalized full email content by `emailId`, keeping `GET /api/v1/emails` unchanged.
-- The fixture inbox content now includes extractor-ready receipt bodies so the local browser flow can validate one successful manual WhatsApp send path without changing the HTTP contract.
+- The fixture inbox now contains the original HU19 action rows plus dedicated HU06 receipt-review rows with extractor-ready bodies, so the local browser flow can validate receipt review without changing the HTTP contract.
 - `/api/v1/suggestions` enriches emails with ML suggestions, includes `snippet`, and publishes domain events when threshold is met.
 - `/api/v1/notifications/summary` aggregates `NotificationEvent` records by period.
 - Gmail OAuth client persists refreshed access tokens to the `Tokens` table.
@@ -232,7 +232,7 @@ Notes:
 
 **Recent change:**
 - Added authenticated `GET /api/v1/emails/:id/content` so the frontend can retrieve normalized `{ id, subject, from, body, html }` data without changing `GET /api/v1/emails`, receipt extraction, or WhatsApp delivery (commit: pending).
-- Updated the fixture inbox content to include extractor-ready receipt bodies for the local HU06 browser validation path; `tests/emailsFixtureRoutes.integration.test.js` passed locally after the fixture change (commit: pending).
+- Added dedicated HU06 fixture emails with extractor-ready receipt bodies so the local browser validation path no longer depends on HU19 fixture rows, and expanded `tests/emailsFixtureRoutes.integration.test.js` to assert the second HU06 content route explicitly (commit: pending).
 
 ---
 
@@ -240,6 +240,7 @@ Notes:
 
 - OAuth cookies require correct SameSite/Secure settings in production.
 - `src/events/listeners/sendWebhookToN8NEvent.js` is still a safe no-op, so the n8n delivery path is not yet validated end-to-end.
+- HU06 backend support only proves deterministic email-content retrieval for the local happy path; the visible provider-error path is still validated in the browser via a controlled frontend override.
 
 ---
 
@@ -276,3 +277,4 @@ Notes:
 - 2026-03-19 18:17 CST — Added ADR 009 plus authenticated `GET /api/v1/emails/:id/content`, extending Gmail and fixture inbox sources with normalized full-content retrieval by `emailId`; targeted Jest validation passed for `tests/emailsRoutes.test.js`, `tests/emailsFixtureRoutes.integration.test.js`, and `tests/gmailService.test.js` (commit: pending)
 - 2026-03-21 22:50 CST — Realigned the backend checkpoint to the verified post-HU_05 merged baseline on `develop`; the next action is story selection, not reopening `GET /api/v1/emails/:id/content` integration work (commit: pending)
 - 2026-03-22 02:06 CST — Updated the fixture inbox content so the local browser receipt-review flow can extract amount and due date on deterministic E2E emails; `npm test -- emailsFixtureRoutes.integration.test.js` passed locally (commit: pending)
+- 2026-03-22 03:05 CST — Split HU06 onto dedicated fixture emails and extended `tests/emailsFixtureRoutes.integration.test.js` so the browser error-path fixture dependency is explicitly covered without reusing HU19 rows (commit: pending)

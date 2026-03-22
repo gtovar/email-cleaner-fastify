@@ -40,6 +40,32 @@ const FIXTURE_EMAILS = [
     hasAttachment: false,
     size: 3072,
   },
+  {
+    id: 'email-hu06-success',
+    subject: '[E2E-HU06] Receipt Success Target',
+    from: 'Utility Billing <receipt-success@example.com>',
+    date: '2026-03-10T11:00:00.000Z',
+    labels: ['INBOX', 'UNREAD'],
+    isRead: false,
+    category: 'updates',
+    attachmentSizeMb: 0,
+    snippet: 'Receipt review happy-path target for manual WhatsApp send validation.',
+    hasAttachment: false,
+    size: 4096,
+  },
+  {
+    id: 'email-hu06-provider-error',
+    subject: '[E2E-HU06] Receipt Provider Error Target',
+    from: 'Utility Billing <receipt-provider-error@example.com>',
+    date: '2026-03-10T12:00:00.000Z',
+    labels: ['INBOX', 'UNREAD'],
+    isRead: false,
+    category: 'updates',
+    attachmentSizeMb: 0,
+    snippet: 'Receipt review error-path target for visible retry validation.',
+    hasAttachment: false,
+    size: 5120,
+  },
 ];
 
 const FIXTURE_EMAIL_CONTENT = {
@@ -62,6 +88,20 @@ const FIXTURE_EMAIL_CONTENT = {
     subject: '[E2E-HU19] Mark Unread Target',
     from: 'E2E Sender <read@example.com>',
     body: 'Mark me as unread from the Inbox row-level flow. Recibo de luz CFE. Total a pagar: $120.75. Fecha limite de pago: 30/03/2026.',
+    html: null,
+  },
+  'email-hu06-success': {
+    id: 'email-hu06-success',
+    subject: '[E2E-HU06] Receipt Success Target',
+    from: 'Utility Billing <receipt-success@example.com>',
+    body: 'Recibo de luz CFE. Total a pagar: $350.50. Fecha limite de pago: 25/03/2026.',
+    html: null,
+  },
+  'email-hu06-provider-error': {
+    id: 'email-hu06-provider-error',
+    subject: '[E2E-HU06] Receipt Provider Error Target',
+    from: 'Utility Billing <receipt-provider-error@example.com>',
+    body: 'Recibo de luz CFE. Total a pagar: $900.00. Fecha limite de pago: 28/03/2026.',
     html: null,
   },
 };

@@ -2,13 +2,13 @@ import { describe, expect, it } from '@jest/globals';
 import { fixtureInboxSource, fixtureInboxUserEmail } from '../src/services/inboxSources/fixtureInboxSource.js';
 
 describe('fixtureInboxSource', () => {
-  it('returns the fixed HU19 dataset for the fixture user', async () => {
+  it('returns the fixed HU19 and HU06 datasets for the fixture user', async () => {
     const result = await fixtureInboxSource.listEmails({
       email: fixtureInboxUserEmail,
       maxResults: 20,
     });
 
-    expect(result.total).toBe(3);
+    expect(result.total).toBe(5);
     expect(result.nextPageToken).toBeNull();
     expect(result.emails).toEqual([
       {
@@ -49,6 +49,32 @@ describe('fixtureInboxSource', () => {
         snippet: 'Mark me as unread from the Inbox row-level flow.',
         hasAttachment: false,
         size: 3072,
+      },
+      {
+        id: 'email-hu06-success',
+        subject: '[E2E-HU06] Receipt Success Target',
+        from: 'Utility Billing <receipt-success@example.com>',
+        date: '2026-03-10T11:00:00.000Z',
+        labels: ['INBOX', 'UNREAD'],
+        isRead: false,
+        category: 'updates',
+        attachmentSizeMb: 0,
+        snippet: 'Receipt review happy-path target for manual WhatsApp send validation.',
+        hasAttachment: false,
+        size: 4096,
+      },
+      {
+        id: 'email-hu06-provider-error',
+        subject: '[E2E-HU06] Receipt Provider Error Target',
+        from: 'Utility Billing <receipt-provider-error@example.com>',
+        date: '2026-03-10T12:00:00.000Z',
+        labels: ['INBOX', 'UNREAD'],
+        isRead: false,
+        category: 'updates',
+        attachmentSizeMb: 0,
+        snippet: 'Receipt review error-path target for visible retry validation.',
+        hasAttachment: false,
+        size: 5120,
       },
     ]);
   });

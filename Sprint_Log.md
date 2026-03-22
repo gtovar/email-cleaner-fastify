@@ -206,3 +206,7 @@ Last updated: 2026-03-17 03:55 CST
 ### 2026-03-22 — HU06 local fixture support for browser validation
 - Updated `src/services/inboxSources/fixtureInboxSource.js` so the deterministic E2E emails now contain extractor-ready receipt bodies with amount and delimited due-date values.
 - Revalidated the fixture content contract with `tests/emailsFixtureRoutes.integration.test.js`, keeping the backend HTTP surface unchanged while enabling the local browser receipt-review flow.
+
+### 2026-03-22 — HU06 fixture dataset decoupled from HU19
+- Added dedicated HU06 receipt-review emails to `src/services/inboxSources/fixtureInboxSource.js` so browser validation no longer depends on HU19 row IDs or content.
+- Extended `tests/emailsFixtureRoutes.integration.test.js` to assert the HU06 provider-error content route explicitly.
