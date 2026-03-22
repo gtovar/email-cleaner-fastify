@@ -23,5 +23,6 @@ proyecto_completo_email-cleaner-fastify.txt
 __pycache__/
 *.pyc
 *.sh
+!scripts/git-hooks/*.sh
 tmp
 coverage/

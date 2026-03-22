@@ -210,3 +210,14 @@ Last updated: 2026-03-17 03:55 CST
 ### 2026-03-22 — HU06 fixture dataset decoupled from HU19
 - Added dedicated HU06 receipt-review emails to `src/services/inboxSources/fixtureInboxSource.js` so browser validation no longer depends on HU19 row IDs or content.
 - Extended `tests/emailsFixtureRoutes.integration.test.js` to assert the HU06 provider-error content route explicitly.
+
+### 2026-03-22 — Husky and commitlint hooks added
+- Added versioned `.husky/pre-commit` and `.husky/commit-msg` hooks plus `.commitlintrc.cjs`.
+- Preserved the existing README timestamp update in `pre-commit` and confirmed that invalid Conventional Commit messages are blocked while the cognitive gate still runs.
+
+### 2026-03-22 — CI commitlint check added
+- Extended `.github/workflows/ci.yml` so pull requests now validate commit messages with `commitlint` in GitHub Actions.
+
+### 2026-03-22 — Husky hook portability fix
+- Replaced the workspace-root `pre-commit` dependency with repo-local scripts under `scripts/git-hooks/`, preserving the README timestamp update while making the versioned hook portable to a clean standalone clone of `email-cleaner-fastify`.
+- Replaced `prepare: "husky"` with a guarded installer so `npm ci --omit=dev` now succeeds without devDependencies while normal dev installs still configure `.husky/_`.

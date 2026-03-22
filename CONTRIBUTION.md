@@ -27,11 +27,13 @@ This guide ensures consistency, code quality, and efficient collaboration.
    git commit -m "feat: add email classification endpoint"
    git commit -m "fix: correct token validation error"
    ```
+   - The repo now validates commit messages through the versioned Husky `commit-msg` hook using `commitlint`.
 
 3. **Run tests before pushing**
    ```bash
    npm test
    ```
+   - Pre-commit governance runs automatically through the versioned Husky `pre-commit` hook.
 
 4. **Submit a Pull Request (PR)**
    - Clearly describe what changed and why.  
@@ -98,6 +100,8 @@ Example:
 ```bash
 feat(auth): implement Gmail refresh token logic
 ```
+
+Commit syntax is validated automatically by the versioned Husky `commit-msg` hook with `commitlint`.
 
 ---
 
