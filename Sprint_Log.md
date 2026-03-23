@@ -221,3 +221,11 @@ Last updated: 2026-03-17 03:55 CST
 ### 2026-03-22 — Husky hook portability fix
 - Replaced the workspace-root `pre-commit` dependency with repo-local scripts under `scripts/git-hooks/`, preserving the README timestamp update while making the versioned hook portable to a clean standalone clone of `email-cleaner-fastify`.
 - Replaced `prepare: "husky"` with a guarded installer so `npm ci --omit=dev` now succeeds without devDependencies while normal dev installs still configure `.husky/_`.
+
+### 2026-03-22 — Comment hygiene wired into Fastify pre-commit
+- Added `scripts/git-hooks/check-comment-hygiene.sh` and wired it into the repo-local Husky `pre-commit` flow.
+- The Fastify hook now blocks empty comments and vague `TODO` / `FIXME` markers before commit without depending on the workspace-root helper script.
+
+### 2026-03-22 — Comment hygiene findings cleared in Fastify
+- Removed the four empty `//` separator comments that the new Fastify comment-hygiene gate was correctly blocking in existing service and test files.
+- Revalidated the repo-local Husky `pre-commit` flow; it now passes with `comment-hygiene: OK`.
