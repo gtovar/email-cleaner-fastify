@@ -30,7 +30,8 @@
 - Commit hooks are now versioned in `.husky/`: `pre-commit` preserves the README timestamp update through repo-local scripts under `scripts/git-hooks/`, while `commit-msg` validates Conventional Commit syntax with `commitlint`.
 - `.github/workflows/ci.yml` now validates PR commit messages with `commitlint` remotely before the main lint/test job runs.
 - The Husky `prepare` step now uses a guarded repo-local installer so `npm ci --omit=dev` skips hook installation cleanly instead of failing in production-style builds.
-- Next action: checkpoint the corrected Husky + commitlint hook migration on `chore/husky-commit-hooks`.
+- The repo-local Husky `pre-commit` flow now includes `scripts/git-hooks/check-comment-hygiene.sh`, blocking empty comments plus vague `TODO` / `FIXME` markers before commit.
+- Next action: checkpoint the repo-local comment-hygiene pre-commit enforcement on `chore/comment-hygiene-precommit`.
 - If the checkpoint feels stale, verify directly in `src/index.js`, `src/routes/*`, `src/services/*`, and `tests/*`
 
 ---

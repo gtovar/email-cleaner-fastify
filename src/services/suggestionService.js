@@ -1,6 +1,5 @@
 // src/services/suggestionService.js
 // Servicio de alto nivel para pedir sugerencias de acción al microservicio de ML.
-//
 // Responsabilidad:
 // - Recibir una lista de correos normalizados desde el backend.
 // - Llamar al microservicio de ML (vía mlClient).

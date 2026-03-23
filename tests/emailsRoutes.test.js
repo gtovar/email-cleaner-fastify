@@ -1,6 +1,5 @@
 // tests/emailsRoutes.test.js
 // Contrato Fastify para la ruta de correos (actualmente /api/v1/emails)
-//
 // Verifica:
 // - Middleware de auth (401 sin Bearer).
 // - 200 OK con token y shape { emails, nextPageToken, total }.

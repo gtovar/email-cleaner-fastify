@@ -1,7 +1,6 @@
 // src/services/mlClient.js
 // Cliente HTTP hacia el microservicio de ML (Python)
 // Responsable de enviar correos y recibir sugerencias/clasificación IA.
-//
 // Diseño alineado con HU12:
 // - No expone detalles del protocolo ML en los controladores.
 // - Permite configurar base URL y timeout por variables de entorno.
@@ -135,4 +134,3 @@ export {
   ML_BASE_URL,
   DEFAULT_TIMEOUT_MS
 };
-
