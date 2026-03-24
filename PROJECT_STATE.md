@@ -1,25 +1,25 @@
 # PROJECT_STATE.md
-Last updated: 2026-03-23 21:57 CST — Commit: pending
+Last updated: 2026-03-23 22:46 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
-SNAPSHOT_DATE: 2026-03-23 21:57 CST
-COMMIT: pending
+SNAPSHOT_DATE: 2026-03-23 22:46 CST
+COMMIT: 2255d90
 ENVIRONMENT: develop
 
 REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
 BRANCH: develop
-WORKING_TREE_STATUS: Clean
+WORKING_TREE_STATUS: Dirty (modified files present)
 
 RUNTIME: Node.js (Fastify)
 DB: PostgreSQL via Sequelize
-TEST_STATUS: PASS (`npm test -- receiptResponseService.test.js receiptResponseRoutes.test.js notificationsRoutes.test.js`)
+TEST_STATUS: PASS (`npm test -- receiptResponseService.test.js receiptResponseRoutes.test.js notificationsRoutes.test.js emailsRoutes.test.js`)
 
-LAST_VERIFIED_TESTS_DATE: 2026-03-23 21:57 CST
+LAST_VERIFIED_TESTS_DATE: 2026-03-23 22:40 CST
 
 Notes:
-- This snapshot reflects the expected `develop` baseline once the `HU_07A` backend boundary and concurrency hardening merge.
+- This snapshot reflects the current `develop` baseline after PR #42 merged the full `HU_07A` backend slice.
 
 ---
 
@@ -267,6 +267,7 @@ Notes:
 - Added the `ReceiptResponse` model plus route-contract coverage in `tests/receiptResponseRoutes.test.js`, with `targetId` resolved to `emailId` internally for this slice (commit: pending).
 - Hardened `src/services/receiptResponseService.js` against concurrent create conflicts and added `tests/receiptResponseService.test.js` to keep retries and double-submit behavior stable under the `(userId, emailId)` unique constraint (commit: pending).
 - Validated `targetId` through the existing inbox-source seam before reads and writes so `HU_07A` now returns `404` for unknown or foreign email IDs while keeping `200` with null-state semantics for valid targets that have no stored response yet (commit: pending).
+- PR #42 merged `HU_07A` into `develop` as commit `2255d90`, so the receipt-response boundary, conflict-tolerant writes, and target validation are now part of the canonical backend baseline.
 
 ---
 
@@ -281,7 +282,7 @@ Notes:
 
 ## 6. Next Immediate Action
 
-➡️ Re-review PR #42 against the now-validated `HU_07A` backend slice, then decide whether any remaining cleanup is limited to PR hygiene or warrants another backend fix before merge.
+➡️ Open the React `HU_07B` follow-up slice from `develop` against the merged `/api/v1/receipt-responses` backend baseline.
 
 ---
 
@@ -322,3 +323,4 @@ Notes:
 - 2026-03-23 18:24 CST — Implemented the local `HU_07A` receipt-response boundary, added the `ReceiptResponse` model/migration, documented ADR 010, and verified `tests/receiptResponseRoutes.test.js` locally while leaving the worktree pending commit-readiness (commit: pending)
 - 2026-03-23 18:47 CST — Checkpointed the `HU_07A` backend boundary on `feat/hu07a-receipt-response-backend` in commit `1eb8224`, keeping the next step focused on PR preparation rather than more backend scope (commit: `1eb8224`)
 - 2026-03-23 19:08 CST — DDR: `HU_07A` receipt-response writes must treat `(userId, emailId)` uniqueness conflicts as normal retry or double-submit behavior; `src/services/receiptResponseService.js` now resolves the existing row after conflict and `tests/receiptResponseService.test.js` covers the simulated path (commit: pending)
+- 2026-03-23 22:40 CST — PR #42 merged `HU_07A` into `develop` as `2255d90`, including the receipt-response boundary, unique-conflict hardening, and inbox-source target validation for `targetId -> emailId` (commit: `2255d90`)
