@@ -1,3 +1,5 @@
+import { UniqueConstraintError } from 'sequelize';
+
 function toApiShape(rowOrNull, targetId) {
   if (!rowOrNull) {
     return {
@@ -17,6 +19,13 @@ function toApiShape(rowOrNull, targetId) {
   };
 }
 
+function isUniqueConstraint(error) {
+  return (
+    error instanceof UniqueConstraintError ||
+    error?.name === 'SequelizeUniqueConstraintError'
+  );
+}
+
 export function receiptResponseService({ models, logger }) {
   const { ReceiptResponse } = models ?? {};
 
@@ -29,12 +38,8 @@ export function receiptResponseService({ models, logger }) {
       // HU_07A keeps targetId in the API contract while resolving it to emailId internally.
       const emailId = String(targetId);
 
-      let row = await ReceiptResponse.findOne({
-        where: { userId, emailId },
-      });
-
-      if (!row) {
-        row = await ReceiptResponse.create({
+      try {
+        const row = await ReceiptResponse.create({
           userId,
           emailId,
           response,
@@ -44,17 +49,31 @@ export function receiptResponseService({ models, logger }) {
           { userId, emailId, response },
           'Receipt response created',
         );
-      } else {
+
+        return toApiShape(row, emailId);
+      } catch (error) {
+        if (!isUniqueConstraint(error)) {
+          throw error;
+        }
+
+        const row = await ReceiptResponse.findOne({
+          where: { userId, emailId },
+        });
+
+        if (!row) {
+          throw error;
+        }
+
         row.response = response;
         await row.save();
 
         logger?.info?.(
           { userId, emailId, response },
-          'Receipt response updated',
+          'Receipt response updated after conflict',
         );
-      }
 
-      return toApiShape(row, emailId);
+        return toApiShape(row, emailId);
+      }
     },
 
     async getCurrent({ userId, targetId }) {

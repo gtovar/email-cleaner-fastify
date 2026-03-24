@@ -1,25 +1,25 @@
 # PROJECT_STATE.md
-Last updated: 2026-03-23 18:47 CST — Commit: 1eb8224
+Last updated: 2026-03-23 19:08 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
-SNAPSHOT_DATE: 2026-03-23 18:47 CST
-COMMIT: 1eb8224
-ENVIRONMENT: feat/hu07a-receipt-response-backend
+SNAPSHOT_DATE: 2026-03-23 19:08 CST
+COMMIT: pending
+ENVIRONMENT: develop
 
 REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
-BRANCH: feat/hu07a-receipt-response-backend
+BRANCH: develop
 WORKING_TREE_STATUS: Clean
 
 RUNTIME: Node.js (Fastify)
 DB: PostgreSQL via Sequelize
-TEST_STATUS: PASS (`npm test -- receiptResponseRoutes.test.js`)
+TEST_STATUS: PASS (`npm test -- receiptResponseRoutes.test.js notificationsRoutes.test.js receiptResponseService.test.js`)
 
-LAST_VERIFIED_TESTS_DATE: 2026-03-23 18:47 CST
+LAST_VERIFIED_TESTS_DATE: 2026-03-23 19:08 CST
 
 Notes:
-- This snapshot reflects the local `HU_07A` checkpoint after the backend boundary commit landed on a feature branch.
+- This snapshot reflects the expected `develop` baseline once the `HU_07A` backend boundary and concurrency hardening merge.
 
 ---
 
@@ -256,15 +256,17 @@ Notes:
 - ADR/API docs: `docs/adr/010-receipt-response-boundary.md`, `docs/API_REFERENCE.md`
 
 **Open items:**
-- None for the local backend slice checkpoint.
+- Decide whether `targetId` existence and ownership validation belongs in `HU_07A` before merge or is explicitly deferred.
 
 **Technical risks:**
 - `targetId` is intentionally resolved to `emailId` only for `HU_07A`; future phases may still require a stronger receipt identity.
-- The new migration must be applied in real database environments before the route can persist state outside mocked tests.
+- The new migration must still be applied in real database environments before the route can persist state outside mocked tests.
+- `targetId` existence and ownership are still a separate integrity decision; the current slice does not yet prove that every accepted target maps to a verified user-owned email.
 
 **Recent change:**
-- Added `POST /api/v1/receipt-responses` and `GET /api/v1/receipt-responses/:targetId` as a separate authenticated boundary for manual `paid | ignore` state, keeping `POST /api/v1/notifications/confirm` unchanged for suggestion confirmation (commit: `1eb8224`).
-- Added the `ReceiptResponse` model plus route-contract coverage in `tests/receiptResponseRoutes.test.js`, with `targetId` resolved to `emailId` internally for this slice (commit: `1eb8224`).
+- Added `POST /api/v1/receipt-responses` and `GET /api/v1/receipt-responses/:targetId` as a separate authenticated boundary for manual `paid | ignore` state, keeping `POST /api/v1/notifications/confirm` unchanged for suggestion confirmation (commit: pending).
+- Added the `ReceiptResponse` model plus route-contract coverage in `tests/receiptResponseRoutes.test.js`, with `targetId` resolved to `emailId` internally for this slice (commit: pending).
+- Hardened `src/services/receiptResponseService.js` against concurrent create conflicts and added `tests/receiptResponseService.test.js` to keep retries and double-submit behavior stable under the `(userId, emailId)` unique constraint (commit: pending).
 
 ---
 
@@ -274,12 +276,13 @@ Notes:
 - `src/events/listeners/sendWebhookToN8NEvent.js` is still a safe no-op, so the n8n delivery path is not yet validated end-to-end.
 - HU06 backend support only proves deterministic email-content retrieval for the local happy path; the visible provider-error path is still validated in the browser via a controlled frontend override.
 - The new `ReceiptResponse` migration must still be applied in DB-backed environments before manual route verification outside mocked tests.
+- `targetId` existence and ownership are still unresolved at the domain level; merge readiness must either accept this as deferred or add validation in a follow-up fix.
 
 ---
 
 ## 6. Next Immediate Action
 
-➡️ Push `feat/hu07a-receipt-response-backend` and open a PR to `develop` for the `HU_07A` backend boundary.
+➡️ Decide whether `targetId` existence and ownership validation belongs in `HU_07A` before merge or is explicitly deferred to the next backend slice.
 
 ---
 
@@ -318,3 +321,4 @@ Notes:
 - 2026-03-23 17:08 CST — Promoted `HU_07A` as the concrete next backend slice, split `HU_07` into backend/frontend execution slices, and anchored the next action to contract + persistence + tests in Fastify (commit: pending)
 - 2026-03-23 18:24 CST — Implemented the local `HU_07A` receipt-response boundary, added the `ReceiptResponse` model/migration, documented ADR 010, and verified `tests/receiptResponseRoutes.test.js` locally while leaving the worktree pending commit-readiness (commit: pending)
 - 2026-03-23 18:47 CST — Checkpointed the `HU_07A` backend boundary on `feat/hu07a-receipt-response-backend` in commit `1eb8224`, keeping the next step focused on PR preparation rather than more backend scope (commit: `1eb8224`)
+- 2026-03-23 19:08 CST — DDR: `HU_07A` receipt-response writes must treat `(userId, emailId)` uniqueness conflicts as normal retry or double-submit behavior; `src/services/receiptResponseService.js` now resolves the existing row after conflict and `tests/receiptResponseService.test.js` covers the simulated path (commit: pending)

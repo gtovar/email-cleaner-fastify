@@ -246,3 +246,8 @@ Last updated: 2026-03-23 18:47 CST
 ### 2026-03-23 — HU_07A backend boundary checkpointed
 - Moved the local slice onto `feat/hu07a-receipt-response-backend` and committed the backend boundary as `1eb8224`.
 - The backend next step is now PR preparation against `develop`, not additional implementation on top of the same slice.
+
+### 2026-03-23 — HU_07A DDR: conflict-tolerant receipt-response writes
+- Recorded the slice-level decision that `HU_07A` write-paths must not surface raw uniqueness failures for normal retry or double-submit behavior on `(userId, emailId)`.
+- Updated `src/services/receiptResponseService.js` so a create conflict falls back to the existing row instead of failing the request.
+- Added `tests/receiptResponseService.test.js` to simulate the unique-constraint conflict path and keep the behavior stable.
