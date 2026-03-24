@@ -268,4 +268,4 @@ Last updated: 2026-03-23 22:40 CST
 - **Done:** Drafted post-merge checkpoint updates in PROJECT_STATE.md, README_REENTRY.md, and Sprint_Log.md to point the next slice to HU_07B.
 - **Learned:** Post-merge checkpoint docs must describe canonical develop truth, but they still cannot be edited and left sitting on develop; move them to a short-lived docs branch or stash them before continuing. Receipt-response ownership can be validated cleanly by reusing the existing inbox-source seam instead of inventing a second source of truth.
 - **Status:** PAUSADA
-- **Next:** Create a short-lived docs branch from fastify/develop, move the post-merge checkpoint updates for PROJECT_STATE.md, README_REENTRY.md, and Sprint_Log.md off develop, then continue in the React repo with HU_07B against the merged /api/v1/receipt-responses backend baseline.
+- **Next:** Open the React `HU_07B` follow-up slice from `develop` against the merged `/api/v1/receipt-responses` backend baseline.

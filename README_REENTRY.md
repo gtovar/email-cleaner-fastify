@@ -35,7 +35,7 @@
 - `HU_07A` now adds `/api/v1/receipt-responses` as a separate boundary backed by `src/models/receiptResponse.js` and `migrations/20260323182000-create-receipt-responses.cjs`; `targetId` stays external while the backend resolves it to `emailId` for this slice.
 - The `HU_07A` write-path now treats unique-key conflicts on `(userId, emailId)` as a normal retry or double-submit case instead of surfacing a raw failure.
 - `HU_07A` now validates `targetId` through the inbox-source seam, so reads and writes return `404` for unknown or foreign email IDs while keeping `200` + null-state semantics for valid targets without stored response state.
-- Next action: Create a short-lived docs branch from fastify/develop, move the post-merge checkpoint updates for PROJECT_STATE.md, README_REENTRY.md, and Sprint_Log.md off develop, then continue in the React repo with HU_07B against the merged /api/v1/receipt-responses backend baseline.
+- Next action: Open the React `HU_07B` follow-up slice from `develop` against the merged `/api/v1/receipt-responses` backend baseline.
 - If the checkpoint feels stale, verify directly in `src/index.js`, `src/routes/*`, `src/services/*`, and `tests/*`
 
 ---

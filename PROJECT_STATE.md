@@ -282,7 +282,7 @@ Notes:
 
 ## 6. Next Immediate Action
 
-➡️ Create a short-lived docs branch from fastify/develop, move the post-merge checkpoint updates for PROJECT_STATE.md, README_REENTRY.md, and Sprint_Log.md off develop, then continue in the React repo with HU_07B against the merged /api/v1/receipt-responses backend baseline.
+➡️ Open the React `HU_07B` follow-up slice from `develop` against the merged `/api/v1/receipt-responses` backend baseline.
 
 ---
 
