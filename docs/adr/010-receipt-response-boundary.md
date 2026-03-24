@@ -2,7 +2,7 @@
 
 - Status: accepted
 - Date: 2026-03-23
-- Commit hash: pending
+- Commit hash: 1eb8224
 
 ## Context
 
