@@ -1,7 +1,7 @@
 ## Sprint_Log.md — Backend Fastify
 
 (Email Cleaner & Smart Notifications — Backend)
-Last updated: 2026-03-17 03:55 CST
+Last updated: 2026-03-23 21:57 CST
 
 ---
 
@@ -224,8 +224,35 @@ Last updated: 2026-03-17 03:55 CST
 
 ### 2026-03-22 — Comment hygiene wired into Fastify pre-commit
 - Added `scripts/git-hooks/check-comment-hygiene.sh` and wired it into the repo-local Husky `pre-commit` flow.
-- The Fastify hook now blocks empty comments and vague `TODO` / `FIXME` markers before commit without depending on the workspace-root helper script.
+- The Fastify hook now blocks empty comments and vague follow-up markers before commit without depending on the workspace-root helper script.
 
 ### 2026-03-22 — Comment hygiene findings cleared in Fastify
 - Removed the four empty `//` separator comments that the new Fastify comment-hygiene gate was correctly blocking in existing service and test files.
 - Revalidated the repo-local Husky `pre-commit` flow; it now passes with `comment-hygiene: OK`.
+
+### 2026-03-23 — Phase 2 backlog realigned
+- Updated the canonical Phase 2 story docs so HU_02, HU_03, and HU_05 match the implemented code-backed state.
+- Registered HU_07, HU_08, and HU_09 as the next backlog candidates and synchronized the backend checkpoint next step.
+
+### 2026-03-23 — HU_07 execution slices defined
+- Split `HU_07` into `HU_07A` backend-first and `HU_07B` frontend follow-up.
+- Anchored the backend next step to freezing response identity, command/query boundary, and persistence before UI work.
+
+### 2026-03-23 — HU_07A backend receipt-response slice implemented locally
+- Added `src/routes/receiptResponseRoutes.js`, `src/controllers/receiptResponseController.js`, `src/services/receiptResponseService.js`, and `src/models/receiptResponse.js` to expose a separate authenticated boundary for manual `paid | ignore` state.
+- Added `migrations/20260323182000-create-receipt-responses.cjs`, registered `ReceiptResponse` in `src/plugins/sequelize.js`, and wired the new route through `src/index.js`.
+- Added `tests/receiptResponseRoutes.test.js`, verified `npm test -- receiptResponseRoutes.test.js` passes locally, and documented the architectural boundary in `docs/adr/010-receipt-response-boundary.md` plus `docs/API_REFERENCE.md`.
+
+### 2026-03-23 — HU_07A backend boundary checkpointed
+- Moved the local slice onto `feat/hu07a-receipt-response-backend` and committed the backend boundary as `1eb8224`.
+- The backend next step is now PR preparation against `develop`, not additional implementation on top of the same slice.
+
+### 2026-03-23 — HU_07A DDR: conflict-tolerant receipt-response writes
+- Recorded the slice-level decision that `HU_07A` write-paths must not surface raw uniqueness failures for normal retry or double-submit behavior on `(userId, emailId)`.
+- Updated `src/services/receiptResponseService.js` so a create conflict falls back to the existing row instead of failing the request.
+- Added `tests/receiptResponseService.test.js` to simulate the unique-constraint conflict path and keep the behavior stable.
+
+### 2026-03-23 — HU_07A target validation aligned to inbox source
+- Resolved the open HU_07A integrity decision by validating `targetId` through the existing inbox-source seam before reads and writes.
+- Updated the receipt-response controller and service so unknown or foreign email IDs return `404` instead of creating or reading state for arbitrary strings.
+- Expanded `tests/receiptResponseRoutes.test.js` and `tests/receiptResponseService.test.js` to cover valid-target null state, nonexistent targets, and foreign-target rejection.

@@ -12,3 +12,4 @@ This page lists architecture decision records (ADRs) for the backend.
 - ADR 007: Inbox direct actions contract (`adr/007-inbox-direct-actions-contract.md`)
 - ADR 008: Bulk Inbox Actions Result Semantics (`adr/008-bulk-inbox-actions-result-semantics.md`)
 - ADR 009: Email content route for receipt extraction (`adr/009-email-content-route-for-receipt-extraction.md`)
+- ADR 010: Receipt response boundary for manual paid or ignore state (`adr/010-receipt-response-boundary.md`)
