@@ -34,7 +34,8 @@
 - The repo-local Husky `pre-commit` flow now includes `scripts/git-hooks/check-comment-hygiene.sh`, blocking empty comments plus vague follow-up markers before commit.
 - `HU_07A` now adds `/api/v1/receipt-responses` as a separate boundary backed by `src/models/receiptResponse.js` and `migrations/20260323182000-create-receipt-responses.cjs`; `targetId` stays external while the backend resolves it to `emailId` for this slice.
 - The `HU_07A` write-path now treats unique-key conflicts on `(userId, emailId)` as a normal retry or double-submit case instead of surfacing a raw failure.
-- Next action: decide whether `targetId` existence and ownership validation belongs in `HU_07A` before merge or is explicitly deferred.
+- `HU_07A` now validates `targetId` through the inbox-source seam, so reads and writes return `404` for unknown or foreign email IDs while keeping `200` + null-state semantics for valid targets without stored response state.
+- Next action: re-review PR #42 against the now-validated `HU_07A` slice and decide whether any remaining work is limited to PR hygiene before merge.
 - If the checkpoint feels stale, verify directly in `src/index.js`, `src/routes/*`, `src/services/*`, and `tests/*`
 
 ---

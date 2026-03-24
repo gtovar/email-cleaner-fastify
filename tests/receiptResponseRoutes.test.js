@@ -1,6 +1,19 @@
 import { describe, test, expect, beforeAll, afterAll, jest } from '@jest/globals';
 import Fastify from 'fastify';
 
+const ownedTargetsByEmail = new Map([
+  ['user-a@example.com', new Set([
+    'email-1',
+    'email-2',
+    'email-4',
+    'email-5',
+    'email-6',
+    'email-valid-without-state',
+    'shared-email',
+  ])],
+  ['user-b@example.com', new Set(['shared-email', 'user-b-only'])],
+]);
+
 const createFakeReceiptResponseModel = () => {
   const store = new Map();
 
@@ -57,8 +70,30 @@ const fakeAuthMiddleware = async (request, reply) => {
   };
 };
 
+const fakeInboxSource = {
+  getEmailContent: jest.fn(async ({ email, emailId }) => {
+    const ownedTargets = ownedTargetsByEmail.get(String(email)) ?? new Set();
+
+    if (!ownedTargets.has(String(emailId))) {
+      return null;
+    }
+
+    return {
+      id: String(emailId),
+      subject: 'Fixture receipt target',
+      from: 'utility@example.com',
+      body: 'Recibo valido para HU_07A.',
+      html: null,
+    };
+  }),
+};
+
 jest.unstable_mockModule('../src/middlewares/authMiddleware.js', () => ({
   default: fakeAuthMiddleware,
+}));
+
+jest.unstable_mockModule('../src/services/inboxSources/index.js', () => ({
+  resolveInboxSource: () => fakeInboxSource,
 }));
 
 const receiptResponseRoutesModule = await import(
@@ -171,19 +206,71 @@ describe('Receipt Response Routes (HU_07A)', () => {
     expect(response.statusCode).toBe(400);
   });
 
-  test('returns 200 + null state when not found', async () => {
+  test('returns 404 when the target email does not exist for the authenticated user', async () => {
     const response = await app.inject({
       method: 'GET',
       url: '/api/v1/receipt-responses/email-not-found',
       headers: { 'x-test-user-id': 'user-a' },
     });
 
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toEqual({ error: 'Email content not found' });
+  });
+
+  test('returns 200 + null state when the email exists but has no recorded response yet', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/v1/receipt-responses/email-valid-without-state',
+      headers: { 'x-test-user-id': 'user-a' },
+    });
+
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
-      targetId: 'email-not-found',
+      targetId: 'email-valid-without-state',
       response: null,
       updatedAt: null,
     });
+  });
+
+  test('rejects writes for a target email that does not exist', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/v1/receipt-responses',
+      headers: { 'x-test-user-id': 'user-a' },
+      payload: {
+        targetId: 'missing-email',
+        response: 'paid',
+      },
+    });
+
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toEqual({ error: 'Email content not found' });
+  });
+
+  test('rejects reads for a target email owned by another user', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/v1/receipt-responses/user-b-only',
+      headers: { 'x-test-user-id': 'user-a' },
+    });
+
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toEqual({ error: 'Email content not found' });
+  });
+
+  test('rejects writes for a target email owned by another user', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/v1/receipt-responses',
+      headers: { 'x-test-user-id': 'user-a' },
+      payload: {
+        targetId: 'user-b-only',
+        response: 'ignore',
+      },
+    });
+
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toEqual({ error: 'Email content not found' });
   });
 
   test('creates initial state and can read it back', async () => {

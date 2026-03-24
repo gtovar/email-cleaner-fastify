@@ -63,6 +63,7 @@ export default async function receiptResponseRoutes(fastify) {
           200: { $ref: 'ReceiptResponse#' },
           400: { description: 'Invalid payload' },
           401: { description: 'Unauthorized' },
+          404: { description: 'Email content not found' },
         },
       },
     },
@@ -81,6 +82,7 @@ export default async function receiptResponseRoutes(fastify) {
         response: {
           200: { $ref: 'ReceiptResponse#' },
           401: { description: 'Unauthorized' },
+          404: { description: 'Email content not found' },
         },
       },
     },

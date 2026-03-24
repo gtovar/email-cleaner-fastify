@@ -1,10 +1,10 @@
 # PROJECT_STATE.md
-Last updated: 2026-03-23 19:08 CST — Commit: pending
+Last updated: 2026-03-23 21:57 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
-SNAPSHOT_DATE: 2026-03-23 19:08 CST
+SNAPSHOT_DATE: 2026-03-23 21:57 CST
 COMMIT: pending
 ENVIRONMENT: develop
 
@@ -14,9 +14,9 @@ WORKING_TREE_STATUS: Clean
 
 RUNTIME: Node.js (Fastify)
 DB: PostgreSQL via Sequelize
-TEST_STATUS: PASS (`npm test -- receiptResponseRoutes.test.js notificationsRoutes.test.js receiptResponseService.test.js`)
+TEST_STATUS: PASS (`npm test -- receiptResponseService.test.js receiptResponseRoutes.test.js notificationsRoutes.test.js`)
 
-LAST_VERIFIED_TESTS_DATE: 2026-03-23 19:08 CST
+LAST_VERIFIED_TESTS_DATE: 2026-03-23 21:57 CST
 
 Notes:
 - This snapshot reflects the expected `develop` baseline once the `HU_07A` backend boundary and concurrency hardening merge.
@@ -252,21 +252,21 @@ Notes:
 - Controller/service: `src/controllers/receiptResponseController.js`, `src/services/receiptResponseService.js`
 - Persistence: `src/models/receiptResponse.js`, `migrations/20260323182000-create-receipt-responses.cjs`
 - Wiring: `src/index.js`, `src/plugins/sequelize.js`
-- Tests: `tests/receiptResponseRoutes.test.js`
+- Tests: `tests/receiptResponseRoutes.test.js`, `tests/receiptResponseService.test.js`
 - ADR/API docs: `docs/adr/010-receipt-response-boundary.md`, `docs/API_REFERENCE.md`
 
 **Open items:**
-- Decide whether `targetId` existence and ownership validation belongs in `HU_07A` before merge or is explicitly deferred.
+- None for this backend prerequisite slice.
 
 **Technical risks:**
 - `targetId` is intentionally resolved to `emailId` only for `HU_07A`; future phases may still require a stronger receipt identity.
 - The new migration must still be applied in real database environments before the route can persist state outside mocked tests.
-- `targetId` existence and ownership are still a separate integrity decision; the current slice does not yet prove that every accepted target maps to a verified user-owned email.
 
 **Recent change:**
 - Added `POST /api/v1/receipt-responses` and `GET /api/v1/receipt-responses/:targetId` as a separate authenticated boundary for manual `paid | ignore` state, keeping `POST /api/v1/notifications/confirm` unchanged for suggestion confirmation (commit: pending).
 - Added the `ReceiptResponse` model plus route-contract coverage in `tests/receiptResponseRoutes.test.js`, with `targetId` resolved to `emailId` internally for this slice (commit: pending).
 - Hardened `src/services/receiptResponseService.js` against concurrent create conflicts and added `tests/receiptResponseService.test.js` to keep retries and double-submit behavior stable under the `(userId, emailId)` unique constraint (commit: pending).
+- Validated `targetId` through the existing inbox-source seam before reads and writes so `HU_07A` now returns `404` for unknown or foreign email IDs while keeping `200` with null-state semantics for valid targets that have no stored response yet (commit: pending).
 
 ---
 
@@ -276,13 +276,12 @@ Notes:
 - `src/events/listeners/sendWebhookToN8NEvent.js` is still a safe no-op, so the n8n delivery path is not yet validated end-to-end.
 - HU06 backend support only proves deterministic email-content retrieval for the local happy path; the visible provider-error path is still validated in the browser via a controlled frontend override.
 - The new `ReceiptResponse` migration must still be applied in DB-backed environments before manual route verification outside mocked tests.
-- `targetId` existence and ownership are still unresolved at the domain level; merge readiness must either accept this as deferred or add validation in a follow-up fix.
 
 ---
 
 ## 6. Next Immediate Action
 
-➡️ Decide whether `targetId` existence and ownership validation belongs in `HU_07A` before merge or is explicitly deferred to the next backend slice.
+➡️ Re-review PR #42 against the now-validated `HU_07A` backend slice, then decide whether any remaining cleanup is limited to PR hygiene or warrants another backend fix before merge.
 
 ---
 
@@ -308,6 +307,7 @@ Notes:
 - 2026-03-17 04:15 CST — HU_03 WhatsApp delivery route, controller, receiptNotificationService, Twilio adapter, and regression tests landed; route now exposes `POST /api/v1/notifications/receipt-whatsapp` and logs deliveries via `notificationDeliveryLogService` (commit: pending)
 - 2026-03-17 03:45 CST — Added `empty-malformed` fixture and regression test coverage so the Node-first extractor proves positive/ambiguous/negative/empty guardrails before wiring production contracts (commit: pending)
 - 2026-03-17 03:55 CST — Added POST `/api/v1/receipt-detection/extract`, the thin controller/service wiring, and integration test coverage hitting the production fixtures (commit: pending)
+- 2026-03-23 19:34 CST — HU_07A now validates `targetId` through the inbox-source seam before reads and writes, returning `404` for unknown or foreign email IDs while keeping `200` + null-state semantics for valid targets without stored response state (commit: pending)
 - 2026-03-17 19:55 CST — Documented the HU_03 WhatsApp delivery API contract in `docs/API_REFERENCE.md` and captured the regression tests for success, skipped, and provider-failure outcomes before preparing the backend PR (commit: pending)
 - 2026-03-17 20:12 CST — Protected `POST /api/v1/notifications/receipt-whatsapp` with `authMiddleware` to align the guardrail with the documented `session_token` requirement (commit: pending)
 - 2026-03-19 18:17 CST — Added ADR 009 plus authenticated `GET /api/v1/emails/:id/content`, extending Gmail and fixture inbox sources with normalized full-content retrieval by `emailId`; targeted Jest validation passed for `tests/emailsRoutes.test.js`, `tests/emailsFixtureRoutes.integration.test.js`, and `tests/gmailService.test.js` (commit: pending)

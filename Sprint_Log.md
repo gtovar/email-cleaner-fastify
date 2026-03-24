@@ -1,7 +1,7 @@
 ## Sprint_Log.md — Backend Fastify
 
 (Email Cleaner & Smart Notifications — Backend)
-Last updated: 2026-03-23 18:47 CST
+Last updated: 2026-03-23 21:57 CST
 
 ---
 
@@ -251,3 +251,8 @@ Last updated: 2026-03-23 18:47 CST
 - Recorded the slice-level decision that `HU_07A` write-paths must not surface raw uniqueness failures for normal retry or double-submit behavior on `(userId, emailId)`.
 - Updated `src/services/receiptResponseService.js` so a create conflict falls back to the existing row instead of failing the request.
 - Added `tests/receiptResponseService.test.js` to simulate the unique-constraint conflict path and keep the behavior stable.
+
+### 2026-03-23 — HU_07A target validation aligned to inbox source
+- Resolved the open HU_07A integrity decision by validating `targetId` through the existing inbox-source seam before reads and writes.
+- Updated the receipt-response controller and service so unknown or foreign email IDs return `404` instead of creating or reading state for arbitrary strings.
+- Expanded `tests/receiptResponseRoutes.test.js` and `tests/receiptResponseService.test.js` to cover valid-target null state, nonexistent targets, and foreign-target rejection.

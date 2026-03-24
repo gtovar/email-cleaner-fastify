@@ -26,7 +26,13 @@ function isUniqueConstraint(error) {
   );
 }
 
-export function receiptResponseService({ models, logger }) {
+function createTargetNotFoundError() {
+  const error = new Error('Email content not found');
+  error.statusCode = 404;
+  return error;
+}
+
+export function receiptResponseService({ models, logger, resolveTarget = async () => true }) {
   const { ReceiptResponse } = models ?? {};
 
   if (!ReceiptResponse) {
@@ -37,6 +43,11 @@ export function receiptResponseService({ models, logger }) {
     async upsert({ userId, targetId, response }) {
       // HU_07A keeps targetId in the API contract while resolving it to emailId internally.
       const emailId = String(targetId);
+      const targetExists = await resolveTarget({ userId, targetId: emailId });
+
+      if (!targetExists) {
+        throw createTargetNotFoundError();
+      }
 
       try {
         const row = await ReceiptResponse.create({
@@ -78,6 +89,11 @@ export function receiptResponseService({ models, logger }) {
 
     async getCurrent({ userId, targetId }) {
       const emailId = String(targetId);
+      const targetExists = await resolveTarget({ userId, targetId: emailId });
+
+      if (!targetExists) {
+        throw createTargetNotFoundError();
+      }
 
       const row = await ReceiptResponse.findOne({
         where: { userId, emailId },

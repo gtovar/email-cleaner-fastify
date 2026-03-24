@@ -492,6 +492,7 @@ Registers or updates the current manual receipt response state for one target.
 * Protected by `authMiddleware`, so a valid `session_token` cookie or `Bearer` JWT is required.
 * The HTTP contract uses `targetId`.
 * Inside `HU_07A`, the backend resolves `targetId` to `emailId`.
+* `targetId` must resolve to an email that exists and belongs to the authenticated user.
 * The route persists one current state per `(userId, emailId)`.
 
 #### Request
@@ -529,6 +530,7 @@ Content-Type: application/json
 * **200 OK** – State was created or updated successfully.
 * **400 Bad Request** – Invalid payload.
 * **401 Unauthorized** – Missing or invalid token.
+* **404 Not Found** – `targetId` does not map to a user-owned email.
 
 ---
 
@@ -539,7 +541,8 @@ Returns the current manual receipt response state for one target.
 #### Description
 
 * Protected by `authMiddleware`, so a valid `session_token` cookie or `Bearer` JWT is required.
-* Returns a null state instead of `404` when no response has been recorded yet.
+* `targetId` must resolve to an email that exists and belongs to the authenticated user.
+* Returns a null state instead of `404` when the target email is valid but no response has been recorded yet.
 
 #### Request
 
@@ -567,6 +570,12 @@ Cookie: session_token=<SESSION_TOKEN>
   "updatedAt": null
 }
 ```
+
+#### Possible Status Codes
+
+* **200 OK** – Current state returned successfully, including the null-state case for a valid target with no stored response yet.
+* **401 Unauthorized** – Missing or invalid token.
+* **404 Not Found** – `targetId` does not map to a user-owned email.
 
 #### Possible Status Codes
 
