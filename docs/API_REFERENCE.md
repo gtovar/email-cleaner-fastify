@@ -475,7 +475,109 @@ Cookie: session_token=<SESSION_TOKEN>
 
 ---
 
-### 5.5 POST /api/v1/notifications/receipt-whatsapp
+## 6. Receipt Responses API
+
+The Receipt Responses API records and reads the current manual receipt-response state for one authenticated user and one target email.
+
+This boundary is separate from `POST /api/v1/notifications/confirm`, which remains dedicated to suggestion confirmation with `accept` or `reject`.
+
+---
+
+### 6.1 POST /api/v1/receipt-responses
+
+Registers or updates the current manual receipt response state for one target.
+
+#### Description
+
+* Protected by `authMiddleware`, so a valid `session_token` cookie or `Bearer` JWT is required.
+* The HTTP contract uses `targetId`.
+* Inside `HU_07A`, the backend resolves `targetId` to `emailId`.
+* The route persists one current state per `(userId, emailId)`.
+
+#### Request
+
+```http
+POST /api/v1/receipt-responses HTTP/1.1
+Cookie: session_token=<SESSION_TOKEN>
+Content-Type: application/json
+```
+
+#### Request Body
+
+```json
+{
+  "targetId": "email-123",
+  "response": "paid"
+}
+```
+
+* `targetId` *(required string)* — Target identifier for the response contract. In `HU_07A`, this maps to `emailId`.
+* `response` *(required string)* — One of: `paid`, `ignore`.
+
+#### Response 200 (example)
+
+```json
+{
+  "targetId": "email-123",
+  "response": "paid",
+  "updatedAt": "2026-03-24T12:00:00.000Z"
+}
+```
+
+#### Possible Status Codes
+
+* **200 OK** – State was created or updated successfully.
+* **400 Bad Request** – Invalid payload.
+* **401 Unauthorized** – Missing or invalid token.
+
+---
+
+### 6.2 GET /api/v1/receipt-responses/:targetId
+
+Returns the current manual receipt response state for one target.
+
+#### Description
+
+* Protected by `authMiddleware`, so a valid `session_token` cookie or `Bearer` JWT is required.
+* Returns a null state instead of `404` when no response has been recorded yet.
+
+#### Request
+
+```http
+GET /api/v1/receipt-responses/email-123 HTTP/1.1
+Cookie: session_token=<SESSION_TOKEN>
+```
+
+#### Response 200 (when state exists)
+
+```json
+{
+  "targetId": "email-123",
+  "response": "paid",
+  "updatedAt": "2026-03-24T12:00:00.000Z"
+}
+```
+
+#### Response 200 (when state does not exist yet)
+
+```json
+{
+  "targetId": "email-123",
+  "response": null,
+  "updatedAt": null
+}
+```
+
+#### Possible Status Codes
+
+* **200 OK** – Current state returned successfully.
+* **401 Unauthorized** – Missing or invalid token.
+
+---
+
+## 7. Receipt Notification Delivery API
+
+### 7.1 POST /api/v1/notifications/receipt-whatsapp
 
 Sends a WhatsApp reminder for a detected invoice when `{ emailId, sender, subject, amount, due_date, phone }` are provided. The controller simply forwards the validated payload to `src/services/notifications/receiptNotificationService.js`, which assembles the reminder text, calls the sandboxed Twilio adapter in `src/services/notifications/twilioAdapter.js`, and logs every attempt via `src/services/notifications/notificationDeliveryLogService.js`.
 

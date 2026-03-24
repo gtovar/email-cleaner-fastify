@@ -1,25 +1,25 @@
 # PROJECT_STATE.md
-Last updated: 2026-03-22 12:19 CST — Commit: pending
+Last updated: 2026-03-23 18:24 CST — Commit: pending
 
 ## 1. Technical Header (Snapshot Metadata)
 
 PROJECT_NAME: Email Cleaner & Smart Notifications — Fastify Backend
-SNAPSHOT_DATE: 2026-03-22 12:19 CST
+SNAPSHOT_DATE: 2026-03-23 18:24 CST
 COMMIT: pending
-ENVIRONMENT: local
+ENVIRONMENT: develop
 
 REPO_PATH: /Users/gil/Documents/email-cleaner/email-cleaner-fastify
-BRANCH: chore/husky-commit-hooks
-WORKING_TREE_STATUS: Dirty (Husky + commitlint hook migration in progress)
+BRANCH: develop
+WORKING_TREE_STATUS: Dirty (modified files present)
 
 RUNTIME: Node.js (Fastify)
 DB: PostgreSQL via Sequelize
-TEST_STATUS: PASS (manual Husky validation via `.husky/_/commit-msg` and `.husky/_/pre-commit`)
+TEST_STATUS: PASS (`npm test -- receiptResponseRoutes.test.js`)
 
-LAST_VERIFIED_TESTS_DATE: 2026-03-19 18:17 CST
+LAST_VERIFIED_TESTS_DATE: 2026-03-23 18:24 CST
 
 Notes:
-- `WORKING_TREE_STATUS` describes the merged operational baseline on `develop`; checkpoint sync edits may still be pending commit during documentation alignment.
+- This snapshot reflects the dirty `develop` worktree while the backend-first `HU_07A` slice is implemented locally and awaiting commit-readiness.
 
 ---
 
@@ -33,13 +33,16 @@ Notes:
 - The fixture inbox now contains the original HU19 action rows plus dedicated HU06 receipt-review rows with extractor-ready bodies, so the local browser flow can validate receipt review without changing the HTTP contract.
 - `/api/v1/suggestions` enriches emails with ML suggestions, includes `snippet`, and publishes domain events when threshold is met.
 - `/api/v1/notifications/summary` aggregates `NotificationEvent` records by period.
+- `HU_07A` now adds a separate authenticated receipt-response boundary at `/api/v1/receipt-responses`, keeping `POST /api/v1/notifications/confirm` dedicated to suggestion confirmation.
 - Gmail OAuth client persists refreshed access tokens to the `Tokens` table.
 - ADR 009 records the additive email-content route decision and the extension of the inbox source boundary for single-message content retrieval.
+- ADR 010 records the decision to keep manual receipt-response state separate from suggestion confirmation and to resolve `targetId` to `emailId` inside `HU_07A`.
 - OAuth tokens are encrypted at rest using `TOKEN_ENCRYPTION_KEY`.
 - Commit hooks are now versioned in `.husky/`, with `commit-msg` validating Conventional Commit syntax via `commitlint` and `pre-commit` preserving both the README timestamp update and the repo-local governance checks under `scripts/git-hooks/`.
 - GitHub Actions `ci.yml` now validates PR commit messages with `commitlint` before the main lint/test job runs.
 - The Husky `prepare` step now uses a guarded repo-local installer, so production-style installs that omit devDependencies skip hook installation cleanly instead of failing.
-- The repo-local Husky `pre-commit` flow now includes `scripts/git-hooks/check-comment-hygiene.sh`, blocking empty comments plus vague `TODO` / `FIXME` markers before commit.
+- The repo-local Husky `pre-commit` flow now includes `scripts/git-hooks/check-comment-hygiene.sh`, blocking empty comments plus vague follow-up markers before commit.
+- The Husky/comment-hygiene checkpoint work is already merged into `develop`; there is no pending hook-migration branch to resume.
 - A local rule-based electricity-receipt classifier now exists as an internal backend service using only `subject`, `sender`, and `body`, with deterministic `invoice_electricity | not_invoice | unknown` output.
 - A Node-first extractor service now powers `HU_02` with the six spike fixtures plus an empty/malformed case run through `tests/electricityInvoiceExtractor.test.js`, keeping `amount`/`due_date` and the `null` fallback explicit before wiring the production slice.
 - HU_03 now exposes `POST /api/v1/notifications/receipt-whatsapp` via `notificationDeliveryRoutes`, `notificationDeliveryController`, `receiptNotificationService`, and the deterministic `twilioAdapter`; the route only sends WhatsApp reminders when `{ amount, due_date }` are present and logs every delivery through `notificationDeliveryLogService`.
@@ -57,6 +60,7 @@ Notes:
   - `inboxRoutes` → `/api/v1/inbox`
   - `suggestionRoutes` → `/api/v1`
   - `notificationsRoutes` → `/api/v1/notifications`
+  - `receiptResponseRoutes` → `/api/v1`
 - CORS is configured for `FRONTEND_ORIGIN` with `credentials: true`.
 - Swagger exposes cookie auth and bearer auth schemes.
 
@@ -74,6 +78,7 @@ Notes:
 
 - `ActionHistory`: per-email actions (userId, emailId, action, timestamp, details).
 - `NotificationEvent`: denormalized event record (type, userId, summary JSONB).
+- `ReceiptResponse`: per-user current receipt-response state keyed by `(userId, emailId)` with `response` constrained to `paid | ignore`.
 
 ### 3.4 External Integrations
 
@@ -238,6 +243,29 @@ Notes:
 - Added authenticated `GET /api/v1/emails/:id/content` so the frontend can retrieve normalized `{ id, subject, from, body, html }` data without changing `GET /api/v1/emails`, receipt extraction, or WhatsApp delivery (commit: pending).
 - Added dedicated HU06 fixture emails with extractor-ready receipt bodies so the local browser validation path no longer depends on HU19 fixture rows, and expanded `tests/emailsFixtureRoutes.integration.test.js` to assert the second HU06 content route explicitly (commit: pending).
 
+### HU_07A — Backend manual receipt response state
+
+**Status:** IN_PROGRESS
+
+**Evidence:**
+- Route: `src/routes/receiptResponseRoutes.js`
+- Controller/service: `src/controllers/receiptResponseController.js`, `src/services/receiptResponseService.js`
+- Persistence: `src/models/receiptResponse.js`, `migrations/20260323182000-create-receipt-responses.cjs`
+- Wiring: `src/index.js`, `src/plugins/sequelize.js`
+- Tests: `tests/receiptResponseRoutes.test.js`
+- ADR/API docs: `docs/adr/010-receipt-response-boundary.md`, `docs/API_REFERENCE.md`
+
+**Open items:**
+- Run commit-readiness on the `HU_07A` worktree and decide the coherent commit boundary before expanding scope.
+
+**Technical risks:**
+- `targetId` is intentionally resolved to `emailId` only for `HU_07A`; future phases may still require a stronger receipt identity.
+- The new migration must be applied in real database environments before the route can persist state outside mocked tests.
+
+**Recent change:**
+- Added `POST /api/v1/receipt-responses` and `GET /api/v1/receipt-responses/:targetId` as a separate authenticated boundary for manual `paid | ignore` state, keeping `POST /api/v1/notifications/confirm` unchanged for suggestion confirmation (commit: pending).
+- Added the `ReceiptResponse` model plus route-contract coverage in `tests/receiptResponseRoutes.test.js`, with `targetId` resolved to `emailId` internally for this slice (commit: pending).
+
 ---
 
 ## 5. Current Technical Risks
@@ -245,12 +273,13 @@ Notes:
 - OAuth cookies require correct SameSite/Secure settings in production.
 - `src/events/listeners/sendWebhookToN8NEvent.js` is still a safe no-op, so the n8n delivery path is not yet validated end-to-end.
 - HU06 backend support only proves deterministic email-content retrieval for the local happy path; the visible provider-error path is still validated in the browser via a controlled frontend override.
+- The `HU_07A` worktree is currently on `develop`; commit-readiness and branch hygiene still need to be resolved before treating the slice as a clean checkpoint.
 
 ---
 
 ## 6. Next Immediate Action
 
-➡️ Checkpoint the repo-local comment-hygiene pre-commit enforcement on `chore/comment-hygiene-precommit`.
+➡️ Run commit-readiness for the local `HU_07A` worktree, including migration/API/ADR review, before any new backend scope is added.
 
 ---
 
@@ -284,3 +313,7 @@ Notes:
 - 2026-03-22 03:05 CST — Split HU06 onto dedicated fixture emails and extended `tests/emailsFixtureRoutes.integration.test.js` so the browser error-path fixture dependency is explicitly covered without reusing HU19 rows (commit: pending)
 - 2026-03-22 12:19 CST — Added versioned Husky hooks plus `commitlint`; `pre-commit` now preserves the README timestamp behavior and the workspace cognitive gate, while `commit-msg` blocks invalid Conventional Commit syntax (commit: pending)
 - 2026-03-22 12:19 CST — Extended `ci.yml` so pull requests now validate commit messages with `commitlint` in GitHub Actions in addition to the local Husky hook (commit: pending)
+- 2026-03-23 01:30 CST — Reconciled the backend operational checkpoint with the real clean `develop` baseline after the Husky/comment-hygiene slice landed (commit: pending)
+- 2026-03-23 15:51 CST — Realigned the Phase 2 backlog with the code-backed baseline, closing the stale HU_02/HU_03 mismatch and registering HU_07, HU_08, and HU_09 as the next candidate slices (commit: pending)
+- 2026-03-23 17:08 CST — Promoted `HU_07A` as the concrete next backend slice, split `HU_07` into backend/frontend execution slices, and anchored the next action to contract + persistence + tests in Fastify (commit: pending)
+- 2026-03-23 18:24 CST — Implemented the local `HU_07A` receipt-response boundary, added the `ReceiptResponse` model/migration, documented ADR 010, and verified `tests/receiptResponseRoutes.test.js` locally while leaving the worktree pending commit-readiness (commit: pending)

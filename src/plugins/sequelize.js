@@ -34,9 +34,10 @@ async function dbConnector(fastify, options) {
   const Token = (await import(path.join(__dirname, '../models/token.js'))).default(sequelize, DataTypes);
   const ActionHistory = (await import(path.join(__dirname, '../models/actionHistory.js'))).default(sequelize, DataTypes);
   const NotificationEvent = (await import(path.join(__dirname, '../models/notificationEvent.js'))).default(sequelize, DataTypes);
+  const ReceiptResponse = (await import(path.join(__dirname, '../models/receiptResponse.js'))).default(sequelize, DataTypes);
 
   fastify.decorate('sequelize', sequelize);
-  fastify.decorate('models', { Token, ActionHistory, NotificationEvent });
+  fastify.decorate('models', { Token, ActionHistory, NotificationEvent, ReceiptResponse });
 }
 
 export default fp(dbConnector);
